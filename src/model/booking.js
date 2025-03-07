@@ -12,6 +12,11 @@ const BookingSchema = new Schema({
         ref: 'User', 
         required: true
     },
+    createdAt: { 
+        type: Date, 
+        default: Date.now 
+    } 
+    //Salmas part
     ticketsBooked: {
         type: Number,
         required: true
@@ -26,10 +31,7 @@ const BookingSchema = new Schema({
         enum: ['Pending', 'Confirmed', 'Cancelled'],
         required: true
     },
-    createdAt: { 
-        type: Date, 
-        default: Date.now 
-    }
+    
 });
 
 module.exports = mongoose.model('Booking', BookingSchema);
