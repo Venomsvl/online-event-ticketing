@@ -1,3 +1,4 @@
+//Muna's Part
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema; 
 
@@ -16,6 +17,7 @@ const BookingSchema = new Schema({
         type: Date, 
         default: Date.now  
     },
+    //Salma's Part
     ticketsBooked: {
         type: Number,
         required: true
