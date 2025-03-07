@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: flase },
-  email: { type: String, required: false, unique: true },
-  password: { type: String, required: false },
-  profilePicture: { type: String }, // URL to the profile picture
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  profilePicture: { type: String }, 
   role: { 
     type: String, 
     enum: ['Standard User', 'Organizer' , 'Admin'], 
