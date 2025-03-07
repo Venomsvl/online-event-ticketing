@@ -13,6 +13,10 @@ const BookingSchema = new Schema({
         ref: 'User', 
         required: true
     },
+     createdAt: { 
+        type: Date, 
+        default: Date.now  
+    }
     //salma's part
         ticketsBooked: {
             type: Number,
