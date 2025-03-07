@@ -16,6 +16,7 @@ const BookingSchema = new Schema({
         type: Number,
         required: true
     },
+    //Salams part
     totalPrice: {
         type: Number,
         required: true
