@@ -39,6 +39,16 @@ const eventSchema = mongoose.Schema({
     remaining_tickets:{
         type: Number,
         require: true
+    },
+    creator :{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'User',
+        require: true
+    },
+    timestamp :{
+        type: Date,
+        require: true,
+        default: Date.now
     }
 })
 const Event = mongoose.model('Event',Event);
