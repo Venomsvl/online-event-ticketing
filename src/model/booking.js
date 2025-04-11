@@ -13,24 +13,20 @@ const BookingSchema = new Schema({
         ref: 'User', 
         required: true
     },
-    createdAt: { 
-        type: Date, 
-        default: Date.now  
-    },
-    //Salma's Part
-    ticketsBooked: {
-        type: Number,
-        required: true
-    },
-    totalPrice: {
-        type: Number,
-        required: true
-    },
-    bookingStatus: {
-        type: String,
-        enum: ['Pending', 'Confirmed', 'Cancelled'],
-        required: true
-    }
-});
-
-module.exports = mongoose.model('Booking', BookingSchema);
+    //salma's part
+        ticketsBooked: {
+            type: Number,
+            required: true
+        },
+        totalPrice: {
+            type: Number,
+            required: true
+        },
+        bookingStatus: {
+            type: String,
+            enum: ['Pending', 'Confirmed', 'Cancelled'],
+            required: true
+        }
+    });
+    
+    module.exports = mongoose.model('Booking', BookingSchema);
