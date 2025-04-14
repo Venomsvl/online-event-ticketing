@@ -2,7 +2,7 @@ const User = require('../model/user');
 
 exports.getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id); // Assuming `req.user` contains the authenticated user's ID
+        const user = await User.findById(req.user.id); // hena han assume `req.user` feha el authenticated user's ID
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -21,7 +21,7 @@ exports.updateUserProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update user details
+        // Update el user details
         if (name) user.name = name;
         if (email) user.email = email;
 
