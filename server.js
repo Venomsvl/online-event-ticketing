@@ -11,9 +11,9 @@ const app = express(); // Initialize the app
 app.use(express.json());
 
 // Routes
-app.use(authRoutes);
-app.use(userRoutes);
-app.use(adminRoutes);
+app.use("/api/v1/auth", authRoutes); // Auth routes
+app.use("/api/v1/users", userRoutes); // User routes
+app.use("/api/v1/admin", adminRoutes); // Admin routes
 
 // Error handling middleware
 app.use(errorHandler);
