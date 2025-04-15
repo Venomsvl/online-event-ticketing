@@ -39,7 +39,8 @@ const eventSchema = mongoose.Schema({
     remaining_tickets:{
         type: Number,
         require: true
-    }
+    },
+ 
 })
-const Event = mongoose.model('Event',Event);
+const Event = mongoose.model('Event',eventSchema);
 module.exports = Event;
