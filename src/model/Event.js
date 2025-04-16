@@ -40,16 +40,7 @@ const eventSchema = mongoose.Schema({
         type: Number,
         require: true
     },
-    creator :{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        require: true
-    },
-    timestamp :{
-        type: Date,
-        require: true,
-        default: Date.now
-    }
+ 
 })
-const Event = mongoose.model('Event',Event);
+const Event = mongoose.model('Event',eventSchema);
 module.exports = Event;
