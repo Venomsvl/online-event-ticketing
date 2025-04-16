@@ -1,19 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const authRoutes = require('./src/routes/authRoutes'); // Import the updated authRoutes
-const userRoutes = require('./src/routes/userRoutes'); // Ensure this file exports a valid router
-const adminRoutes = require('./src/routes/adminRoutes'); // Ensure this file exports a valid router
-const errorHandler = require('./src/middlewares/errorHandler'); // Ensure this file exports a valid middleware
+const authRoutes = require('./src/routes/authRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const errorHandler = require('./src/middlewares/errorHandler');
 
-const app = express(); // Initialize the app
-
-// Middleware
+const app = express();
 app.use(express.json());
 
 // Routes
 app.use(authRoutes);
 app.use(userRoutes);
-app.use(adminRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
