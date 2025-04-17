@@ -2,7 +2,7 @@ const Event = require('../model/event');
 const Booking = require('../model/booking');
 const mongoose = require('mongoose');
 
-checkBooking = async (req, res) => {
+createBooking = async (req, res) => {
     const { eventId, userId, ticketsBooked } = req.body;
 
     try {
@@ -69,4 +69,10 @@ deleteBooking = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'An error occurred', error: error.message }); 
     }
+};
+
+module.exports = {
+    createBooking,
+    viewBookingById,
+    deleteBooking,
 };

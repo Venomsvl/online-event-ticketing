@@ -15,7 +15,7 @@ exports.getUserProfile = async (req, res) => {
 };
 
 // Update User Profile
-exports.updateUserProfile = async (req, res) => {
+exports.updateUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });

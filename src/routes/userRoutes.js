@@ -1,12 +1,13 @@
 const express = require('express');
-const router = express.Router();
-const { getUserProfile, updateUserProfile } = require('../controllers/userController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { getUserProfile, updateUser } = require('../Controllers/UserController'); // Ensure correct import
+const { verifyToken } = require('../middlewares/authMiddleware');
 
-// Get el user profile
+const router = express.Router();
+
+// Get user profile
 router.get('/api/v1/users/profile', verifyToken, getUserProfile);
 
-// Update el user profile
-router.put('/profile', authMiddleware, updateUserProfile);
+// Update user profile
+router.put('/api/v1/users/profile', verifyToken, updateUser); // Use verifyToken middleware for consistency
 
 module.exports = router;
