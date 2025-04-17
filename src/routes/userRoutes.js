@@ -1,12 +1,21 @@
 const express = require('express');
+const { body } = require('express-validator');
 const router = express.Router();
-const { getUserProfile, updateUserProfile } = require('../controllers/userController');
+const { getUser, updateUser } = require('../controllers/UserController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-// Get user profile
-router.get('/api/v1/users/profile', authMiddleware, getUserProfile);
+// Define routes
+router.get('/:id', authMiddleware.verifyToken, getUser); // Get user by ID
 
-// Update user profile
-router.put('/api/v1/users/profile', authMiddleware, updateUserProfile);
+// Add validation for updating a user
+router.put(
+    '/:id',
+    [
+        authMiddleware.verifyToken,
+        body('name').optional().notEmpty().withMessage('Name cannot be empty'),
+        body('email').optional().isEmail().withMessage('Valid email is required')
+    ],
+    updateUser
+);
 
 module.exports = router;

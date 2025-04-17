@@ -1,8 +1,10 @@
+const { validationResult } = require('express-validator');
 const User = require('../model/user');
 
-exports.getUserProfile = async (req, res) => {
+// Get User Profile
+exports.getUser = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id); // Assuming `req.user` contains the authenticated user's ID
+        const user = await User.findById(req.params.id).select('-password');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -12,18 +14,30 @@ exports.getUserProfile = async (req, res) => {
     }
 };
 
-exports.updateUserProfile = async (req, res) => {
+// Update User Profile
+exports.updateUser = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { name, email } = req.body;
 
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update user details
+        if (email) {
+            const existingUser = await User.findOne({ email });
+            if (existingUser && existingUser.id !== req.params.id) {
+                return res.status(400).json({ message: 'Email is already in use' });
+            }
+            user.email = email;
+        }
+
         if (name) user.name = name;
-        if (email) user.email = email;
 
         await user.save();
         res.status(200).json({ message: 'Profile updated successfully', user });

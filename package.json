@@ -1,23 +1,29 @@
 {
-  "dependencies": {
-    "express-validator": "^7.2.1",
-    "mongodb": "^6.14.2",
-    "mongoose": "^8.12.0"
-  },
   "name": "online-event-ticketing",
   "version": "1.0.0",
   "description": "An online event ticketing system is a full-stack web application designed to allow users to browse, search, and purchase tickets for various events—such as concerts, sports games, and theater shows—while providing organizers with the ability to post and manage their own events. System administrators have full control over user and event data.",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.14.2",
+    "mongoose": "^8.13.2",
+    "nodemailer": "^6.10.1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Venomsvl/online-event-ticketing.git"
   },
-  "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Venomsvl/online-event-ticketing/issues"
   },
