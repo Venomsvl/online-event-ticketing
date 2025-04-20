@@ -1,5 +1,9 @@
 const { validationResult } = require('express-validator');
+<<<<<<< HEAD
 const User = require('../model/user');
+=======
+const User = require('../model/User');
+>>>>>>> origin/Lana-2
 
 exports.updateUserProfile = async (req, res) => {
     const errors = validationResult(req);

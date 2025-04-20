@@ -1,28 +1,50 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
+<<<<<<< HEAD
+=======
+// Define the user schema
+>>>>>>> origin/Lana-2
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: [true, 'Name is required'],
+        trim: true
     },
     email: {
         type: String,
-        required: true,
-        unique: true
+        required: [true, 'Email is required'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/.+@.+\..+/, 'Please enter a valid email address']
     },
     password: {
         type: String,
-        required: true
+        required: [true, 'Password is required'],
+        minlength: [8, 'Password must be at least 8 characters']
     },
     role: {
         type: String,
+<<<<<<< HEAD
         enum: ['user', 'organizer', 'admin'], // Include all roles
+=======
+        enum: ['user', 'organizer', 'admin'],
+>>>>>>> origin/Lana-2
         default: 'user'
     },
     createdAt: {
         type: Date,
         default: Date.now
+    }
+}, {
+    toJSON: {
+        transform(doc, ret) {
+            delete ret.password;           // Remove password from responses
+            ret.id = ret._id;              // Add id alias
+            delete ret._id;
+            delete ret.__v;
+        }
     }
 });
 
@@ -33,12 +55,30 @@ userSchema.pre('save', async function (next) {
     }
 
     try {
+<<<<<<< HEAD
         const saltRounds = 10;
         this.password = await bcrypt.hash(this.password, saltRounds);
+=======
+        console.log('[User Model] Hashing password for:', this.email);
+        this.password = await bcrypt.hash(this.password, 10);
+        console.log('[User Model] Password hashed successfully');
+>>>>>>> origin/Lana-2
         next();
     } catch (error) {
         next(error);
     }
 });
 
+<<<<<<< HEAD
 module.exports = mongoose.model('User', userSchema);
+=======
+// Instance method to compare plaintext password with hashed password
+userSchema.methods.checkPassword = function (plainPassword) {
+    return bcrypt.compare(plainPassword, this.password);
+};
+
+// Ensure we don't redefine the model in hot-reloading environments
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+module.exports = User;
+>>>>>>> origin/Lana-2

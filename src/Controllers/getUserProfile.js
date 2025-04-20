@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 const User = require('../model/user');
+=======
+const User = require('../model/User');
+>>>>>>> origin/Lana-2
 
 exports.getUserProfile = async (req, res) => {
     try {

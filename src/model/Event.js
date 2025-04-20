@@ -32,6 +32,7 @@ const eventSchema = mongoose.Schema({
     },
     total_tickets: {
         type: Number,
+<<<<<<< HEAD
         require: true,
     },
     remaining_tickets: {
@@ -41,4 +42,11 @@ const eventSchema = mongoose.Schema({
 });
 
 const Event = mongoose.model('Event', eventSchema);
+=======
+        require: true
+    },
+ 
+})
+const Event = mongoose.model('Event',eventSchema);
+>>>>>>> origin/Lana-2
 module.exports = Event;
