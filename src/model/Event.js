@@ -39,17 +39,8 @@ const eventSchema = mongoose.Schema({
         type: Number,
         require: true
     },
-    creator :{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        require: true
-    },
-    timestamp :{
-        type: Date,
-        require: true,
-        default: Date.now
-    },
-     //se2
+    
+     //adding an event status field
     event_status:{
         type: String,
         enum: ['approved', 'pending', 'declined'],

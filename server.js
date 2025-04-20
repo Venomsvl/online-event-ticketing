@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const authRoutes = require('./src/routes/authRoutes'); // Import the updated authRoutes
 const userRoutes = require('./src/routes/userRoutes'); // Ensure this file exports a valid router
 const adminRoutes = require('./src/routes/adminRoutes'); // Ensure this file exports a valid router
-const eventRoutes = require('./src/routes/eventroutesTEMP'); // Ensure this file exports a valid router
+const eventRoutes = require('./src/routes/eventRoutes'); // Ensure this file exports a valid router
 const errorHandler = require('./src/middlewares/errorHandler'); // Ensure this file exports a valid middleware
 
 
