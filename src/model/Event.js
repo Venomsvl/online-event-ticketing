@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const User = require('/User')
 
 const eventSchema = mongoose.Schema({
 
@@ -39,7 +38,13 @@ const eventSchema = mongoose.Schema({
     remaining_tickets:{
         type: Number,
         require: true
-    }
+    },
+     //se2
+    event_status:{
+        type: String,
+        enum: ['approved', 'pending', 'declined'],
+        default: 'pending',
+    },
 })
-const Event = mongoose.model('Event',Event);
+const Event = mongoose.model('Event', eventSchema);
 module.exports = Event;

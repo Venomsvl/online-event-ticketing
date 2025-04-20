@@ -42,4 +42,12 @@ router.delete(
     deleteUser // Controller to delete a user by ID
 );
 
+//event related part
+//Only admins can approve or reject the event. (point 2)
+router.put('/api/v1/events/:id', 
+    authMiddleware,
+    adminMiddleware
+    //a controller for ????
+);
+
 module.exports = router;
