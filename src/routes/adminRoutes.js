@@ -6,7 +6,7 @@ const {
     getUser,
     updateUserRole,
     deleteUser
-} = require('../controllers/adminController');
+} = require('../Controllers/AdminController');
 const { verifyToken } = require('../middlewares/authMiddleware'); // Correct import
 const adminMiddleware = require('../middlewares/adminMiddleware'); // Correct import
 
