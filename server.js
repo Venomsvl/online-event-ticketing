@@ -1,3 +1,4 @@
+gitconsole.log('test')
 const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('./src/routes/authRoutes'); // Import the updated authRoutes
