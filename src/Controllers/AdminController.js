@@ -1,4 +1,4 @@
-const User = require('../model/user');
+const User = require('../model/User');
 
 // List all users
 exports.listUsers = async (req, res) => {
@@ -51,6 +51,7 @@ exports.deleteUser = async (req, res) => {
         }
         res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
+        console.error('Error during user deletion:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
