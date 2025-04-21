@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-const User = require('../model/user');
+const User = require('../models/User'); // Fixed casing
 const PasswordReset = require('../model/passwordReset');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');

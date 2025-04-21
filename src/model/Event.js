@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./user'); // Ensure the correct path to the user model
+const User = require('./User'); // Fixed casing
 
 const eventSchema = mongoose.Schema({
     title: {
