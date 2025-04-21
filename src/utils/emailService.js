@@ -1,17 +1,30 @@
 const nodemailer = require('nodemailer');
+const mongoose = require('mongoose');
+
+// Example: SystemSettings model for storing system-wide configs like email credentials
+const SystemSettings = mongoose.model('SystemSettings', new mongoose.Schema({
+    email: String,
+    emailPassword: String
+}));
 
 const sendEmail = async (to, subject, text) => {
     try {
+        // Fetch the first system email credentials from the database
+        const settings = await SystemSettings.findOne();
+        if (!settings || !settings.email || !settings.emailPassword) {
+            throw new Error('System email credentials not found in the database');
+        }
+
         const transporter = nodemailer.createTransport({
-            service: 'Gmail', // Use your email service provider
+            service: 'Gmail',
             auth: {
-                user: 'your-email@gmail.com', // Replace with your email
-                pass: 'your-email-password'   // Replace with your email password
+                user: settings.email,
+                pass: settings.emailPassword
             }
         });
 
         const mailOptions = {
-            from: 'your-email@gmail.com',
+            from: settings.email,
             to,
             subject,
             text

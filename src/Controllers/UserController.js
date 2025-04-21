@@ -1,8 +1,10 @@
-const User = require('../model/user');
+const { validationResult } = require('express-validator');
+const User = require('../model/User');
 
+// Get User Profile
 exports.getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id); // hena han assume `req.user` feha el authenticated user's ID
+        const user = await User.findById(req.user.id).select('-password'); // Exclude password
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -12,7 +14,13 @@ exports.getUserProfile = async (req, res) => {
     }
 };
 
+// Update User Profile
 exports.updateUserProfile = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { name, email } = req.body;
 
     try {
@@ -21,7 +29,6 @@ exports.updateUserProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update el user details
         if (name) user.name = name;
         if (email) user.email = email;
 
