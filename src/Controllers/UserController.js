@@ -1,5 +1,5 @@
 const { validationResult } = require('express-validator');
-const User = require('../models/User'); // Fixed casing
+const User = require('../model/User'); // Fixed casing and path
 
 // Get User Profile
 exports.getUserProfile = async (req, res) => {

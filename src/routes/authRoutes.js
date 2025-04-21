@@ -1,6 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { sendOTP, verifyOTP, resetPassword } = require('../Controllers/AuthController');
+const { sendOTP, verifyOTP, resetPassword } = require('../Controllers/AuthController'); // Fixed casing to match the actual file path
 const router = express.Router();
 
 // Request OTP
