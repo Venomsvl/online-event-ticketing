@@ -1,46 +1,44 @@
-const mongoose = require('mongoose')
-const User = require('/User')
+const mongoose = require('mongoose');
+const User = require('./User'); // Fixed casing
 
 const eventSchema = mongoose.Schema({
-
-    title : {
+    title: {
         type: String,
-        require : true
+        require: true,
     },
-    description : {
-        type : String,
-        require : true
+    description: {
+        type: String,
+        require: true,
     },
-    date : {
-        type : Date,
-        require : true
-
+    date: {
+        type: Date,
+        require: true,
     },
     location: {
         type: String,
-        require : true 
+        require: true,
     },
     category: {
         type: String,
-        require : true 
+        require: true,
     },
     image: {
         type: String,
-        require : false 
+        require: false,
     },
-    ticket_price:{
-        type : Number,
-        require : true 
-    },
-    total_tickets :{
+    ticket_price: {
         type: Number,
-        require : true 
+        require: true,
     },
-    remaining_tickets:{
+    total_tickets: {
         type: Number,
-        require: true
+        require: true,
     },
- 
-})
-const Event = mongoose.model('Event',eventSchema);
+    remaining_tickets: {
+        type: Number,
+        require: true,
+    }
+});
+
+const Event = mongoose.model('Event', eventSchema);
 module.exports = Event;
