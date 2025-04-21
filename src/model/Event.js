@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./user'); // Fixed casing
+const User = require('./User'); // Fixed casing
 
 const eventSchema = mongoose.Schema({
     title: {
