@@ -6,7 +6,7 @@ const {
     getUser,
     updateUserRole,
     deleteUser
-} = require('../controllers/adminController'); // Import admin controllers
+} = require('../Controllers/AdminController'); // Import admin controllers
 const authMiddleware = require('../middlewares/authMiddleware'); // Import authentication middleware
 const adminMiddleware = require('../middlewares/adminMiddleware'); // Import admin middleware
 
@@ -30,15 +30,17 @@ router.put(
     [
         authMiddleware, // Ensure the user is authenticated
         adminMiddleware, // Ensure the user has admin privileges
-        body('role').notEmpty().withMessage('Role is required') // Validate role input
+        body('role')
+          .notEmpty().withMessage('Role is required')
+          .isIn(['user', 'organizer', 'admin']).withMessage('Role must be user, organizer, or admin') // Validate role input
     ],
     updateUserRole // Controller to update a user's role
 );
 
 router.delete(
     '/users/:id', 
-    authMiddleware, 
-    adminMiddleware, 
+    authMiddleware, // Ensure the user is authenticated
+    adminMiddleware, // Ensure the user has admin privileges
     deleteUser // Controller to delete a user by ID
 );
 
