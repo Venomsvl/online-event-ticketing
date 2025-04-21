@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 
 const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes');
-const adminRoutes = require('./src/routes/adminRoutes'); // ✅ added
+const adminRoutes = require('./src/routes/adminRoutes'); 
 
 const errorHandler = require('./src/middlewares/errorHandler');
 
@@ -16,7 +16,7 @@ app.use(express.json());
 // Routes
 app.use('/api/v1', authRoutes);
 app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/admin', adminRoutes); // ✅ added
+app.use('/api/v1/admin', adminRoutes); 
 
 // Error handler
 app.use(errorHandler);
