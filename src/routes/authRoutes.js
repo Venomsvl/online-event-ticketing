@@ -1,11 +1,5 @@
 const express = require('express');
 const { body } = require('express-validator');
-<<<<<<< HEAD
-const router = express.Router();
-const AuthController = require('../Controllers/AuthController'); // Ensure correct path
-
-// Define routes
-=======
 const {
     register,
     login,
@@ -16,28 +10,11 @@ const {
 const router = express.Router();
 
 // Register route
->>>>>>> origin/Lana-2
 router.post(
     '/register',
     [
         body('name').notEmpty().withMessage('Name is required'),
-<<<<<<< HEAD
         body('email').isEmail().withMessage('Valid email is required'),
-        body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
-    ],
-    AuthController.register
-);
-
-router.post('/login', AuthController.login); // Ensure the method exists and is correctly referenced
-
-router.post(
-    '/forget-password',
-    [body('email').isEmail().withMessage('Valid email is required')],
-    AuthController.forgetPassword
-);
-
-=======
-        body('email').isEmail().withMessage('Invalid email'),
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
         body('role').isIn(['user', 'organizer', 'admin']).withMessage('Invalid role')
     ],
@@ -48,7 +25,7 @@ router.post(
 router.post(
     '/login',
     [
-        body('email').isEmail().withMessage('Invalid email'),
+        body('email').isEmail().withMessage('Valid email is required'),
         body('password').notEmpty().withMessage('Password is required')
     ],
     login
@@ -57,7 +34,7 @@ router.post(
 // Request OTP for password reset
 router.post(
     '/forgetPassword/request-otp',
-    [body('email').isEmail().withMessage('Invalid email')],
+    [body('email').isEmail().withMessage('Valid email is required')],
     sendOTP
 );
 
@@ -65,7 +42,7 @@ router.post(
 router.post(
     '/forgetPassword/verify-otp',
     [
-        body('email').isEmail().withMessage('Invalid email'),
+        body('email').isEmail().withMessage9V('Valid email is required'),
         body('otp').isLength({ min: 6, max: 6 }).withMessage('Invalid OTP')
     ],
     verifyOTP
@@ -75,11 +52,10 @@ router.post(
 router.put(
     '/forgetPassword',
     [
-        body('email').isEmail().withMessage('Invalid email'),
+        body('email').isEmail().withMessage('Valid email is required'),
         body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
     ],
     resetPassword
 );
 
->>>>>>> origin/Lana-2
 module.exports = router;

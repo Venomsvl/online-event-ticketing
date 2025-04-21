@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./user'); // Ensure the correct path to the user model
+const User = require('./User'); // Ensure the correct path to the user model
 
 const eventSchema = mongoose.Schema({
     title: {
@@ -32,21 +32,9 @@ const eventSchema = mongoose.Schema({
     },
     total_tickets: {
         type: Number,
-<<<<<<< HEAD
-        require: true,
-    },
-    remaining_tickets: {
-        type: Number,
-        require: true,
-    }
-});
-
-const Event = mongoose.model('Event', eventSchema);
-=======
         require: true
     },
  
 })
 const Event = mongoose.model('Event',eventSchema);
->>>>>>> origin/Lana-2
 module.exports = Event;

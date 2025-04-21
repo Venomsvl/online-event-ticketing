@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-const User = require('../model/user');
-=======
-const User = require('../model/User');
->>>>>>> origin/Lana-2
-
+const User = require('../model/User'); // Ensure the file name matches exactly 
 exports.getUserProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password'); // Exclude the password field

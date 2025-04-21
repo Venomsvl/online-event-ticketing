@@ -1,10 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-<<<<<<< HEAD
-=======
 // Define the user schema
->>>>>>> origin/Lana-2
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -25,12 +22,9 @@ const userSchema = new mongoose.Schema({
         minlength: [8, 'Password must be at least 8 characters']
     },
     role: {
-        type: String,
-<<<<<<< HEAD
+        type: String, 
         enum: ['user', 'organizer', 'admin'], // Include all roles
-=======
-        enum: ['user', 'organizer', 'admin'],
->>>>>>> origin/Lana-2
+
         default: 'user'
     },
     createdAt: {
@@ -55,23 +49,15 @@ userSchema.pre('save', async function (next) {
     }
 
     try {
-<<<<<<< HEAD
-        const saltRounds = 10;
-        this.password = await bcrypt.hash(this.password, saltRounds);
-=======
         console.log('[User Model] Hashing password for:', this.email);
         this.password = await bcrypt.hash(this.password, 10);
         console.log('[User Model] Password hashed successfully');
->>>>>>> origin/Lana-2
         next();
     } catch (error) {
         next(error);
     }
 });
 
-<<<<<<< HEAD
-module.exports = mongoose.model('User', userSchema);
-=======
 // Instance method to compare plaintext password with hashed password
 userSchema.methods.checkPassword = function (plainPassword) {
     return bcrypt.compare(plainPassword, this.password);
@@ -81,4 +67,3 @@ userSchema.methods.checkPassword = function (plainPassword) {
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 module.exports = User;
->>>>>>> origin/Lana-2

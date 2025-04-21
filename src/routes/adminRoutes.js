@@ -1,41 +1,12 @@
 const express = require('express');
-<<<<<<< HEAD
 const { body } = require('express-validator');
-=======
-const { body } = require('express-validator'); // Import express-validator
->>>>>>> origin/Lana-2
 const router = express.Router();
 const {
     listUsers,
     getUser,
     updateUserRole,
     deleteUser
-<<<<<<< HEAD
-} = require('../controllers/AdminController');
-const { verifyToken } = require('../middlewares/authMiddleware');
-const adminMiddleware = require('../middlewares/adminMiddleware');
-
-// List all users
-router.get('/users', verifyToken, adminMiddleware, listUsers);
-
-// Get a single user by ID
-router.get('/users/:id', verifyToken, adminMiddleware, getUser);
-
-// Update a user's role
-router.put(
-    '/users/:id',
-    [
-        verifyToken,
-        adminMiddleware,
-        body('role').notEmpty().withMessage('Role is required')
-    ],
-    updateUserRole
-);
-
-// Delete a user by ID
-router.delete('/users/:id', verifyToken, adminMiddleware, deleteUser);
-=======
-} = require('../controllers/adminController'); // Import admin controllers
+} = require('../Controllers/AdminController'); // Import admin controllers
 const authMiddleware = require('../middlewares/authMiddleware'); // Import authentication middleware
 const adminMiddleware = require('../middlewares/adminMiddleware'); // Import admin middleware
 
@@ -70,6 +41,5 @@ router.delete(
     adminMiddleware, // Ensure the user has admin privileges
     deleteUser // Controller to delete a user by ID
 );
->>>>>>> origin/Lana-2
 
 module.exports = router;

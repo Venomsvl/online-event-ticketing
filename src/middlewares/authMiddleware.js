@@ -2,20 +2,16 @@ const jwt = require('jsonwebtoken');
 const Booking = require('../model/booking');
 
 // Middleware to verify the token
-const verifyToken = (req, res, next) => {
+const verifyToken = (req, res, next) => {}
     const authHeader = req.header('Authorization');
     const token = authHeader && authHeader.split(' ')[1];
 
-<<<<<<< HEAD
-    if (!token) {
-=======
 module.exports = (req, res, next) => {
     const authHeader = req.header('Authorization');
     console.log('[authMiddleware] Authorization Header:', authHeader);
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         console.log('[authMiddleware] Missing or malformed Authorization header');
->>>>>>> origin/Lana-2
         return res.status(401).json({ message: 'Access denied. No token provided.' });
     }
 
@@ -28,12 +24,8 @@ module.exports = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
-<<<<<<< HEAD
-        res.status(400).json({ message: 'Invalid token.' });
-=======
         console.error('[authMiddleware] JWT Verification Error:', error.message);
         return res.status(401).json({ message: 'Invalid or expired token' });
->>>>>>> origin/Lana-2
     }
 };
 
@@ -55,4 +47,4 @@ const checkBookingOwner = async (req, res, next) => {
     }
 };
 
-module.exports = { verifyToken, checkBookingOwner };
+module.exports = { verifyToken, checkBookingOwner }; 
