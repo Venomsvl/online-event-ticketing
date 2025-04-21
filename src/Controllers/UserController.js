@@ -1,10 +1,10 @@
 const { validationResult } = require('express-validator');
-const User = require('../model/user');
+const User = require('../model/User');
 
 // Get User Profile
 exports.getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user.id).select('-password'); // Exclude password
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
