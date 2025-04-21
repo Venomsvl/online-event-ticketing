@@ -8,11 +8,6 @@ const errorHandler = require('./src/middlewares/errorHandler'); // Ensure this f
 
 const dotenv = require('dotenv');
 
-const authRoutes = require('./src/routes/authRoutes');
-const userRoutes = require('./src/routes/userRoutes');
-const adminRoutes = require('./src/routes/adminRoutes'); 
-
-const errorHandler = require('./src/middlewares/errorHandler');
 
 dotenv.config();
 
