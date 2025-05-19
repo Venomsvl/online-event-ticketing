@@ -5,7 +5,7 @@ const {
   updateEvent, 
   deleteEvent, 
   getAnalytics 
-} = require('../controllers/eventController');
+} = require('../Controllers/EventController.js');
 const { verifyToken, checkRole } = require('../middlewares/authMiddleware');
 
 
