@@ -1,12 +1,21 @@
 const express = require('express');
-const router = express.Router();
-const { getUserProfile, updateUserProfile } = require('../controllers/userController');
+const { body } = require('express-validator');
+const { getUserProfile, updateUserProfile } = require('../controllers/UserController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const router = express.Router();
 
-// Get el user profile
-router.get('/api/v1/users/profile', authMiddleware, getUserProfile);
+// Get user profile
+router.get('/profile', authMiddleware, getUserProfile);
 
-// Update el user profile
-router.put('/profile', authMiddleware, updateUserProfile);
+// Update user profile
+router.put(
+    '/profile',
+    [
+        authMiddleware,
+        body('name').optional().isString().withMessage('Name must be a string'),
+        body('email').optional().isEmail().withMessage('Invalid email')
+    ],
+    updateUserProfile
+);
 
 module.exports = router;

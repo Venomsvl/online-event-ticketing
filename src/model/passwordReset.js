@@ -9,10 +9,13 @@ const passwordResetSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    otpExpires: {
+    expiresAt: {
         type: Date,
         required: true
     }
 });
+
+// Automatically remove expired OTPs
+passwordResetSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model('PasswordReset', passwordResetSchema);

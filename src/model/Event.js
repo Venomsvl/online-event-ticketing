@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const User = require('/User')
 
 const eventSchema = mongoose.Schema({
 
@@ -40,6 +39,13 @@ const eventSchema = mongoose.Schema({
         type: Number,
         require: true
     },
+    
+     //adding an event status field
+    event_status:{
+        type: String,
+        enum: ['approved', 'pending', 'declined'],
+        default: 'pending',
+    },
     creator :{
         type: mongoose.Schema.Types.ObjectId,
         ref:'User',
@@ -51,5 +57,5 @@ const eventSchema = mongoose.Schema({
         default: Date.now
     }
 })
-const Event = mongoose.model('Event',eventSchema);
+const Event = mongoose.model('Event', eventSchema);
 module.exports = Event;
