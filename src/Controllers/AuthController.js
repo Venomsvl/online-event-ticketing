@@ -121,7 +121,6 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-const { validationResult } = require('express-validator');
 const User = require('../model/User'); // Ensure the file name matches exactly
 const PasswordReset = require('../model/passwordReset'); // Ensure the file name matches exactly
 const bcrypt = require('bcrypt');
