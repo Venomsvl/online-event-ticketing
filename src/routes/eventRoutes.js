@@ -4,14 +4,20 @@ const EventController = require('../Controllers/EventController'); //iport event
 const adminMiddleware = require('../middlewares/adminMiddleware'); //import the admin and auth middlewares
 const authMiddleware = require('../middlewares/authMiddleware');
 
+// Public routes
+router.get('/', EventController.getAllEvents);
+router.get('/:id', EventController.getEventById);
 
-//anyone can view posted events (1) 
-router.get('/',EventController.viewPostedEvents);
+// Protected routes
+router.get('/my/events', authMiddleware, EventController.getMyEvents);
+router.get('/my/analytics', authMiddleware, EventController.getMyEventsAnalytics);
 
+// Organizer-only routes
+router.post('/', authMiddleware, adminMiddleware, EventController.createEvent);
+router.put('/:id', authMiddleware, adminMiddleware, EventController.updateEvent);
+router.delete('/:id', authMiddleware, adminMiddleware, EventController.deleteEvent);
 
-//Only admins can approve or reject the event. (4)
-router.put('/:id', authMiddleware, adminMiddleware, EventController.approveOrReject);
+// Admin-only routes
+router.put('/:id/status', authMiddleware, adminMiddleware, EventController.approveOrReject);
 
-
-
-module.exports = router;
+module.exports = router; 

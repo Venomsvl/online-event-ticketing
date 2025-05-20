@@ -1,18 +1,10 @@
-const { validationResult } = require('express-validator');
-<<<<<<< HEAD
-const User = require('../model/User');
-=======
-const User = require('../models/User'); // Fixed casing
->>>>>>> muna
+const { validationResult } = require('express-validator'); // Import validationResult
+const User = require('../model/User'); // Import User model
 
 // Get User Profile
 exports.getUserProfile = async (req, res) => {
     try {
-<<<<<<< HEAD
         const user = await User.findById(req.user.id).select('-password'); // Exclude password
-=======
-        const user = await User.findById(req.user.id).select('-password');
->>>>>>> muna
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -24,7 +16,6 @@ exports.getUserProfile = async (req, res) => {
 
 // Update User Profile
 exports.updateUserProfile = async (req, res) => {
-exports.updateUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
