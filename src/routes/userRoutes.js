@@ -1,13 +1,13 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { getUserProfile, updateUserProfile } = require('../controllers/UserController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { getUserProfile, updateUserProfile } = require('../Controllers/UserController');
+const { getMyEvents, getMyEventsAnalytics } = require('../Controllers/EventController');
+const { authMiddleware } = require('../middlewares/authMiddleware');
+const roleMiddleware = require('../middlewares/roleMiddleware');
 const router = express.Router();
 
-// Get user profile
+// Profile routes
 router.get('/profile', authMiddleware, getUserProfile);
-
-// Update user profile
 router.put(
     '/profile',
     [
@@ -17,5 +17,9 @@ router.put(
     ],
     updateUserProfile
 );
+
+// Organizer-specific routes
+router.get('/events', authMiddleware, roleMiddleware('Organizer'), getMyEvents);
+router.get('/events/analytics', authMiddleware, roleMiddleware('Organizer'), getMyEventsAnalytics);
 
 module.exports = router;
