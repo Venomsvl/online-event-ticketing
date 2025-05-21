@@ -13,24 +13,21 @@ function EventCard({
   const formatDate = (dateString) => {
     try {
       return format(new Date(dateString), 'PPP');
-    } catch {
+    } catch (error) {
       return dateString;
     }
   };
 
   const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
+    switch (status) {
       case 'approved':
-      case 'active':
-        return '#28a745'; // green
+        return '#28a745';
       case 'pending':
-      case 'pending approval':
-        return '#ffc107'; // yellow
+        return '#ffc107';
       case 'declined':
-      case 'cancelled':
-        return '#dc3545'; // red
+        return '#dc3545';
       default:
-        return '#6c757d'; // gray
+        return '#6c757d';
     }
   };
 
@@ -40,7 +37,7 @@ function EventCard({
   };
 
   return (
-    <div className="event-card" onClick={handleCardClick} style={{ position: 'relative', cursor: onSelect ? 'pointer' : 'default' }}>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {onSelect && (
         <input
           type="checkbox"
@@ -52,51 +49,50 @@ function EventCard({
       )}
 
       {event.image && (
-        <div className="event-image">
-          <img src={event.image} alt={event.title || event.name} />
-          <span
-            className="status-badge"
-            style={{ backgroundColor: getStatusColor(event.event_status || event.status) }}
-          >
-            {(event.event_status || event.status || '').charAt(0).toUpperCase() +
-              (event.event_status || event.status || '').slice(1)}
-          </span>
+        <div className="h-48 overflow-hidden">
+          <img 
+            src={event.image} 
+            alt={event.title}
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
-
-      <div className="event-content">
-        <h3>{event.title || event.name}</h3>
-        <p className="date">{formatDate(event.date)}</p>
-        <p className="description">{event.description}</p>
-
-        <div className="event-details">
-          <p>Location: {event.location}</p>
-          <p>Category: {event.category || 'N/A'}</p>
-          <p>Price: ${event.ticket_price ?? event.price ?? 0}</p>
-          <p>
-            Tickets: {event.remaining_tickets ?? event.ticketsSold ?? 0}/
-            {event.total_tickets ?? event.totalTickets ?? 0}
-          </p>
-          {isOrganizer && (event.event_status || event.status) && (
-            <p className="status-text" style={{ color: getStatusColor(event.event_status || event.status) }}>
-              Status: {event.event_status || event.status}
+      
+      <div className="p-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">{event.title}</h3>
+        <p className="text-sm text-gray-600 mb-3">{formatDate(event.date)}</p>
+        
+        <p className="text-gray-700 mb-4 line-clamp-3">{event.description}</p>
+        
+        <div className="space-y-2 text-sm text-gray-600 mb-4">
+          <p><span className="font-medium">Location:</span> {event.location}</p>
+          <p><span className="font-medium">Category:</span> {event.category}</p>
+          <p><span className="font-medium">Price:</span> ${event.ticket_price}</p>
+          <p><span className="font-medium">Available Tickets:</span> {event.remaining_tickets}/{event.total_tickets}</p>
+          {isOrganizer && (
+            <p className="font-medium" style={{ color: getStatusColor(event.event_status) }}>
+              Status: {event.event_status}
             </p>
           )}
         </div>
 
-        <div className="actions">
-          {onView && (
-            <button onClick={onView} className="view-button" type="button">
-              View Details
-            </button>
-          )}
-          {isOrganizer && onEdit && (
-            <button onClick={onEdit} className="edit-button" type="button">
+        <div className="flex gap-3">
+          <button
+            onClick={onView}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition duration-200"
+          >
+            View Details
+          </button>
+          {isOrganizer && (
+            <button
+              onClick={onEdit}
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md transition duration-200"
+            >
               Edit Event
             </button>
           )}
           {onStatusUpdate && (
-            <button onClick={onStatusUpdate} className="status-update-button" type="button">
+            <button onClick={onStatusUpdate} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md transition duration-200" type="button">
               Update Status
             </button>
           )}

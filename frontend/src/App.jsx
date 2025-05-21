@@ -15,8 +15,8 @@ import AdminEventsPage from './pages/AdminEventsPage';
 import Profile from './pages/Profile';
 import AdminLogin from './pages/AdminLogin';
 
-import MyEventsPage from './MyEventsPage';
-import EventForm from './EventForm';
+import MyEventsPage from './pages/organizer/MyEventsPage';
+import EventForm from './pages/organizer/EventForm';
 import EventPage from './EventPage';
 
 function App() {
@@ -92,7 +92,7 @@ function App() {
                 } 
               />
               <Route 
-                path="/my-events/:eventid/edit" 
+                path="/my-events/:id/edit" 
                 element={
                   <ProtectedRoute>
                     <EventForm />
