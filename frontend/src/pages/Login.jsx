@@ -45,7 +45,11 @@ export default function LoginForm() {
       await axios.post('/api/auth/login', form);
       
       // Then, update the auth context
-      await login();
+      const userData = await login();
+      
+      if (!userData) {
+        throw new Error('Failed to get user data after login');
+      }
       
       // Update loading toast to success
       toast.update(loadingToast, {
@@ -61,7 +65,11 @@ export default function LoginForm() {
       });
       
       // Double check authentication
-      await checkAuth();
+      const authCheck = await checkAuth();
+      
+      if (!authCheck) {
+        throw new Error('Authentication check failed');
+      }
       
       // Finally, navigate to profile
       navigate('/profile', { replace: true });
@@ -241,7 +249,69 @@ export default function LoginForm() {
   };
 
   return (
-    <div style={styles.outer}>
+    <div className="login-outer" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', background: styles.outer.background }}>
+      <style>{`
+        .login-outer {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          box-sizing: border-box;
+          width: 100vw;
+          overflow-x: hidden;
+        }
+        .login-logo {
+          position: fixed;
+          top: 24px;
+          left: 24px;
+          z-index: 1000;
+          height: 192px;
+          width: auto;
+          transition: all 0.2s;
+        }
+        .login-logo img {
+          height: 192px;
+          width: auto;
+          display: block;
+        }
+        .login-card {
+          margin-top: 80px;
+          margin-bottom: 32px;
+        }
+        @media (max-width: 600px) {
+          .login-logo {
+            position: static !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 32px 0 24px 0;
+            height: auto;
+            width: 100%;
+          }
+          .login-logo img {
+            height: 160px !important;
+            max-width: 90vw;
+            width: auto;
+            display: block;
+            margin: 0 auto;
+          }
+          .login-card {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 32px auto;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+            background: rgba(255,255,255,0.18);
+            padding: 1.5rem 1rem;
+            box-sizing: border-box;
+          }
+        }
+      `}</style>
+      <div className="login-logo">
+        <Link to="/">
+          <img src="/LogoWhite.png" alt="Logo" />
+        </Link>
+      </div>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -254,7 +324,7 @@ export default function LoginForm() {
         pauseOnHover
         theme="light"
       />
-      <div style={styles.container}>
+      <div className="login-card" style={styles.container}>
         <h1 style={styles.title}>Welcome Back</h1>
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>

@@ -18,6 +18,16 @@ export default function Layout() {
       justifyContent: 'space-between',
       alignItems: 'center',
     },
+    left: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1rem',
+    },
+    logo: {
+      height: 48,
+      width: 'auto',
+      display: 'block',
+    },
     title: {
       fontSize: '1.25rem',
       fontWeight: '600',
@@ -49,7 +59,12 @@ export default function Layout() {
   return (
     <div style={styles.container}>
       <header style={styles.header}>
-        <h1 style={styles.title}>Event Ticketing System</h1>
+        <div style={styles.left}>
+          <Link to="/">
+            <img src="/LogoWhite.png" alt="Logo" style={styles.logo} />
+          </Link>
+          <h1 style={styles.title}>Event Ticketing System</h1>
+        </div>
         <nav style={styles.nav}>
           <Link to="/" style={styles.link}>Home</Link>
           {user?.role === "admin" && (

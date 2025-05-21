@@ -8,21 +8,23 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     try {
       const res = await axios.get('/api/users/profile');
       setUser(res.data);
+      return res.data;
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const login = async () => {
     try {
