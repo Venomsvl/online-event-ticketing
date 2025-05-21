@@ -7,6 +7,7 @@ const eventRoutes = require('./src/routes/eventRoutes');
 const errorHandler = require('./src/middlewares/errorHandler');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -23,7 +24,20 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Routes
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Root route serves the homepage
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Register route
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
@@ -58,7 +72,23 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-tic
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Function to try different ports
+const startServer = (initialPort) => {
+  const server = app.listen(initialPort)
+    .on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${initialPort} is busy, trying ${initialPort + 1}...`);
+        startServer(initialPort + 1);
+      } else {
+        console.error('Server error:', err);
+      }
+    })
+    .on('listening', () => {
+      const port = server.address().port;
+      console.log(`Server is running on http://localhost:${port}`);
+    });
+};
+
+// Start server with initial port
+const initialPort = process.env.PORT || 3000;
+startServer(initialPort);

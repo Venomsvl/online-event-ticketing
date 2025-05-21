@@ -7,24 +7,18 @@ const SystemSettings = mongoose.model('SystemSettings', new mongoose.Schema({
     emailPassword: String
 }));
 
+const transporter = nodemailer.createTransport({
+    service: process.env.EMAIL_SERVICE || 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
 const sendEmail = async (to, subject, text) => {
     try {
-        // Fetch the first system email credentials from the database
-        const settings = await SystemSettings.findOne();
-        if (!settings || !settings.email || !settings.emailPassword) {
-            throw new Error('System email credentials not found in the database');
-        }
-
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
-            auth: {
-                user: settings.email,
-                pass: settings.emailPassword
-            }
-        });
-
         const mailOptions = {
-            from: settings.email,
+            from: process.env.EMAIL_USER,
             to,
             subject,
             text
@@ -33,7 +27,7 @@ const sendEmail = async (to, subject, text) => {
         await transporter.sendMail(mailOptions);
         console.log('Email sent successfully');
     } catch (error) {
-        console.error('Error sending email:', error.message);
+        console.error('Error sending email:', error);
         throw error;
     }
 };

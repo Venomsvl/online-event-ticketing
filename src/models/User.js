@@ -4,25 +4,21 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true,
-        trim: true
+        required: true
     },
     email: {
         type: String,
         required: true,
         unique: true,
-        lowercase: true,
-        trim: true,
-        match: [/.+@.+\..+/, 'Please enter a valid email address']
+        lowercase: true
     },
     password: {
         type: String,
-        required: true,
-        minlength: [6, 'Password must be at least 6 characters']
+        required: true
     },
     role: {
         type: String,
-        enum: ['user', 'organizer', 'admin'],
+        enum: ['user', 'admin'],
         default: 'user'
     },
     createdAt: {
@@ -46,11 +42,7 @@ userSchema.pre('save', async function(next) {
 
 // Method to check password
 userSchema.methods.checkPassword = async function(password) {
-    try {
-        return await bcrypt.compare(password, this.password);
-    } catch (error) {
-        throw error;
-    }
+    return await bcrypt.compare(password, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema); 

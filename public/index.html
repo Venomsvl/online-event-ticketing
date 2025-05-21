@@ -1,14 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Online Event Ticketing System" />
-    <title>Event Ticketing</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tixify - Event Ticketing Made Easy</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
   </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+  <body class="bg-black text-white">
+    <!-- Navigation -->
+    <nav class="bg-gradient-to-r from-purple-600 to-purple-800 border-b border-purple-500">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <a href="/" class="text-2xl font-bold text-white">Tixify</a>
+          </div>
+          <!-- Mobile menu button -->
+          <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-white hover:text-purple-200">
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+          <!-- Desktop menu -->
+          <div class="hidden md:flex items-center space-x-6">
+            <a href="/" class="text-white hover:text-purple-200">Home</a>
+            <a href="/events" class="text-white hover:text-purple-200">Events</a>
+            <a href="/about" class="text-white hover:text-purple-200">About</a>
+            <a href="/contact" class="text-white hover:text-purple-200">Contact</a>
+            <a href="/create-event" class="bg-purple-500 text-white px-4 py-2 rounded-full hover:bg-purple-600">Create Event</a>
+          </div>
+        </div>
+      </div>
+      <!-- Mobile menu (hidden by default) -->
+      <div id="mobile-menu" class="hidden md:hidden">
+        <div class="px-2 pt-2 pb-3 space-y-1 bg-purple-800">
+          <a href="/" class="block px-3 py-2 text-white hover:bg-purple-700 rounded-md">Home</a>
+          <a href="/events" class="block px-3 py-2 text-white hover:bg-purple-700 rounded-md">Events</a>
+          <a href="/about" class="block px-3 py-2 text-white hover:bg-purple-700 rounded-md">About</a>
+          <a href="/contact" class="block px-3 py-2 text-white hover:bg-purple-700 rounded-md">Contact</a>
+          <a href="/create-event" class="block px-3 py-2 text-white bg-purple-600 hover:bg-purple-700 rounded-md">Create Event</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section with Countdown -->
+    <div class="relative bg-gradient-to-br from-purple-900 to-purple-600 py-12 md:py-20">
+      <div class="absolute inset-0 bg-black opacity-50 pointer-events-none"></div>
+      <div class="relative max-w-7xl mx-auto px-4 text-center">
+        <div class="welcome-section mb-8">
+          <div class="text-2xl md:text-3xl text-purple-200 mb-4 welcome-text">Welcome to</div>
+          <div class="logo-container flex justify-center mb-6">
+            <!-- Replace the path below with the actual path to your logo -->
+            <img src="/images/take3gradient.png" alt="Tixify" class="w-64 md:w-80 logo-animation">
+          </div>
+          <p class="text-lg md:text-xl mb-8 md:mb-12 text-purple-100">Explore the vibrant events happening locally and globally.</p>
+        </div>
+        
+        <!-- Countdown Timer -->
+        <div class="grid grid-cols-2 md:flex md:justify-center gap-4 md:space-x-4 mb-8 md:mb-12">
+          <div class="countdown-box p-4 rounded-lg">
+            <div id="days" class="text-3xl md:text-4xl font-bold">12</div>
+            <div class="text-sm text-purple-300">Days</div>
+          </div>
+          <div class="countdown-box p-4 rounded-lg">
+            <div id="hours" class="text-3xl md:text-4xl font-bold">00</div>
+            <div class="text-sm text-purple-300">Hours</div>
+          </div>
+          <div class="countdown-box p-4 rounded-lg">
+            <div id="minutes" class="text-3xl md:text-4xl font-bold">00</div>
+            <div class="text-sm text-purple-300">Minutes</div>
+          </div>
+          <div class="countdown-box p-4 rounded-lg">
+            <div id="seconds" class="text-3xl md:text-4xl font-bold">00</div>
+            <div class="text-sm text-purple-300">Seconds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event List Section -->
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <div class="relative">
+        <div class="event-list overflow-x-auto">
+          <div class="flex space-x-4 md:space-x-6 pb-4" id="eventContainer">
+            <!-- Event cards will be inserted here dynamically -->
+          </div>
+        </div>
+        <!-- Navigation Arrows (hidden on mobile) -->
+        <button class="hidden md:block absolute left-0 top-1/2 transform -translate-y-1/2 bg-purple-600 p-2 rounded-full text-white hover:bg-purple-700 scroll-button" onclick="scrollEvents('left')">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button class="hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 bg-purple-600 p-2 rounded-full text-white hover:bg-purple-700 scroll-button" onclick="scrollEvents('right')">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Event Categories -->
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <div class="flex justify-between items-center mb-6 md:mb-8">
+        <h2 class="text-xl md:text-2xl font-bold">Event Categories</h2>
+        <a href="/categories" class="text-purple-400 hover:text-purple-300">See all categories →</a>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+        <a href="/category/music" class="category-card block">
+          <div class="relative rounded-lg overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=300&fit=crop" alt="Music" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-purple-900 to-transparent"></div>
+            <div class="absolute bottom-4 left-4 text-white font-semibold">Music</div>
+          </div>
+        </a>
+        <!-- Add more category cards as needed -->
+      </div>
+    </div>
+
+    <script>
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+      });
+
+      // Sample event data (in a real app, this would come from your API)
+      const events = [
+        {
+          id: 1,
+          title: 'Summer Music Festival',
+          date: '2024-07-15',
+          time: '18:00',
+          location: 'Central Park',
+          image: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=500&h=300&fit=crop',
+          price: '50.00'
+        },
+        {
+          id: 2,
+          title: 'Tech Conference 2024',
+          date: '2024-08-20',
+          time: '09:00',
+          location: 'Convention Center',
+          image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=500&h=300&fit=crop',
+          price: '199.00'
+        },
+        {
+          id: 3,
+          title: 'Food & Wine Festival',
+          date: '2024-09-10',
+          time: '12:00',
+          location: 'City Square',
+          image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500&h=300&fit=crop',
+          price: '75.00'
+        },
+        {
+          id: 4,
+          title: 'Comedy Night',
+          date: '2024-07-25',
+          time: '20:00',
+          location: 'Laugh Factory',
+          image: 'https://images.unsplash.com/photo-1485282826741-1b5d56f7e268?w=500&h=300&fit=crop',
+          price: '35.00'
+        }
+      ];
+
+      function createEventCard(event) {
+        const date = new Date(event.date);
+        return `
+          <div class="event-card bg-purple-900 rounded-lg shadow-xl flex-none w-72 md:w-80 overflow-hidden">
+            <div class="relative">
+              <img src="${event.image}" alt="${event.title}" class="w-full h-40 md:h-48 object-cover">
+              <div class="absolute top-4 left-4 bg-purple-600 text-white px-2 py-1 rounded-md">
+                ${date.getDate()} ${date.toLocaleString('default', { month: 'short' }).toUpperCase()}
+              </div>
+            </div>
+            <div class="p-4">
+              <h3 class="text-lg md:text-xl font-semibold mb-2 text-white">${event.title}</h3>
+              <div class="text-purple-300 text-sm md:text-base mb-2">
+                <p>${date.toLocaleDateString()} at ${event.time}</p>
+                <p>${event.location}</p>
+              </div>
+              <div class="flex justify-between items-center mt-4">
+                <span class="text-lg font-bold text-purple-400">$${event.price}</span>
+                <button onclick="bookEvent(${event.id})" 
+                  class="bg-purple-600 text-white px-3 py-1 md:px-4 md:py-2 rounded-full hover:bg-purple-700 text-sm md:text-base">
+                  Book Now
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function scrollEvents(direction) {
+        const container = document.getElementById('eventContainer');
+        const scrollAmount = window.innerWidth >= 768 ? 400 : 300;
+        if (direction === 'left') {
+          container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+      }
+
+      function updateCountdown() {
+        const now = new Date();
+        const target = new Date(now);
+        target.setDate(target.getDate() + 12); // 12 days from now
+        
+        const diff = target - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('days').textContent = String(days).padStart(2, '0');
+        document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+      }
+
+      function bookEvent(eventId) {
+        // Check if user is logged in
+        const isLoggedIn = false; // This should be determined by your authentication logic
+        if (!isLoggedIn) {
+          window.location.href = '/login';
+          return;
+        }
+        // Handle booking logic here
+        console.log('Booking event:', eventId);
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', () => {
+        const eventContainer = document.getElementById('eventContainer');
+        events.forEach(event => {
+          eventContainer.innerHTML += createEventCard(event);
+        });
+        
+        // Start countdown
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      });
+
+      // Fetch real events from the server
+      async function fetchEvents() {
+        try {
+          const response = await fetch('/api/events');
+          if (response.ok) {
+            const events = await response.json();
+            const eventContainer = document.getElementById('eventContainer');
+            eventContainer.innerHTML = ''; // Clear sample events
+            events.forEach(event => {
+              eventContainer.innerHTML += createEventCard(event);
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching events:', error);
+        }
+      }
+
+      // Uncomment this when your API is ready
+      // fetchEvents();
+    </script>
+
+    <style>
+      .event-list {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+      }
+      .event-list::-webkit-scrollbar { /* WebKit */
+        display: none;
+      }
+    </style>
   </body>
 </html> 

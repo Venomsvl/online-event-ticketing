@@ -15,7 +15,8 @@ const passwordResetSchema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
+        expires: 600 // Document will be automatically deleted after 10 minutes
     }
 });
 
