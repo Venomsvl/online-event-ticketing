@@ -4,6 +4,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const eventRoutes = require('./src/routes/eventRoutes');
+const bookingRoutes = require('./src/routes/bookingRoutes');
 const errorHandler = require('./src/middlewares/errorHandler');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -18,10 +19,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:3001',
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
 // Serve static files from public directory
@@ -42,6 +43,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // Hardcoded admin login route
 const ADMIN_USERS = [
@@ -67,13 +69,32 @@ app.post('/api/auth/admin-login', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-ticketing')
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('MongoDB connection error:', err));
+// MongoDB Connection with proper error handling
+mongoose.set('strictQuery', false);
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-ticketing', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    
+    // Clear any existing models to prevent the OverwriteModelError
+    Object.keys(mongoose.models).forEach(modelName => {
+      delete mongoose.models[modelName];
+    });
+    
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
 
 // Function to try different ports
-const startServer = (initialPort) => {
+const startServer = async (initialPort) => {
+  // Connect to MongoDB first
+  await connectDB();
+  
   const server = app.listen(initialPort)
     .on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
