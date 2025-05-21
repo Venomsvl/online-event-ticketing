@@ -1,156 +1,37 @@
 const { validationResult } = require('express-validator');
-const User = require('../models/User'); // Fixed casing
-const PasswordReset = require('../model/passwordReset');
+const User = require('../models/User');
+const PasswordReset = require('../models/PasswordReset');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/emailService');
-const jwt = require('jsonwebtoken');
-
-// Register a new user
-exports.register = async (req, res) => {
-    const { name, email, password, role } = req.body;
-
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ name, email, password: hashedPassword, role });
-        await newUser.save();
-
-        res.status(201).json({ message: 'User registered successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// Login a user
-exports.login = async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        }
-
-        const token = jwt.sign({ id: user._id, role: user.role }, 'your_jwt_secret', { expiresIn: '1h' });
-        res.status(200).json({ message: 'Login successful', token });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// Request OTP for password reset
-exports.sendOTP = async (req, res) => {
-    const { email } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const otp = crypto.randomInt(100000, 999999).toString();
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-        await PasswordReset.create({ email, otp, expiresAt });
-
-        const expirationMinutes = 10;
-        const emailText = `
-Hello,
-
-You requested to reset your password for your Online Event Ticketing account.
-
-Your OTP code is: ${otp}
-
-This code will expire in ${expirationMinutes} minutes (at ${expiresAt.toLocaleTimeString()}).
-
-If you did not request this, please ignore this email.
-
-Best regards,
-Online Event Ticketing Support Team
-        `;
-
-        await sendEmail(email, 'Your Password Reset OTP', emailText);
-        res.status(200).json({ message: 'OTP sent to your email' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// Verify OTP
-exports.verifyOTP = async (req, res) => {
-    const { email, otp } = req.body;
-
-    try {
-        const passwordReset = await PasswordReset.findOne({ email, otp });
-        if (!passwordReset) {
-            return res.status(400).json({ message: 'Invalid or expired OTP' });
-        }
-
-        await PasswordReset.deleteOne({ email, otp });
-        res.status(200).json({ message: 'OTP verified successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// Reset Password
-exports.resetPassword = async (req, res) => {
-    const { email, newPassword } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedPassword;
-        await user.save();
-
-        res.status(200).json({ message: 'Password reset successful' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-const { validationResult } = require('express-validator');
-const User = require('../model/User'); // Ensure the file name matches exactly
-const PasswordReset = require('../model/passwordReset'); // Ensure the file name matches exactly
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const sendEmail = require('../utils/emailService'); // Ensure the file name matches exactly
 
 // Register a new user
 exports.register = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.log('[REGISTER] Validation errors:', errors.array());
         return res.status(400).json({ errors: errors.array() });
     }
 
     const { name, email, password, role } = req.body;
+    console.log('[REGISTER] Attempting to register user:', { name, email, role });
 
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
+            console.log('[REGISTER] User already exists:', email);
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Create a new user (password will be hashed in the User model's pre-save middleware)
+        // Create a new user (password will be hashed by the User model's pre-save middleware)
         const newUser = new User({ name, email, password, role });
         await newUser.save();
+        console.log('[REGISTER] User registered successfully:', email);
 
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
-        console.error('Error during registration:', error);
+        console.error('[REGISTER] Error during registration:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
@@ -158,37 +39,48 @@ exports.register = async (req, res) => {
 // Login a user
 exports.login = async (req, res) => {
     const { email, password } = req.body;
+    console.log('[LOGIN] Attempting login for:', email);
 
     try {
-        console.log("=== Incoming login ===");
-        console.log("req.body:", req.body);
-
         const user = await User.findOne({ email });
         if (!user) {
             console.log('[LOGIN] No user found for email:', email);
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        console.log('[LOGIN] bcrypt.compare result:', isMatch);
+        const isMatch = await user.checkPassword(password);
+        console.log('[LOGIN] Password check result:', isMatch);
 
         if (!isMatch) {
+            console.log('[LOGIN] Invalid password for user:', email);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
         const token = jwt.sign(
             { id: user._id, role: user.role },
-            process.env.JWT_SECRET, // Use the secret key from .env
+            process.env.JWT_SECRET || 'your_jwt_secret',
             { expiresIn: '1h' }
         );
 
-        console.log('Generated token:', token); // Log the generated token
-        
-        res.status(200).json({ message: 'Login successful', token });
+        // Set JWT as HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000 // 1 hour
+        });
+        console.log('[LOGIN] Login successful for:', email);
+        res.status(200).json({ message: 'Login successful' });
     } catch (error) {
-        console.error('Error during login:', error);
+        console.error('[LOGIN] Error during login:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
+};
+
+// Logout user (clear cookie)
+exports.logout = (req, res) => {
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Logged out' });
 };
 
 // Request OTP for password reset
@@ -247,7 +139,7 @@ exports.verifyOTP = async (req, res) => {
     }
 };
 
-// Reset Password (after OTP verification)
+// Reset Password
 exports.resetPassword = async (req, res) => {
     const { email, newPassword } = req.body;
 
@@ -257,7 +149,7 @@ exports.resetPassword = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update the password (it will be hashed in the User model's pre-save middleware)
+        // Update the password (it will be hashed by the User model's pre-save middleware)
         user.password = newPassword;
         await user.save();
 
