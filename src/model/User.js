@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const bcrypt = require('bcrypt');
 
 // Define the user schema
 const userSchema = new mongoose.Schema({
@@ -45,13 +44,11 @@ const userSchema = new mongoose.Schema({
 // Hash the password before saving the user
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
-        return next(); // Skip hashing if the password is not modified
+        return next(); // Skip hashing if password not modified
     }
 
     try {
-        console.log('[User Model] Hashing password for:', this.email);
         this.password = await bcrypt.hash(this.password, 10);
-        console.log('[User Model] Password hashed successfully');
         next();
     } catch (error) {
         next(error);
@@ -63,7 +60,7 @@ userSchema.methods.checkPassword = function (plainPassword) {
     return bcrypt.compare(plainPassword, this.password);
 };
 
-// Ensure we don't redefine the model in hot-reloading environments
+// Export model, avoid redefinition during hot reloads
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 module.exports = User;

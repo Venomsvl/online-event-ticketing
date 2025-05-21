@@ -13,7 +13,7 @@ function EventForm() {
   // Load data if editing
   useEffect(() => {
     if (eventid) {
-      fetch(`http://localhost:3001/my-events/${eventid}`)
+      fetch(`http://localhost:3000/api/v1/events/${eventid}`)
         .then((res) => res.json())
         .then((data) => {
           setTitle(data.title);
@@ -33,8 +33,8 @@ function EventForm() {
     const eventData = { title, date, description };
 
     const url = eventid
-      ? `http://localhost:3001/my-events/${eventid}`
-      : `http://localhost:3001/my-events`;
+      ? `http://localhost:3000/api/v1/events/${eventid}`
+      : `http://localhost:3000/api/v1/events`;
 
     const method = eventid ? 'PUT' : 'POST';
 
@@ -54,7 +54,7 @@ function EventForm() {
     const confirmDelete = window.confirm("Are you sure you want to delete this event?");
     if (!confirmDelete) return;
 
-    fetch(`http://localhost:3001/my-events/${eventid}`, {
+    fetch(`http://localhost:3000/api/v1/events/${eventid}`, {
       method: 'DELETE'
     })
       .then(() => navigate('/my-events'))

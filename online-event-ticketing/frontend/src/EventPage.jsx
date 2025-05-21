@@ -7,7 +7,7 @@ const [event, setEvent] = useState(null);
 const navigate = useNavigate();
 
 useEffect(() => {
-fetch(`http://localhost:3001/my-events/${eventid}`)
+fetch(`http://localhost:3000/api/v1/events/${eventid}`)
 .then((res) => {
 if (!res.ok) {
 throw new Error('Event not found');

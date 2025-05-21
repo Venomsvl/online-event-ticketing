@@ -1,6 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { sendOTP, verifyOTP, resetPassword } = require('../Controllers/AuthController');
+const AuthController = require('../Controllers/AuthController');
 const router = express.Router();
 
 // Register route
@@ -12,7 +12,7 @@ router.post(
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
         body('role').isIn(['user', 'organizer', 'admin']).withMessage('Invalid role')
     ],
-    register
+    AuthController.register
 );
 
 // Login route
@@ -22,14 +22,14 @@ router.post(
         body('email').isEmail().withMessage('Invalid email'),
         body('password').notEmpty().withMessage('Password is required')
     ],
-    login
+    AuthController.login
 );
 
 // Request OTP for password reset
 router.post(
     '/forgetPassword/request-otp',
     [body('email').isEmail().withMessage('Invalid email')],
-    sendOTP
+    AuthController.sendOTP
 );
 
 // Verify OTP
@@ -39,7 +39,7 @@ router.post(
         body('email').isEmail().withMessage('Invalid email'),
         body('otp').isLength({ min: 6, max: 6 }).withMessage('Invalid OTP')
     ],
-    verifyOTP
+    AuthController.verifyOTP
 );
 
 // Reset Password with OTP
@@ -49,7 +49,7 @@ router.put(
         body('email').isEmail().withMessage('Invalid email'),
         body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
     ],
-    resetPassword
+    AuthController.resetPassword
 );
 
 module.exports = router;

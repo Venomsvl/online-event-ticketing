@@ -4,40 +4,40 @@ const eventSchema = mongoose.Schema({
 
     title : {
         type: String,
-        require : true
+        required : true
     },
     description : {
         type : String,
-        require : true
+        required : true
     },
     date : {
         type : Date,
-        require : true
+        required : true
 
     },
     location: {
         type: String,
-        require : true 
+        required : true 
     },
     category: {
         type: String,
-        require : true 
+        required : true 
     },
     image: {
         type: String,
-        require : false 
+        required : false 
     },
     ticket_price:{
         type : Number,
-        require : true 
+        required : true 
     },
     total_tickets :{
         type: Number,
-        require : true 
+        required : true 
     },
     remaining_tickets:{
         type: Number,
-        require: true
+        required: true
     },
     
      //adding an event status field
@@ -46,6 +46,10 @@ const eventSchema = mongoose.Schema({
         enum: ['approved', 'pending', 'declined'],
         default: 'pending',
     },
+    organizer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
 })
 const Event = mongoose.model('Event', eventSchema);
 module.exports = Event;
