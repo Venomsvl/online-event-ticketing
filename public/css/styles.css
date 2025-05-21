@@ -11,11 +11,26 @@
 .logo-container {
     transform: translateY(20px);
     animation: slideUp 1s ease-out 0.3s forwards;
+    min-height: 100px; /* Reserve space for logo */
 }
 
 .logo-animation {
     animation: logoReveal 1.2s ease-out 0.3s both;
     filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.4));
+}
+
+.error-loading {
+    border: 2px dashed rgba(168, 85, 247, 0.4);
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.error-loading::after {
+    content: 'Logo not found';
+    display: block;
+    color: #e9d5ff;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
 }
 
 .gradient-text {
