@@ -1,33 +1,55 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body } = require('express-validator'); // Import express-validator
 const router = express.Router();
 const {
     listUsers,
     getUser,
     updateUserRole,
     deleteUser
-} = require('../controllers/adminController');
-const { verifyToken } = require('../middlewares/authMiddleware'); // Correct import
-const adminMiddleware = require('../middlewares/adminMiddleware'); // Correct import
+} = require('../Controllers/AdminController'); // Import admin controllers
+const authMiddleware = require('../middlewares/authMiddleware'); // Import authentication middleware
+const adminMiddleware = require('../middlewares/adminMiddleware'); // Import admin middleware
 
-// List all users
-router.get('/api/v1/users', verifyToken, adminMiddleware, listUsers);
-
-// Get a single user by ID
-router.get('/api/v1/users/:id', verifyToken, adminMiddleware, getUser);
-
-// Update a user's role
-router.put(
-    '/api/v1/users/:id',
-    [
-        verifyToken,
-        adminMiddleware,
-        body('role').notEmpty().withMessage('Role is required')
-    ],
-    updateUserRole
+// Admin routes
+router.get(
+    '/users', 
+    authMiddleware, // Ensure the user is authenticated
+    adminMiddleware, // Ensure the user has admin privileges
+    listUsers // Controller to list all users
 );
 
-// Delete a user by ID
-router.delete('/api/v1/users/:id', verifyToken, adminMiddleware, deleteUser);
+router.get(
+    '/users/:id', 
+    authMiddleware, // Ensure the user is authenticated
+    adminMiddleware, // Ensure the user has admin privileges
+    getUser // Controller to get a single user by ID
+);
+
+router.put(
+    '/users/:id',
+    [
+        authMiddleware, // Ensure the user is authenticated
+        adminMiddleware, // Ensure the user has admin privileges
+        body('role')
+          .notEmpty().withMessage('Role is required')
+          .isIn(['user', 'organizer', 'admin']).withMessage('Role must be user, organizer, or admin') // Validate role input
+    ],
+    updateUserRole // Controller to update a user's role
+);
+
+router.delete(
+    '/users/:id', 
+    authMiddleware, // Ensure the user is authenticated
+    adminMiddleware, // Ensure the user has admin privileges
+    deleteUser // Controller to delete a user by ID
+);
+
+//event related part
+//Only admins can approve or reject the event. (point 2)
+router.put('/api/v1/events/:id', 
+    authMiddleware,
+    adminMiddleware
+    //a controller for ????
+);
 
 module.exports = router;

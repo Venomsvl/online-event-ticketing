@@ -1,10 +1,10 @@
 const { validationResult } = require('express-validator');
-const User = require('../model/User'); // Fixed casing and path
+const User = require('../models/User'); // Fixed casing
 
 // Get User Profile
 exports.getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user.id).select('-password'); // Exclude password
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -15,7 +15,7 @@ exports.getUserProfile = async (req, res) => {
 };
 
 // Update User Profile
-exports.updateUser = async (req, res) => {
+exports.updateUserProfile = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });

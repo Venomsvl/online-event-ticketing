@@ -1,4 +1,4 @@
-const Event = require('../model/event');
+const Event = require('../model/Event');
 const Booking = require('../model/booking');
 const mongoose = require('mongoose');
 
