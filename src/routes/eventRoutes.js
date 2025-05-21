@@ -1,23 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const EventController = require('../Controllers/EventController'); //iport event controller
-const adminMiddleware = require('../middlewares/adminMiddleware'); //import the admin and auth middlewares
-const authMiddleware = require('../middlewares/authMiddleware');
+const EventController = require('../Controllers/EventController');
+const { verifyToken } = require('../middlewares/authMiddleware');
+const roleMiddleware = require('../middlewares/roleMiddleware');
 
 // Public routes
-router.get('/', getAllEvents);
-router.get('/:id', getEventById);
-
-// Protected routes
-router.get('/my/events', authMiddleware, EventController.getMyEvents);
-router.get('/my/analytics', authMiddleware, EventController.getMyEventsAnalytics);
+router.get('/', EventController.getAllEvents);
+router.get('/:id', EventController.getEventById);
 
 // Organizer-only routes
-router.post('/', authMiddleware, adminMiddleware, EventController.createEvent);
-router.put('/:id', authMiddleware, adminMiddleware, EventController.updateEvent);
-router.delete('/:id', authMiddleware, adminMiddleware, EventController.deleteEvent);
+router.get('/my/events', verifyToken, roleMiddleware('organizer'), EventController.getMyEvents);
+router.get('/my/analytics', verifyToken, roleMiddleware('organizer'), EventController.getMyEventsAnalytics);
+router.post('/', verifyToken, roleMiddleware('organizer'), EventController.createEvent);
+router.put('/:id', verifyToken, roleMiddleware('organizer'), EventController.updateEvent);
+router.delete('/:id', verifyToken, roleMiddleware('organizer'), EventController.deleteEvent);
 
 // Admin-only routes
-router.put('/:id/status', authMiddleware, adminMiddleware, EventController.approveOrReject);
+router.put('/:id/status', verifyToken, roleMiddleware('admin'), EventController.approveOrReject);
 
 module.exports = router;

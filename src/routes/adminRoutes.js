@@ -6,21 +6,21 @@ const {
     getUser,
     updateUserRole,
     deleteUser
-} = require('../Controllers/AdminController'); // Import admin controllers
-const authMiddleware = require('../middlewares/authMiddleware'); // Import authentication middleware
-const adminMiddleware = require('../middlewares/adminMiddleware'); // Import admin middleware
+} = require('../Controllers/AdminController');
+const { verifyToken } = require('../middlewares/authMiddleware'); // Use named import
+const adminMiddleware = require('../middlewares/adminMiddleware'); // Should be a function
 
 // Admin routes
 router.get(
     '/users', 
-    authMiddleware, // Ensure the user is authenticated
+    verifyToken, // Ensure the user is authenticated
     adminMiddleware, // Ensure the user has admin privileges
     listUsers // Controller to list all users
 );
 
 router.get(
     '/users/:id', 
-    authMiddleware, // Ensure the user is authenticated
+    verifyToken, // Ensure the user is authenticated
     adminMiddleware, // Ensure the user has admin privileges
     getUser // Controller to get a single user by ID
 );
@@ -28,7 +28,7 @@ router.get(
 router.put(
     '/users/:id',
     [
-        authMiddleware, // Ensure the user is authenticated
+        verifyToken, // Ensure the user is authenticated
         adminMiddleware, // Ensure the user has admin privileges
         body('role')
           .notEmpty().withMessage('Role is required')
@@ -39,17 +39,16 @@ router.put(
 
 router.delete(
     '/users/:id', 
-    authMiddleware, // Ensure the user is authenticated
+    verifyToken, // Ensure the user is authenticated
     adminMiddleware, // Ensure the user has admin privileges
     deleteUser // Controller to delete a user by ID
 );
 
-//event related part
-//Only admins can approve or reject the event. (point 2)
-router.put('/api/v1/events/:id', 
-    authMiddleware,
-    adminMiddleware
-    //a controller for ????
-);
+// Remove or fix the broken event route below if not needed
+// router.put('/api/v1/events/:id', 
+//     verifyToken,
+//     adminMiddleware
+//     // a controller for ????
+// );
 
 module.exports = router;

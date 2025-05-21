@@ -1,17 +1,23 @@
-import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { AuthProvider } from './context/AuthContext'
-import ProtectedRoute from './components/ProtectedRoute'
-import Layout from './components/Layout'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Unauthorized from './pages/Unauthorized'
-import EventAnalytics from './pages/EventAnalytics'
-import AdminEventsPage from './pages/AdminEventsPage'
-import Profile from './pages/Profile'
-import AdminLogin from './pages/AdminLogin'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
+
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Unauthorized from './pages/Unauthorized';
+import EventAnalytics from './pages/EventAnalytics';
+import AdminEventsPage from './pages/AdminEventsPage';
+import Profile from './pages/Profile';
+import AdminLogin from './pages/AdminLogin';
+
+import MyEventsPage from './MyEventsPage';
+import EventForm from './EventForm';
+import EventPage from './EventPage';
 
 function App() {
   return (
@@ -19,16 +25,18 @@ function App() {
       <Router>
         <div className="min-h-screen bg-gray-50">
           <Routes>
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
-            
+
+            {/* All below routes use Layout */}
             <Route element={<Layout />}>
-              {/* Public routes */}
+              {/* Home route */}
               <Route path="/" element={<div>Home Page</div>} />
-              
-              {/* Protected routes */}
+
+              {/* Profile route protected */}
               <Route 
                 path="/profile" 
                 element={
@@ -37,7 +45,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              
+
               {/* Organizer routes */}
               <Route 
                 path="/my-events/analytics" 
@@ -47,7 +55,7 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              
+
               {/* Admin routes */}
               <Route 
                 path="/admin/events" 
@@ -65,8 +73,47 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+
+              {/* My Events routes */}
+              <Route 
+                path="/my-events" 
+                element={
+                  <ProtectedRoute>
+                    <MyEventsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-events/new" 
+                element={
+                  <ProtectedRoute>
+                    <EventForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-events/:eventid/edit" 
+                element={
+                  <ProtectedRoute>
+                    <EventForm />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-events/:eventid" 
+                element={
+                  <ProtectedRoute>
+                    <EventPage />
+                  </ProtectedRoute>
+                } 
+              />
+
+              {/* Redirect root to /my-events or you can keep home page */}
+              {/* Uncomment this if you want root to redirect */}
+              {/* <Route path="/" element={<Navigate to="/my-events" replace />} /> */}
             </Route>
           </Routes>
+
           <ToastContainer
             position="top-right"
             autoClose={5000}
@@ -81,7 +128,7 @@ function App() {
         </div>
       </Router>
     </AuthProvider>
-  )
+  );
 }
 
-export default App 
+export default App;

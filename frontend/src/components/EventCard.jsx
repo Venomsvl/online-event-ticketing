@@ -1,145 +1,259 @@
 import React from 'react';
 import { format } from 'date-fns';
 
-const EventCard = ({ event, onStatusUpdate, isSelected, onSelect }) => {
-    const cardStyle = {
-        background: 'rgba(255,255,255,0.18)',
-        borderRadius: '28px',
-        boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-        border: '1.5px solid rgba(151,125,255,0.3)',
-        overflow: 'hidden',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        position: 'relative',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        cursor: 'pointer',
-        color: '#fff',
-    };
+function EventCard({
+  event,
+  onEdit,
+  onView,
+  isOrganizer,
+  onStatusUpdate,
+  isSelected,
+  onSelect
+}) {
+  const formatDate = (dateString) => {
+    try {
+      return format(new Date(dateString), 'PPP');
+    } catch {
+      return dateString;
+    }
+  };
 
-    const imageStyle = {
-        width: '100%',
-        height: '200px',
-        objectFit: 'cover',
-        borderBottom: '1.5px solid rgba(151,125,255,0.3)',
-    };
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+      case 'active':
+        return '#28a745'; // green
+      case 'pending':
+      case 'pending approval':
+        return '#ffc107'; // yellow
+      case 'declined':
+      case 'cancelled':
+        return '#dc3545'; // red
+      default:
+        return '#6c757d'; // gray
+    }
+  };
 
-    const contentStyle = {
-        padding: '1.5rem',
-    };
+  const handleCardClick = (e) => {
+    if (e.target.type === 'checkbox') return;
+    if (onSelect) onSelect();
+  };
 
-    const titleStyle = {
-        fontSize: '1.25rem',
-        fontWeight: 'bold',
-        marginBottom: '0.75rem',
-        color: '#fff',
-    };
+  return (
+    <div className="event-card" onClick={handleCardClick} style={{ position: 'relative', cursor: onSelect ? 'pointer' : 'default' }}>
+      {onSelect && (
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={onSelect}
+          className="select-checkbox"
+          aria-label="Select event"
+        />
+      )}
 
-    const descriptionStyle = {
-        color: 'rgba(255,255,255,0.8)',
-        marginBottom: '1rem',
-        fontSize: '0.95rem',
-        lineHeight: '1.5',
-    };
-
-    const infoStyle = {
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '0.75rem',
-        color: 'rgba(255,255,255,0.9)',
-        fontSize: '0.95rem',
-    };
-
-    const iconStyle = {
-        width: '1.25rem',
-        height: '1.25rem',
-        marginRight: '0.75rem',
-        color: '#977DFF',
-    };
-
-    const statusStyle = {
-        position: 'absolute',
-        top: '1rem',
-        right: '1rem',
-        padding: '0.5rem 1rem',
-        borderRadius: '12px',
-        fontSize: '0.875rem',
-        fontWeight: '500',
-        background: event.status === 'active' ? 'rgba(16, 185, 129, 0.9)' : 
-                   event.status === 'cancelled' ? 'rgba(239, 68, 68, 0.9)' : 
-                   'rgba(245, 158, 11, 0.9)',
-        color: '#fff',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-        border: '1px solid rgba(255,255,255,0.2)',
-    };
-
-    const checkboxStyle = {
-        position: 'absolute',
-        top: '1rem',
-        left: '1rem',
-        width: '1.5rem',
-        height: '1.5rem',
-        accentColor: '#977DFF',
-        cursor: 'pointer',
-        zIndex: 1,
-    };
-
-    const handleClick = (e) => {
-        if (e.target.type === 'checkbox') return;
-        if (onSelect) onSelect();
-    };
-
-    return (
-        <div style={cardStyle} onClick={handleClick}>
-            {onSelect && (
-                <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={onSelect}
-                    style={checkboxStyle}
-                />
-            )}
-            <div style={{ position: 'relative' }}>
-                <img 
-                    src={event.image || 'https://via.placeholder.com/400x200'} 
-                    alt={event.name}
-                    style={imageStyle}
-                />
-                <span style={statusStyle}>
-                    {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                </span>
-            </div>
-            <div style={contentStyle}>
-                <h3 style={titleStyle}>{event.name}</h3>
-                <p style={descriptionStyle}>{event.description}</p>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    {format(new Date(event.date), 'PPP')}
-                </div>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {event.location}
-                </div>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                    </svg>
-                    {event.ticketsSold} / {event.totalTickets} tickets sold
-                </div>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    ${event.price}
-                </div>
-            </div>
+      {event.image && (
+        <div className="event-image">
+          <img src={event.image} alt={event.title || event.name} />
+          <span
+            className="status-badge"
+            style={{ backgroundColor: getStatusColor(event.event_status || event.status) }}
+          >
+            {(event.event_status || event.status || '').charAt(0).toUpperCase() +
+              (event.event_status || event.status || '').slice(1)}
+          </span>
         </div>
-    );
-};
+      )}
 
-export default EventCard; 
+      <div className="event-content">
+        <h3>{event.title || event.name}</h3>
+        <p className="date">{formatDate(event.date)}</p>
+        <p className="description">{event.description}</p>
+
+        <div className="event-details">
+          <p>Location: {event.location}</p>
+          <p>Category: {event.category || 'N/A'}</p>
+          <p>Price: ${event.ticket_price ?? event.price ?? 0}</p>
+          <p>
+            Tickets: {event.remaining_tickets ?? event.ticketsSold ?? 0}/
+            {event.total_tickets ?? event.totalTickets ?? 0}
+          </p>
+          {isOrganizer && (event.event_status || event.status) && (
+            <p className="status-text" style={{ color: getStatusColor(event.event_status || event.status) }}>
+              Status: {event.event_status || event.status}
+            </p>
+          )}
+        </div>
+
+        <div className="actions">
+          {onView && (
+            <button onClick={onView} className="view-button" type="button">
+              View Details
+            </button>
+          )}
+          {isOrganizer && onEdit && (
+            <button onClick={onEdit} className="edit-button" type="button">
+              Edit Event
+            </button>
+          )}
+          {onStatusUpdate && (
+            <button onClick={onStatusUpdate} className="status-update-button" type="button">
+              Update Status
+            </button>
+          )}
+        </div>
+      </div>
+
+      <style jsx>{`
+        .event-card {
+          border: 1px solid #ddd;
+          border-radius: 28px;
+          overflow: hidden;
+          background: rgba(255, 255, 255, 0.18);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          color: #333;
+          position: relative;
+          padding: 0;
+        }
+
+        .event-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .select-checkbox {
+          position: absolute;
+          top: 1rem;
+          left: 1rem;
+          width: 1.5rem;
+          height: 1.5rem;
+          accent-color: #977dff;
+          cursor: pointer;
+          z-index: 10;
+        }
+
+        .event-image {
+          position: relative;
+          height: 200px;
+          overflow: hidden;
+          border-bottom: 1.5px solid rgba(151, 125, 255, 0.3);
+        }
+
+        .event-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+
+        .status-badge {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          padding: 0.5rem 1rem;
+          border-radius: 12px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #fff;
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          text-transform: capitalize;
+          user-select: none;
+        }
+
+        .event-content {
+          padding: 1.5rem;
+          color: #fff;
+        }
+
+        h3 {
+          margin: 0 0 0.5rem 0;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #fff;
+        }
+
+        .date {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 0.9rem;
+          margin-bottom: 1rem;
+        }
+
+        .description {
+          color: rgba(255, 255, 255, 0.85);
+          margin-bottom: 1rem;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          font-size: 0.95rem;
+          line-height: 1.4;
+        }
+
+        .event-details {
+          font-size: 0.95rem;
+          margin-bottom: 1rem;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .event-details p {
+          margin: 0.25rem 0;
+        }
+
+        .status-text {
+          font-weight: 600;
+          text-transform: capitalize;
+          margin-top: 0.5rem;
+        }
+
+        .actions {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+        }
+
+        button {
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: background-color 0.2s ease;
+          user-select: none;
+        }
+
+        .view-button {
+          background-color: #977dff;
+          color: white;
+        }
+
+        .view-button:hover {
+          background-color: #7a5edb;
+        }
+
+        .edit-button {
+          background-color: #6c757d;
+          color: white;
+        }
+
+        .edit-button:hover {
+          background-color: #545b62;
+        }
+
+        .status-update-button {
+          background-color: #28a745;
+          color: white;
+        }
+
+        .status-update-button:hover {
+          background-color: #218838;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default EventCard;
