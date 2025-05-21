@@ -4,12 +4,15 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 import theme from '../styles/theme';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function RegisterForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "user",
   });
   const [message, setMessage] = useState('');
@@ -81,6 +84,7 @@ export default function RegisterForm() {
     if (!form.email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Invalid email format';
     if (passwordStrength.score < 2) newErrors.password = 'Password is too weak';
+    if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -89,8 +93,30 @@ export default function RegisterForm() {
     }
 
     try {
-      await axios.post('/api/auth/register', form, { withCredentials: true });
-      setMessage("Registration successful! Logging you in...");
+      // Show loading toast
+      const loadingToast = toast.loading('Creating your account...');
+      
+      // Register user
+      await axios.post('/api/auth/register', {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+      });
+      
+      // Update loading toast to success
+      toast.update(loadingToast, {
+        render: 'Registration successful!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2000
+      });
+      
+      // Show redirecting toast
+      toast.info('Redirecting to login...', {
+        autoClose: 1000
+      });
+      
       // Automatically log in the user after registration
       await axios.post('/api/auth/login', {
         email: form.email,
@@ -359,8 +385,82 @@ export default function RegisterForm() {
   };
 
   return (
-    <div style={styles.outer}>
-      <div style={styles.container}>
+    <div className="register-outer" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', background: styles.outer.background }}>
+      <style>{`
+        .register-outer {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          box-sizing: border-box;
+          width: 100vw;
+          overflow-x: hidden;
+        }
+        .register-logo {
+          position: fixed;
+          top: 24px;
+          left: 24px;
+          z-index: 1000;
+          height: 192px;
+          width: auto;
+          transition: all 0.2s;
+        }
+        .register-logo img {
+          height: 192px;
+          width: auto;
+          display: block;
+        }
+        .register-card {
+          margin-top: 80px;
+          margin-bottom: 32px;
+        }
+        @media (max-width: 600px) {
+          .register-logo {
+            position: static !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 32px 0 24px 0;
+            height: auto;
+            width: 100%;
+          }
+          .register-logo img {
+            height: 160px !important;
+            max-width: 90vw;
+            width: auto;
+            display: block;
+            margin: 0 auto;
+          }
+          .register-card {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 32px auto;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+            background: rgba(255,255,255,0.18);
+            padding: 1.5rem 1rem;
+            box-sizing: border-box;
+          }
+        }
+      `}</style>
+      <div className="register-logo">
+        <Link to="/">
+          <img src="/LogoGradientDark.png" alt="Logo" />
+        </Link>
+      </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <div className="register-card" style={styles.container}>
         <h1 style={styles.title}>Create Your Account</h1>
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
@@ -455,6 +555,30 @@ export default function RegisterForm() {
               </div>
             )}
             {errors.password && <span style={styles.error}>{errors.password}</span>}
+          </div>
+
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Confirm Password</label>
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                style={{ ...styles.input, width: '100%', paddingRight: 44 }}
+                value={form.confirmPassword}
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                disabled={loading}
+              />
+              <button
+                type="button"
+                style={styles.passwordToggle}
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
 
           <div style={styles.inputGroup}>
