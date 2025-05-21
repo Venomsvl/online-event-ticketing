@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import axios from '../utils/axios';
 import colors from '../styles/colors';
 
 export default function Profile() {
@@ -24,15 +24,7 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
-        'http://localhost:5000/api/users/profile',
-        form,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
+      const response = await axios.put('/api/users/profile', form);
       setMessage('Profile updated successfully!');
       setIsEditing(false);
     } catch (err) {

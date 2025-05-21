@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import theme from '../styles/theme';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -15,12 +17,13 @@ export default function LoginForm() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, checkAuth } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
     setLoading(true);
+    setMessage('');
 
     // Validate form
     const newErrors = {};
@@ -35,12 +38,46 @@ export default function LoginForm() {
     }
 
     try {
-      await axios.post('/api/auth/login', form, { withCredentials: true });
-      setMessage('Login successful! Redirecting...');
+      // Show loading toast
+      const loadingToast = toast.loading('Logging in...');
+      
+      // First, attempt to login
+      await axios.post('/api/auth/login', form);
+      
+      // Then, update the auth context
       await login();
-      setTimeout(() => navigate('/profile'), 1000);
+      
+      // Update loading toast to success
+      toast.update(loadingToast, {
+        render: 'Login successful!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2000
+      });
+      
+      // Show redirecting toast
+      toast.info('Redirecting to profile...', {
+        autoClose: 1000
+      });
+      
+      // Double check authentication
+      await checkAuth();
+      
+      // Finally, navigate to profile
+      navigate('/profile', { replace: true });
     } catch (err) {
-      // Custom error handling for specific messages
+      console.error('Login error:', err);
+      
+      // Show error toast
+      toast.error(
+        err.response?.data?.message === 'User not found' 
+          ? 'No account found with this email.'
+          : err.response?.data?.message === 'Invalid credentials'
+          ? 'Incorrect password.'
+          : err.response?.data?.message || 'Login failed. Please check your credentials.'
+      );
+      
+      // Set form error message
       if (err.response?.data?.message === 'User not found') {
         setMessage('No account found with this email.');
       } else if (err.response?.data?.message === 'Invalid credentials') {
@@ -205,6 +242,18 @@ export default function LoginForm() {
 
   return (
     <div style={styles.outer}>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div style={styles.container}>
         <h1 style={styles.title}>Welcome Back</h1>
         <form onSubmit={handleSubmit} style={styles.form}>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
+import { toast } from 'react-toastify';
 
 const AuthContext = createContext(null);
 
@@ -8,39 +9,50 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is authenticated by calling backend
-    const checkAuth = async () => {
-      try {
-        const res = await axios.get('http://localhost:3000/api/users/profile', { withCredentials: true });
-        setUser(res.data);
-      } catch (error) {
-        setUser(null);
-      }
-      setLoading(false);
-    };
     checkAuth();
   }, []);
 
-  const login = async () => {
-    // After login, fetch user profile
+  const checkAuth = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/users/profile', { withCredentials: true });
+      const res = await axios.get('/api/users/profile');
       setUser(res.data);
     } catch (error) {
+      console.error('Auth check failed:', error);
       setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async () => {
+    try {
+      const res = await axios.get('/api/users/profile');
+      setUser(res.data);
+      return res.data;
+    } catch (error) {
+      console.error('Login failed:', error);
+      setUser(null);
+      throw error;
     }
   };
 
   const logout = async () => {
-    await axios.post('http://localhost:3000/api/auth/logout', {}, { withCredentials: true });
-    setUser(null);
+    try {
+      await axios.post('/api/auth/logout');
+      setUser(null);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error('Failed to logout');
+    }
   };
 
   const value = {
     user,
     login,
     logout,
-    loading
+    loading,
+    checkAuth
   };
 
   return (

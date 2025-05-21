@@ -58,7 +58,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-tic
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
