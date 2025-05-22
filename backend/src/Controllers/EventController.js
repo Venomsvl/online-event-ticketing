@@ -16,10 +16,10 @@ const EventController = {
 
 //Only admins can approve or reject the event. (4)
     approveOrReject: async (req, res) => {
-      const { id } = req.params;  //taking ad from request
-      const stat= req.body.status; //taking status from request body
+      const { id } = req.params;  //taking id from request
+      const status = req.body.status; //taking status from request body
       try {
-        const event = await Event.findByIdAndUpdate(id, { event_status: stat }, { new: true }); //update status by id
+        const event = await Event.findByIdAndUpdate(id, { event_status: status }, { new: true }); //update status by id
         if (!event) {
           return res.status(404).json({ message: 'Event not found' }); //if event not found throw msg
         }
@@ -40,12 +40,12 @@ const EventController = {
         // Organizer asks to see their own events only
         else if (req.user && req.user.role === "Organizer" && req.query.mine === "true") {
             events = await Event.find({
-                $or: [{ status: "approved" }, { organizer: req.user._id }],
+                $or: [{ event_status: "approved" }, { organizer: req.user._id }],
             });
         }
         // Everyone else (public, standard users, or organizer without ?mine)
         else {
-            events = await Event.find({ status: "approved" });
+            events = await Event.find({ event_status: "approved" });
         }
 
         res.status(200).json(events);
@@ -66,12 +66,12 @@ const EventController = {
 
         // Organizer can access if it's approved OR if it's their own event
         if (req.user && req.user.role === "Organizer" &&
-            (event.status === "approved" || event.organizer.toString() === req.user._id.toString())) {
+            (event.event_status === "approved" || event.organizer.toString() === req.user._id.toString())) {
             return res.status(200).json(event);
         }
 
         // Public or standard users can only access approved events
-        if (event.status === "approved") {
+        if (event.event_status === "approved") {
             return res.status(200).json(event);
         }
 
@@ -88,8 +88,8 @@ const EventController = {
             location,
             category,
             image,
-            ticketPrice,
-            totalTickets,
+            ticket_price,
+            total_tickets,
         } = req.body;
 
         const event = await Event.create({
@@ -99,11 +99,11 @@ const EventController = {
             location,
             category,
             image,
-            ticketPrice,
-            totalTickets,
-            remainingTickets: totalTickets,
+            ticket_price,
+            total_tickets,
+            remaining_tickets: total_tickets,
             organizer: req.user._id,
-            status: "pending", // default status for new events
+            event_status: "pending", // default status for new events
         });
 
         res.status(201).json(event);
@@ -130,15 +130,15 @@ const EventController = {
             "location",
             "category",
             "image",
-            "ticketPrice",
-            "totalTickets",
+            "ticket_price",
+            "total_tickets",
         ];
 
-        // Optional: Adjust remainingTickets if totalTickets is updated
-        if (req.body.totalTickets) {
-            const ticketsSold = event.totalTickets - event.remainingTickets;
-            event.totalTickets = req.body.totalTickets;
-            event.remainingTickets = req.body.totalTickets - ticketsSold;
+        // Optional: Adjust remaining_tickets if total_tickets is updated
+        if (req.body.total_tickets) {
+            const ticketsSold = event.total_tickets - event.remaining_tickets;
+            event.total_tickets = req.body.total_tickets;
+            event.remaining_tickets = req.body.total_tickets - ticketsSold;
         }
 
         fields.forEach((field) => {
@@ -147,12 +147,12 @@ const EventController = {
             }
         });
 
-        if (req.body.status !== undefined) {
+        if (req.body.event_status !== undefined) {
             if (isAdmin) {
-                if (!["approved", "pending", "declined"].includes(req.body.status)) {
+                if (!["approved", "pending", "declined"].includes(req.body.event_status)) {
                     return res.status(400).json({ message: "Invalid status value" });
                 }
-                event.status = req.body.status;
+                event.event_status = req.body.event_status;
             } else {
                 return res.status(403).json({ message: "Not authorized to change status" });
             }
@@ -188,7 +188,7 @@ const EventController = {
 
         const analytics = events.map((e) => ({
             title: e.title,
-            percentBooked: e.totalTickets === 0 ? 0 : Math.round(((e.totalTickets - e.remainingTickets) / e.totalTickets) * 100),
+            percentBooked: e.total_tickets === 0 ? 0 : Math.round(((e.total_tickets - e.remaining_tickets) / e.total_tickets) * 100),
         }));
 
         res.status(200).json(analytics);

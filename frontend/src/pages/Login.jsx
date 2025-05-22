@@ -41,11 +41,14 @@ export default function LoginForm() {
       // Show loading toast
       const loadingToast = toast.loading('Logging in...');
       
-      // First, attempt to login
-      await axios.post('/api/auth/login', form);
+      // Normalize email before sending
+      const normalizedEmail = form.email.toLowerCase().trim();
       
-      // Then, update the auth context
-      const userData = await login();
+      // Call login function from AuthContext with credentials
+      const userData = await login({
+        email: normalizedEmail,
+        password: form.password
+      });
       
       if (!userData) {
         throw new Error('Failed to get user data after login');
@@ -58,41 +61,25 @@ export default function LoginForm() {
         isLoading: false,
         autoClose: 2000
       });
-      
+
       // Show redirecting toast
       toast.info('Redirecting to profile...', {
         autoClose: 1000
       });
       
-      // Double check authentication
-      const authCheck = await checkAuth();
-      
-      if (!authCheck) {
-        throw new Error('Authentication check failed');
-      }
-      
-      // Finally, navigate to profile
-      navigate('/profile', { replace: true });
+      // Navigate to profile page after a short delay
+      setTimeout(() => {
+        navigate('/profile');
+      }, 1000);
     } catch (err) {
       console.error('Login error:', err);
       
       // Show error toast
       toast.error(
-        err.response?.data?.message === 'User not found' 
-          ? 'No account found with this email.'
-          : err.response?.data?.message === 'Invalid credentials'
-          ? 'Incorrect password.'
-          : err.response?.data?.message || 'Login failed. Please check your credentials.'
+        err.response?.data?.message || 'Login failed. Please check your credentials.'
       );
       
-      // Set form error message
-      if (err.response?.data?.message === 'User not found') {
-        setMessage('No account found with this email.');
-      } else if (err.response?.data?.message === 'Invalid credentials') {
-        setMessage('Incorrect password.');
-      } else {
-        setMessage(err.response?.data?.message || 'Login failed. Please check your credentials.');
-      }
+      setMessage(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }

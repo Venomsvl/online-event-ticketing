@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
-const User = require('../models/User');
-const PasswordReset = require('../models/PasswordReset');
+const User = require('../model/User');
+const PasswordReset = require('../model/passwordReset');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -15,36 +15,80 @@ exports.register = async (req, res) => {
     }
 
     const { name, email, password, role } = req.body;
-    console.log('[REGISTER] Attempting to register user:', { name, email, role });
+    const normalizedEmail = User.normalizeEmail(email);
+    console.log('[REGISTER] Attempting to register user:', { name, email: normalizedEmail, role });
 
     try {
-        const existingUser = await User.findOne({ email });
+        // Check if user already exists
+        const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser) {
-            console.log('[REGISTER] User already exists:', email);
+            console.log('[REGISTER] User already exists:', normalizedEmail);
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Create a new user (password will be hashed by the User model's pre-save middleware)
-        const newUser = new User({ name, email, password, role });
-        await newUser.save();
-        console.log('[REGISTER] User registered successfully:', email);
+        // Create a new user
+        console.log('[REGISTER] Creating new user...');
+        const newUser = new User({ 
+            name: name.trim(),
+            email: normalizedEmail,
+            password,
+            role: role || 'user' // Default to 'user' if no role specified
+        });
 
-        res.status(201).json({ message: 'User registered successfully' });
+        // Save the user
+        console.log('[REGISTER] Saving user to database...');
+        await newUser.save();
+        console.log('[REGISTER] User saved successfully:', normalizedEmail);
+
+        // Generate JWT token
+        console.log('[REGISTER] Generating JWT token...');
+        const token = jwt.sign(
+            { id: newUser._id, role: newUser.role },
+            process.env.JWT_SECRET || 'your_jwt_secret',
+            { expiresIn: '1h' }
+        );
+
+        // Set JWT as HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000 // 1 hour
+        });
+
+        console.log('[REGISTER] Registration completed successfully for:', normalizedEmail);
+        res.status(201).json({ 
+            message: 'User registered successfully',
+            user: {
+                id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role
+            }
+        });
     } catch (error) {
         console.error('[REGISTER] Error during registration:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Email already exists' });
+        }
+        res.status(500).json({ 
+            message: 'Server error during registration',
+            error: error.message 
+        });
     }
 };
 
 // Login a user
 exports.login = async (req, res) => {
     const { email, password } = req.body;
-    console.log('[LOGIN] Attempting login for:', email);
+    const normalizedEmail = User.normalizeEmail(email);
+    console.log('[LOGIN] Attempting login for:', normalizedEmail);
 
     try {
-        const user = await User.findOne({ email });
+        // Use the normalized email to find the user
+        const user = await User.findOne({ email: normalizedEmail });
         if (!user) {
-            console.log('[LOGIN] No user found for email:', email);
+            console.log('[LOGIN] No user found for email:', normalizedEmail);
             return res.status(404).json({ message: 'User not found' });
         }
 
@@ -52,7 +96,7 @@ exports.login = async (req, res) => {
         console.log('[LOGIN] Password check result:', isMatch);
 
         if (!isMatch) {
-            console.log('[LOGIN] Invalid password for user:', email);
+            console.log('[LOGIN] Invalid password for user:', normalizedEmail);
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
@@ -69,8 +113,17 @@ exports.login = async (req, res) => {
             sameSite: 'strict',
             maxAge: 60 * 60 * 1000 // 1 hour
         });
-        console.log('[LOGIN] Login successful for:', email);
-        res.status(200).json({ message: 'Login successful' });
+
+        console.log('[LOGIN] Login successful for:', normalizedEmail);
+        res.status(200).json({ 
+            message: 'Login successful',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
     } catch (error) {
         console.error('[LOGIN] Error during login:', error);
         res.status(500).json({ message: 'Server error', error: error.message });

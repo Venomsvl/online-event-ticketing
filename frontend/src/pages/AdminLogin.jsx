@@ -43,12 +43,12 @@ export default function AdminLogin() {
       });
       
       // Show redirecting toast
-      toast.info('Redirecting to profile...', {
+      toast.info('Redirecting to admin dashboard...', {
         autoClose: 1000
       });
       
-      // Navigate to profile
-      navigate('/profile', { replace: true });
+      // Navigate to admin dashboard
+      navigate('/admin/events', { replace: true });
     } catch (err) {
       console.error('Admin login error:', err);
       

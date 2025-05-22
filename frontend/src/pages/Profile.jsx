@@ -24,7 +24,7 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put('/api/users/profile', form);
+      const response = await axios.put('/users/profile', form);
       setMessage('Profile updated successfully!');
       setIsEditing(false);
     } catch (err) {

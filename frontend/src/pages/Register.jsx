@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../utils/axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 import theme from '../styles/theme';
@@ -20,6 +20,7 @@ export default function RegisterForm() {
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
     feedback: '',
+    isValid: false,
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
@@ -29,19 +30,17 @@ export default function RegisterForm() {
   const { login } = useAuth();
 
   const passwordRequirements = [
-    "At least 6 characters",
-    "One uppercase letter",
-    "One lowercase letter",
-    "One number",
-    "One special character (!@#$%^&*(),.?\":{}|<>)"
+    "At least 8 characters",
+    "At least one letter",
+    "At least one number"
   ];
 
   const validatePassword = (password) => {
-    const minLength = 6;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const minLength = 8;
+    // Match backend's regex pattern: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/
+    const hasLetter = /[A-Za-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[^A-Za-z\d]/.test(password);
 
     let score = 0;
     let feedback = [];
@@ -49,21 +48,19 @@ export default function RegisterForm() {
     if (password.length >= minLength) score += 1;
     else feedback.push(`At least ${minLength} characters`);
 
-    if (hasUpperCase) score += 1;
-    else feedback.push('One uppercase letter');
+    if (hasLetter) score += 1;
+    else feedback.push('At least one letter');
 
-    if (hasLowerCase) score += 1;
-    else feedback.push('One lowercase letter');
+    if (hasNumber) score += 1;
+    else feedback.push('At least one number');
 
-    if (hasNumbers) score += 1;
-    else feedback.push('One number');
-
+    // Add bonus point for special characters
     if (hasSpecialChar) score += 1;
-    else feedback.push('One special character');
 
     return {
-      score,
+      score: Math.min(score, 3), // Cap at 3 for display purposes
       feedback: feedback.join(', '),
+      isValid: password.length >= minLength && hasLetter && hasNumber
     };
   };
 
@@ -77,14 +74,29 @@ export default function RegisterForm() {
     e.preventDefault();
     setErrors({});
     setLoading(true);
+    setMessage('');
 
     // Validate form
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = 'Name is required';
     if (!form.email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = 'Invalid email format';
-    if (passwordStrength.score < 2) newErrors.password = 'Password is too weak';
-    if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    
+    // Password validation matching backend requirements
+    if (form.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters long';
+    } else {
+      const hasLetter = /[a-zA-Z]/.test(form.password);
+      const hasNumber = /\d/.test(form.password);
+      
+      if (!hasLetter || !hasNumber) {
+        newErrors.password = 'Password must contain at least one letter and one number';
+      }
+    }
+    
+    if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -97,9 +109,9 @@ export default function RegisterForm() {
       const loadingToast = toast.loading('Creating your account...');
       
       // Register user
-      await axios.post('/api/auth/register', {
+      const response = await axios.post('/api/auth/register', {
         name: form.name,
-        email: form.email,
+        email: form.email.toLowerCase().trim(),
         password: form.password,
         role: form.role,
       });
@@ -117,20 +129,24 @@ export default function RegisterForm() {
         autoClose: 1000
       });
       
-      // Automatically log in the user after registration
-      await axios.post('/api/auth/login', {
-        email: form.email,
-        password: form.password
-      }, { withCredentials: true });
-      await login();
-      setTimeout(() => navigate('/profile'), 1000);
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000);
+    
     } catch (err) {
-      console.error('Registration error:', err.response?.data);
+      console.error('Registration error:', err);
+      
+      // Show error toast
+      toast.error(
+        err.response?.data?.message || 'Registration failed. Please try again.'
+      );
+      
+      // Handle validation errors
       if (err.response?.data?.errors) {
-        // Handle validation errors
         const validationErrors = {};
         err.response.data.errors.forEach(error => {
-          validationErrors[error.param] = error.msg;
+          validationErrors[error.path] = error.msg;
         });
         setErrors(validationErrors);
         setMessage("Please fix the errors in the form.");
@@ -146,17 +162,27 @@ export default function RegisterForm() {
     switch (score) {
       case 0:
       case 1:
-        return 'Very Weak';
-      case 2:
         return 'Weak';
-      case 3:
+      case 2:
         return 'Medium';
-      case 4:
+      case 3:
         return 'Strong';
-      case 5:
-        return 'Very Strong';
       default:
         return '';
+    }
+  };
+
+  const getStrengthColor = (score) => {
+    switch (score) {
+      case 0:
+      case 1:
+        return '#FFCCF2'; // Light pink from theme
+      case 2:
+        return '#977DFF'; // Purple from theme
+      case 3:
+        return '#0033FF'; // Blue from theme
+      default:
+        return '#d1d5db'; // gray
     }
   };
 
@@ -513,15 +539,16 @@ export default function RegisterForm() {
               </button>
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 16, marginBottom: 8 }}>
-              {[1,2,3,4,5].map((seg) => (
+              {[1,2,3].map((seg) => (
                 <div
                   key={seg}
                   style={{
                     flex: 1,
                     height: 6,
                     borderRadius: 3,
-                    background: passwordStrength.score >= seg ? '#C8102E' : '#ececec',
-                    transition: 'background 0.3s',
+                    background: passwordStrength.score >= seg ? getStrengthColor(passwordStrength.score) : 'rgba(255,255,255,0.3)',
+                    transition: 'all 0.3s ease',
+                    boxShadow: passwordStrength.score >= seg ? '0 0 8px rgba(151,125,255,0.3)' : 'none'
                   }}
                 />
               ))}
@@ -531,12 +558,13 @@ export default function RegisterForm() {
               fontWeight: 800,
               fontSize: '1.1rem',
               marginBottom: 8,
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
             }}>
               Password Strength: {getStrengthLabel(passwordStrength.score)}
             </div>
-            {form.password && passwordStrength.score < 5 && (
+            {form.password && !passwordStrength.isValid && (
               <div style={styles.requirements}>
-                Password must contain at least 6 characters, including uppercase, lowercase, numbers, and special characters
+                Password must be at least 8 characters long and contain at least one letter and one number. Special characters are allowed and recommended for better security.
               </div>
             )}
             {showPasswordRequirements && (

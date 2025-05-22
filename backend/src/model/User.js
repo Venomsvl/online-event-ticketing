@@ -14,12 +14,18 @@ const userSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         trim: true,
-        match: [/.+@.+\..+/, 'Please enter a valid email address']
+        match: [/.+@.+\..+/, 'Please enter a valid email address'],
+        set: function(v) {
+            // Remove dots from the local part of the email
+            const [localPart, domain] = v.toLowerCase().trim().split('@');
+            return `${localPart.replace(/\./g, '')}@${domain}`;
+        }
     },
     password: {
         type: String,
         required: [true, 'Password is required'],
-        minlength: [8, 'Password must be at least 8 characters']
+        minlength: [8, 'Password must be at least 8 characters'],
+        match: [/^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$/, 'Password must contain at least one letter and one number']
     },
     role: {
         type: String,
@@ -60,6 +66,12 @@ userSchema.pre('save', async function (next) {
 // Instance method to compare plaintext password with hashed password
 userSchema.methods.checkPassword = function (plainPassword) {
     return bcrypt.compare(plainPassword, this.password);
+};
+
+// Static method to normalize email
+userSchema.statics.normalizeEmail = function(email) {
+    const [localPart, domain] = email.toLowerCase().trim().split('@');
+    return `${localPart.replace(/\./g, '')}@${domain}`;
 };
 
 // Ensure we don't redefine the model in hot-reloading environments

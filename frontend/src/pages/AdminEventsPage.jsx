@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import EventCard from '../components/EventCard';
@@ -157,16 +157,8 @@ const AdminEventsPage = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-
-        const response = await axios.get('http://localhost:3000/api/v1/admin/events', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
+        setLoading(true);
+        const response = await axios.get('/api/v1/events');
         setEvents(response.data);
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to fetch events');
@@ -176,22 +168,15 @@ const AdminEventsPage = () => {
     };
 
     fetchEvents();
-  }, [navigate]);
+  }, []);
 
-  const handleStatusUpdate = async (eventId, newStatus) => {
+  const handleStatusUpdate = async (eventId, status) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `http://localhost:3000/api/v1/admin/events/${eventId}/status`,
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+      await axios.put(`/api/v1/events/${eventId}`, { status });
       setEvents(events.map(event => 
-        event._id === eventId ? { ...event, status: newStatus } : event
+        event._id === eventId ? { ...event, status } : event
       ));
-
-      toast.success(`Event ${newStatus} successfully`);
+      toast.success('Event status updated successfully');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update event status');
     }

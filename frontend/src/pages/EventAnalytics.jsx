@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import axios from 'axios';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import axios from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { format, subMonths } from 'date-fns';
@@ -10,78 +10,76 @@ const EventAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [eventData, setEventData] = useState([]);
   const [dateRange, setDateRange] = useState('all');
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalTickets, setTotalTickets] = useState(0);
   const navigate = useNavigate();
+
+  const COLORS = [theme.colors.primary, theme.colors.primaryLight, '#e94256', '#f87171'];
 
   const styles = {
     outer: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #977DFF 0%, #0033FF 50%, #0600AB 100%)',
-      color: '#fff',
+      background: theme.colors.lightGray,
+      color: theme.colors.text.primary,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: '2rem',
+      padding: theme.spacing.xl,
     },
     container: {
       width: '100%',
       maxWidth: '1200px',
       margin: '0 auto',
-      padding: '2rem',
+      padding: theme.spacing.xl,
     },
     header: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: '2rem',
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      padding: '1.5rem 2rem',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      marginBottom: theme.spacing.xl,
+      background: theme.colors.white,
+      borderRadius: theme.borderRadius.lg,
+      boxShadow: theme.shadows.md,
+      border: `1.5px solid ${theme.colors.border}`,
+      padding: theme.spacing.xl,
     },
     title: {
       ...theme.typography.h1,
-      color: '#fff',
+      color: theme.colors.text.primary,
       margin: 0,
     },
     chartContainer: {
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      padding: '2rem',
-      marginBottom: '2rem',
+      background: theme.colors.white,
+      borderRadius: theme.borderRadius.lg,
+      boxShadow: theme.shadows.md,
+      border: `1.5px solid ${theme.colors.border}`,
+      padding: theme.spacing.xl,
+      marginBottom: theme.spacing.xl,
       height: '400px',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
     },
     grid: {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-      gap: '2rem',
-      marginTop: '2rem',
+      gap: theme.spacing.xl,
+      marginTop: theme.spacing.xl,
     },
     card: {
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      padding: '1.5rem',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      background: theme.colors.white,
+      borderRadius: theme.borderRadius.lg,
+      boxShadow: theme.shadows.md,
+      border: `1.5px solid ${theme.colors.border}`,
+      padding: theme.spacing.xl,
     },
     cardTitle: {
       ...theme.typography.h2,
-      marginBottom: '1rem',
-      color: '#fff',
+      marginBottom: theme.spacing.md,
+      color: theme.colors.text.primary,
     },
     stat: {
       display: 'flex',
       justifyContent: 'space-between',
-      marginBottom: '0.5rem',
-      color: '#fff',
+      marginBottom: theme.spacing.sm,
+      color: theme.colors.text.secondary,
       ...theme.typography.body,
     },
     loading: {
@@ -93,43 +91,61 @@ const EventAnalytics = () => {
     spinner: {
       width: '3rem',
       height: '3rem',
-      border: '4px solid rgba(255,255,255,0.3)',
-      borderTop: '4px solid #fff',
+      border: `4px solid ${theme.colors.border}`,
+      borderTop: `4px solid ${theme.colors.primary}`,
       borderRadius: '50%',
       animation: 'spin 1s linear infinite',
     },
     select: {
-      background: 'rgba(255,255,255,0.7)',
-      border: '1.5px solid #977DFF',
-      borderRadius: '12px',
-      color: '#0033FF',
-      padding: '0.75rem',
-      fontSize: '1rem',
-      cursor: 'pointer',
-      outline: 'none',
-      boxShadow: '0 1px 4px 0 rgba(0,0,0,0.08)',
-      transition: 'border 0.2s',
+      ...theme.components.input,
       width: '200px',
+    },
+    summaryCards: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: theme.spacing.lg,
+      marginBottom: theme.spacing.xl,
+    },
+    summaryCard: {
+      ...theme.components.card,
+      padding: theme.spacing.lg,
+    },
+    summaryValue: {
+      ...theme.typography.h1,
+      color: theme.colors.primary,
+      margin: `${theme.spacing.sm} 0`,
+    },
+    statusIndicator: {
+      display: 'inline-block',
+      padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+      borderRadius: theme.borderRadius.sm,
+      fontSize: theme.typography.small.fontSize,
+      fontWeight: '600',
+    },
+    statusActive: {
+      backgroundColor: '#dcfce7',
+      color: theme.colors.success,
+    },
+    statusUpcoming: {
+      backgroundColor: '#dbeafe',
+      color: '#2563eb',
+    },
+    statusCompleted: {
+      backgroundColor: '#f3f4f6',
+      color: theme.colors.text.secondary,
     },
   };
 
   const fetchEventData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
       let startDate = null;
       if (dateRange !== 'all') {
         const months = parseInt(dateRange);
         startDate = subMonths(new Date(), months);
       }
 
-      const response = await axios.get('http://localhost:3000/api/v1/events/analytics', {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await axios.get('/api/v1/users/events/analytics', {
         params: { startDate: startDate?.toISOString() }
       });
 
@@ -137,10 +153,19 @@ const EventAnalytics = () => {
         name: event.name,
         ticketsBooked: event.ticketsBooked,
         totalTickets: event.totalTickets,
-        percentage: ((event.ticketsBooked / event.totalTickets) * 100).toFixed(1)
+        percentage: ((event.ticketsBooked / event.totalTickets) * 100).toFixed(1),
+        revenue: event.revenue || 0,
+        status: event.status || 'upcoming',
+        date: new Date(event.date),
       }));
 
       setEventData(formattedData);
+      
+      // Calculate totals
+      const revenue = formattedData.reduce((sum, event) => sum + event.revenue, 0);
+      const tickets = formattedData.reduce((sum, event) => sum + event.ticketsBooked, 0);
+      setTotalRevenue(revenue);
+      setTotalTickets(tickets);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to fetch event analytics');
     } finally {
@@ -151,6 +176,19 @@ const EventAnalytics = () => {
   useEffect(() => {
     fetchEventData();
   }, [navigate, dateRange]);
+
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'active':
+        return { ...styles.statusIndicator, ...styles.statusActive };
+      case 'upcoming':
+        return { ...styles.statusIndicator, ...styles.statusUpcoming };
+      case 'completed':
+        return { ...styles.statusIndicator, ...styles.statusCompleted };
+      default:
+        return { ...styles.statusIndicator, ...styles.statusUpcoming };
+    }
+  };
 
   if (loading) {
     return (
@@ -186,27 +224,45 @@ const EventAnalytics = () => {
           </select>
         </div>
 
+        <div style={styles.summaryCards}>
+          <div style={styles.summaryCard}>
+            <h3 style={styles.cardTitle}>Total Revenue</h3>
+            <div style={styles.summaryValue}>${totalRevenue.toLocaleString()}</div>
+          </div>
+          <div style={styles.summaryCard}>
+            <h3 style={styles.cardTitle}>Total Tickets Sold</h3>
+            <div style={styles.summaryValue}>{totalTickets.toLocaleString()}</div>
+          </div>
+          <div style={styles.summaryCard}>
+            <h3 style={styles.cardTitle}>Active Events</h3>
+            <div style={styles.summaryValue}>
+              {eventData.filter(e => e.status === 'active').length}
+            </div>
+          </div>
+        </div>
+
         <div style={styles.chartContainer}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={eventData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.3)" />
-              <XAxis dataKey="name" stroke="#fff" />
-              <YAxis stroke="#fff" />
+              <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border} />
+              <XAxis dataKey="name" stroke={theme.colors.text.secondary} />
+              <YAxis stroke={theme.colors.text.secondary} />
               <Tooltip
                 formatter={(value, name) => {
                   if (name === 'percentage') return [`${value}%`, 'Booking Percentage'];
+                  if (name === 'revenue') return [`$${value.toLocaleString()}`, 'Revenue'];
                   return [value, name === 'ticketsBooked' ? 'Tickets Booked' : 'Total Tickets'];
                 }}
                 contentStyle={{
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  border: '1.5px solid #977DFF',
-                  borderRadius: '12px',
-                  color: '#0033FF',
+                  backgroundColor: theme.colors.white,
+                  border: `1.5px solid ${theme.colors.border}`,
+                  borderRadius: theme.borderRadius.md,
+                  color: theme.colors.text.primary,
                 }}
               />
               <Legend />
-              <Bar dataKey="ticketsBooked" fill="#977DFF" name="Tickets Booked" />
-              <Bar dataKey="totalTickets" fill="#0033FF" name="Total Tickets" />
+              <Bar dataKey="ticketsBooked" fill={theme.colors.primary} name="Tickets Booked" />
+              <Bar dataKey="revenue" fill={theme.colors.primaryLight} name="Revenue" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -214,7 +270,16 @@ const EventAnalytics = () => {
         <div style={styles.grid}>
           {eventData.map((event) => (
             <div key={event.name} style={styles.card}>
-              <h3 style={styles.cardTitle}>{event.name}</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
+                <h3 style={styles.cardTitle}>{event.name}</h3>
+                <span style={getStatusStyle(event.status)}>
+                  {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                </span>
+              </div>
+              <div style={styles.stat}>
+                <span>Date:</span>
+                <span>{format(event.date, 'MMM d, yyyy')}</span>
+              </div>
               <div style={styles.stat}>
                 <span>Tickets Booked:</span>
                 <span>{event.ticketsBooked}</span>
@@ -226,6 +291,10 @@ const EventAnalytics = () => {
               <div style={styles.stat}>
                 <span>Booking Rate:</span>
                 <span>{event.percentage}%</span>
+              </div>
+              <div style={styles.stat}>
+                <span>Revenue:</span>
+                <span>${event.revenue.toLocaleString()}</span>
               </div>
             </div>
           ))}

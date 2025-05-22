@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
+import { eventAPI } from '../utils/api';
 
 const EventCard = ({ event, onStatusUpdate, isSelected, onSelect }) => {
+    const [isBooking, setIsBooking] = useState(false);
+    const [error, setError] = useState(null);
+
     const cardStyle = {
         background: 'rgba(255,255,255,0.18)',
         borderRadius: '28px',
@@ -89,6 +93,26 @@ const EventCard = ({ event, onStatusUpdate, isSelected, onSelect }) => {
         if (onSelect) onSelect();
     };
 
+    const handleBookTicket = async () => {
+        try {
+            setIsBooking(true);
+            setError(null);
+            const response = await eventAPI.bookTicket(event._id, {
+                quantity: 1,
+                // Add any other required booking data
+            });
+            if (response.data.success) {
+                // Handle successful booking
+                alert('Ticket booked successfully!');
+                // You might want to refresh the event data or update the UI
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to book ticket');
+        } finally {
+            setIsBooking(false);
+        }
+    };
+
     return (
         <div style={cardStyle} onClick={handleClick}>
             {onSelect && (
@@ -137,6 +161,31 @@ const EventCard = ({ event, onStatusUpdate, isSelected, onSelect }) => {
                     </svg>
                     ${event.price}
                 </div>
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleBookTicket();
+                    }}
+                    disabled={isBooking || event.ticketsSold >= event.totalTickets}
+                    style={{
+                        background: '#977DFF',
+                        color: '#fff',
+                        padding: '0.75rem 1.5rem',
+                        borderRadius: '12px',
+                        border: 'none',
+                        cursor: isBooking || event.ticketsSold >= event.totalTickets ? 'not-allowed' : 'pointer',
+                        opacity: isBooking || event.ticketsSold >= event.totalTickets ? 0.7 : 1,
+                        width: '100%',
+                        marginTop: '1rem',
+                    }}
+                >
+                    {isBooking ? 'Booking...' : 'Book Ticket'}
+                </button>
+                {error && (
+                    <p style={{ color: '#ef4444', marginTop: '0.5rem', fontSize: '0.875rem' }}>
+                        {error}
+                    </p>
+                )}
             </div>
         </div>
     );

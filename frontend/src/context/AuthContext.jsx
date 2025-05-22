@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get('/api/users/profile');
+      const res = await axios.get('/api/auth/profile');
       setUser(res.data);
       return res.data;
     } catch (error) {
@@ -26,11 +26,20 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const login = async () => {
+  const login = async (credentials) => {
     try {
-      const res = await axios.get('/api/users/profile');
-      setUser(res.data);
-      return res.data;
+      // First, attempt to login
+      const response = await axios.post('/api/auth/login', credentials);
+      
+      // Use the user data from the login response
+      const userData = response.data.user;
+      
+      if (!userData) {
+        throw new Error('Failed to get user data after login');
+      }
+      
+      setUser(userData);
+      return userData;
     } catch (error) {
       console.error('Login failed:', error);
       setUser(null);
