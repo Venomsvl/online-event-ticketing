@@ -2,36 +2,61 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema; 
 
-const BookingSchema = new Schema({
-    eventId: {
+const bookingSchema = new Schema({
+    event: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event', 
+        ref: 'Event',
         required: true
     },
-    userId: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: 'User',
         required: true
     },
-    createdAt: { 
-        type: Date, 
-        default: Date.now  
-    },
-    //Salma's Part
-    ticketsBooked: {
+    tickets: [{
+        type: {
+            type: String,
+            required: true
+        },
+        quantity: {
+            type: Number,
+            required: true,
+            min: 1
+        },
+        price: {
+            type: Number,
+            required: true,
+            min: 0
+        }
+    }],
+    totalAmount: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
-
-    totalPrice: {
-        type: Number,
-        required: true
-    },
-    bookingStatus: {
+    status: {
         type: String,
-        enum: ['Pending', 'Confirmed', 'Cancelled'],
-        required: true
+        enum: ['pending', 'confirmed', 'cancelled'],
+        default: 'pending'
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'completed', 'failed', 'refunded'],
+        default: 'pending'
+    },
+    bookingDate: {
+        type: Date,
+        default: Date.now
     }
+}, {
+    timestamps: true
 });
 
-module.exports = mongoose.model('Booking', BookingSchema);
+// Add indexes for better query performance
+bookingSchema.index({ event: 1, user: 1 });
+bookingSchema.index({ status: 1 });
+bookingSchema.index({ paymentStatus: 1 });
+
+const Booking = mongoose.model('Booking', bookingSchema);
+
+module.exports = Booking;

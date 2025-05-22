@@ -5,17 +5,25 @@ import { toast } from 'react-toastify';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Try to get user from localStorage on initial load
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
 
   const checkAuth = async () => {
     try {
       const res = await axios.get('/api/auth/profile');
-      setUser(res.data);
-      return res.data;
+      const userData = res.data;
+      setUser(userData);
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      return userData;
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
+      localStorage.removeItem('user');
       return null;
     } finally {
       setLoading(false);
@@ -39,10 +47,13 @@ export const AuthProvider = ({ children }) => {
       }
       
       setUser(userData);
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
       return userData;
     } catch (error) {
       console.error('Login failed:', error);
       setUser(null);
+      localStorage.removeItem('user');
       throw error;
     }
   };
@@ -51,6 +62,8 @@ export const AuthProvider = ({ children }) => {
     try {
       await axios.post('/api/auth/logout');
       setUser(null);
+      // Remove user data from localStorage
+      localStorage.removeItem('user');
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout failed:', error);

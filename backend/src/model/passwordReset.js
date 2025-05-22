@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const passwordResetSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
+        lowercase: true
     },
     otp: {
         type: String,
@@ -11,11 +13,21 @@ const passwordResetSchema = new mongoose.Schema({
     },
     expiresAt: {
         type: Date,
-        required: true
+        required: true,
+        default: () => new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
+    },
+    used: {
+        type: Boolean,
+        default: false
     }
+}, {
+    timestamps: true
 });
 
-// Automatically remove expired OTPs
+// Add index for faster queries and automatic expiration
+passwordResetSchema.index({ email: 1, otp: 1 });
 passwordResetSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('PasswordReset', passwordResetSchema);
+const PasswordReset = mongoose.model('PasswordReset', passwordResetSchema);
+
+module.exports = PasswordReset;

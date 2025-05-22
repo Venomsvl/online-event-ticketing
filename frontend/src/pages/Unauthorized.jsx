@@ -44,7 +44,7 @@ export default function Unauthorized() {
         onClick={() => navigate('/')} 
         style={styles.button}
       >
-        Return to Home
+        Return to Home Page
       </button>
     </div>
   );

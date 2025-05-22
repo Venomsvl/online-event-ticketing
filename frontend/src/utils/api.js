@@ -6,7 +6,6 @@ export const authAPI = {
   register: (userData) => axios.post('/api/auth/register', userData),
   adminLogin: (credentials) => axios.post('/api/auth/admin-login', credentials),
   logout: () => axios.post('/api/auth/logout'),
-  forgetPassword: (data) => axios.put('/api/auth/forgetPassword', data),
 };
 
 // User API calls

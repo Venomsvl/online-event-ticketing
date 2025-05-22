@@ -4,11 +4,10 @@ const { body } = require('express-validator');
 const {
     register,
     login,
-    sendOTP,
-    verifyOTP,
-    resetPassword
+    adminLogin,
+    logout,
+    deleteUser
 } = require('../Controllers/AuthController');
-const router = express.Router();
 
 // Register route
 router.post(
@@ -30,13 +29,14 @@ router.post(
     register
 );
 
-// Routes
-router.post('/register', registerValidation, authController.register);
-router.post('/login', authController.login);
-router.post('/logout', authController.logout);
-router.post('/send-otp', authController.sendOTP);
-router.post('/verify-otp', authController.verifyOTP);
-router.post('/reset-password', authController.resetPassword);
-router.delete('/users/:id', authController.deleteUser);
+// Login routes
+router.post('/login', login);
+router.post('/admin-login', adminLogin);
+
+// Logout route
+router.post('/logout', logout);
+
+// User management route
+router.delete('/users/:id', deleteUser);
 
 module.exports = router;
