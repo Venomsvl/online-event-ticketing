@@ -92,7 +92,11 @@ exports.login = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const isMatch = await user.checkPassword(password);
+        // If you have a checkPassword method on your User model, use it. Otherwise, use bcrypt.compare
+        const isMatch = user.checkPassword
+            ? await user.checkPassword(password)
+            : await bcrypt.compare(password, user.password);
+
         console.log('[LOGIN] Password check result:', isMatch);
 
         if (!isMatch) {

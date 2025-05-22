@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{
+      background: 'linear-gradient(135deg, #E9D5FF 0%, #A855F7 50%, #6B21A8 100%)'
+    }}>
       <div className="max-w-7xl mx-auto">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-8">
+          <h1 className="text-4xl font-bold text-white mb-8">
             Welcome to Event Ticketing
           </h1>
           <div className="space-y-4">
