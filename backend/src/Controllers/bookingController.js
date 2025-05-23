@@ -1,78 +1,109 @@
 const Event = require('../model/Event');
-const Booking = require('../model/booking');
+const Booking = require('../model/Booking');
 const mongoose = require('mongoose');
 
-createBooking = async (req, res) => {
-    const { eventId, userId, ticketsBooked } = req.body;
-
+// Create a new booking
+const createBooking = async (req, res) => {
     try {
-        const event = await Event.findById(eventId); 
+        const { eventId, ticketType, quantity, name, email, phone } = req.body;
         
-        if (!event) return res.status(400).json({ message: "Event Not Found!" });
-
-        if (event.remaining_tickets < ticketsBooked) {
-            return res.status(400).json({ message: 'Not enough tickets available' });
+        // Check if event exists
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
         }
 
-        const totalPrice = ticketsBooked * event.ticket_price;
-        const booking = await Booking.create({
-            eventId,
-            userId,
-            ticketsBooked,
-            totalPrice,
-            bookingStatus: 'Confirmed',
+        // Calculate total amount
+        const basePrice = event.price;
+        const vipMultiplier = ticketType === 'vip' ? 2 : 1;
+        const totalAmount = quantity * basePrice * vipMultiplier;
+
+        const booking = new Booking({
+            event: eventId,
+            user: req.user.id,
+            ticketType,
+            quantity,
+            totalAmount,
+            name,
+            email,
+            phone
         });
 
-        event.remaining_tickets -= ticketsBooked;
-        await event.save();
-
-        res.status(201).json({ message: 'Booking successful', booking });
+        await booking.save();
+        res.status(201).json(booking);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
-viewBookingById = async (req, res) => {
+// Get user's bookings
+const getUserBookings = async (req, res) => {
     try {
-        const { id: bookingId } = req.params;
+        const bookings = await Booking.find({ user: req.user.id })
+            .populate('event')
+            .sort({ createdAt: -1 });
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
 
-        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-            return res.status(400).json({ message: 'Invalid booking ID' });
+// Get booking details
+const getBookingDetails = async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id)
+            .populate('event');
+        
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
         }
 
-        const booking = await Booking.findById(bookingId).populate('eventId').populate('userId');
-        if (!booking) return res.status(404).json({ message: 'Booking not found' });
+        // Check if user owns the booking or is admin
+        if (booking.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
 
-        res.status(200).json(booking);
+        res.json(booking);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message }); 
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
-deleteBooking = async (req, res) => {
+// Cancel booking
+const cancelBooking = async (req, res) => {
     try {
-        const { id } = req.params;
+        const booking = await Booking.findById(req.params.id);
+        
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
 
-        const booking = await Booking.findById(id);
-        if (!booking) return res.status(404).json({ message: 'Booking not found' });
+        // Check if user owns the booking
+        if (booking.user.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
 
-        const event = await Event.findById(booking.eventId);
-        if (!event) return res.status(404).json({ message: 'Event not found' });
+        // Check if booking can be cancelled (e.g., not too close to event)
+        const event = await Event.findById(booking.event);
+        const eventDate = new Date(event.date);
+        const now = new Date();
+        const hoursUntilEvent = (eventDate - now) / (1000 * 60 * 60);
 
-        event.remaining_tickets += booking.ticketsBooked;
-        await event.save();
+        if (hoursUntilEvent < 24) {
+            return res.status(400).json({ message: 'Cannot cancel booking within 24 hours of event' });
+        }
 
-        booking.bookingStatus = 'Cancelled';
+        booking.status = 'cancelled';
         await booking.save();
-
-        res.status(200).json({ message: 'Booking cancelled successfully', booking });
+        res.json({ message: 'Booking cancelled successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred', error: error.message }); 
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
 module.exports = {
     createBooking,
-    viewBookingById,
-    deleteBooking,
+    getUserBookings,
+    getBookingDetails,
+    cancelBooking
 };

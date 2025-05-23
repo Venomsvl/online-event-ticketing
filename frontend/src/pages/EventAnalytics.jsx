@@ -1,307 +1,332 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import axios from '../utils/axios';
+import { 
+    BarChart, 
+    Bar, 
+    XAxis, 
+    YAxis, 
+    CartesianGrid, 
+    Tooltip, 
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell
+} from 'recharts';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import { format, subMonths } from 'date-fns';
-import theme from '../styles/theme';
+import axios from '../utils/axios';
 
 const EventAnalytics = () => {
-  const [loading, setLoading] = useState(true);
-  const [eventData, setEventData] = useState([]);
-  const [dateRange, setDateRange] = useState('all');
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [totalTickets, setTotalTickets] = useState(0);
-  const navigate = useNavigate();
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  const COLORS = [theme.colors.primary, theme.colors.primaryLight, '#e94256', '#f87171'];
+    const styles = {
+        container: {
+            padding: '2rem',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            minHeight: '100vh'
+        },
+        header: {
+            marginBottom: '2rem',
+            textAlign: 'center'
+        },
+        title: {
+            fontSize: '2.5rem',
+            fontWeight: 'bold',
+            marginBottom: '0.5rem',
+            background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+        },
+        subtitle: {
+            fontSize: '1.125rem',
+            color: 'rgba(255,255,255,0.7)'
+        },
+        chartsContainer: {
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: '2rem',
+            '@media (min-width: 1024px)': {
+                gridTemplateColumns: 'repeat(2, 1fr)'
+            }
+        },
+        chartCard: {
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(151, 125, 255, 0.3)'
+        },
+        chartTitle: {
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            marginBottom: '1rem',
+            color: '#C4B5FD'
+        },
+        statsGrid: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '1rem',
+            marginBottom: '2rem'
+        },
+        statCard: {
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            textAlign: 'center',
+            border: '1px solid rgba(151, 125, 255, 0.3)'
+        },
+        statNumber: {
+            fontSize: '2rem',
+            fontWeight: 'bold',
+            color: '#977DFF',
+            marginBottom: '0.5rem'
+        },
+        statLabel: {
+            fontSize: '0.875rem',
+            color: 'rgba(255,255,255,0.7)'
+        },
+        loading: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '300px',
+            fontSize: '1.125rem',
+            color: 'rgba(255,255,255,0.7)'
+        },
+        error: {
+            textAlign: 'center',
+            color: '#ef4444',
+            fontSize: '1.125rem',
+            padding: '2rem'
+        },
+        noData: {
+            textAlign: 'center',
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: '1.125rem',
+            padding: '2rem'
+        }
+    };
 
-  const styles = {
-    outer: {
-      minHeight: '100vh',
-      background: theme.colors.lightGray,
-      color: theme.colors.text.primary,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: theme.spacing.xl,
-    },
-    container: {
-      width: '100%',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: theme.spacing.xl,
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.spacing.xl,
-      background: theme.colors.white,
-      borderRadius: theme.borderRadius.lg,
-      boxShadow: theme.shadows.md,
-      border: `1.5px solid ${theme.colors.border}`,
-      padding: theme.spacing.xl,
-    },
-    title: {
-      ...theme.typography.h1,
-      color: theme.colors.text.primary,
-      margin: 0,
-    },
-    chartContainer: {
-      background: theme.colors.white,
-      borderRadius: theme.borderRadius.lg,
-      boxShadow: theme.shadows.md,
-      border: `1.5px solid ${theme.colors.border}`,
-      padding: theme.spacing.xl,
-      marginBottom: theme.spacing.xl,
-      height: '400px',
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-      gap: theme.spacing.xl,
-      marginTop: theme.spacing.xl,
-    },
-    card: {
-      background: theme.colors.white,
-      borderRadius: theme.borderRadius.lg,
-      boxShadow: theme.shadows.md,
-      border: `1.5px solid ${theme.colors.border}`,
-      padding: theme.spacing.xl,
-    },
-    cardTitle: {
-      ...theme.typography.h2,
-      marginBottom: theme.spacing.md,
-      color: theme.colors.text.primary,
-    },
-    stat: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      marginBottom: theme.spacing.sm,
-      color: theme.colors.text.secondary,
-      ...theme.typography.body,
-    },
-    loading: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '400px',
-    },
-    spinner: {
-      width: '3rem',
-      height: '3rem',
-      border: `4px solid ${theme.colors.border}`,
-      borderTop: `4px solid ${theme.colors.primary}`,
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-    },
-    select: {
-      ...theme.components.input,
-      width: '200px',
-    },
-    summaryCards: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-      gap: theme.spacing.lg,
-      marginBottom: theme.spacing.xl,
-    },
-    summaryCard: {
-      ...theme.components.card,
-      padding: theme.spacing.lg,
-    },
-    summaryValue: {
-      ...theme.typography.h1,
-      color: theme.colors.primary,
-      margin: `${theme.spacing.sm} 0`,
-    },
-    statusIndicator: {
-      display: 'inline-block',
-      padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-      borderRadius: theme.borderRadius.sm,
-      fontSize: theme.typography.small.fontSize,
-      fontWeight: '600',
-    },
-    statusActive: {
-      backgroundColor: '#dcfce7',
-      color: theme.colors.success,
-    },
-    statusUpcoming: {
-      backgroundColor: '#dbeafe',
-      color: '#2563eb',
-    },
-    statusCompleted: {
-      backgroundColor: '#f3f4f6',
-      color: theme.colors.text.secondary,
-    },
-  };
+    useEffect(() => {
+        fetchAnalytics();
+    }, []);
 
-  const fetchEventData = async () => {
-    try {
-      setLoading(true);
-      let startDate = null;
-      if (dateRange !== 'all') {
-        const months = parseInt(dateRange);
-        startDate = subMonths(new Date(), months);
-      }
+    const fetchAnalytics = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/v1/users/events/analytics');
+            setEvents(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching analytics:', err);
+            setError(err.response?.data?.message || 'Failed to load analytics');
+            toast.error('Failed to load event analytics');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      const response = await axios.get('/api/v1/users/events/analytics', {
-        params: { startDate: startDate?.toISOString() }
-      });
+    const formatChartData = () => {
+        return events.map(event => ({
+            name: event.name.length > 15 ? event.name.substring(0, 15) + '...' : event.name,
+            fullName: event.name,
+            ticketsSold: event.ticketsSold || 0,
+            totalTickets: event.totalTickets || 0,
+            percentage: event.totalTickets > 0 ? 
+                Math.round((event.ticketsSold / event.totalTickets) * 100) : 0,
+            revenue: (event.ticketsSold || 0) * (event.price || 0)
+        }));
+    };
 
-      const formattedData = response.data.map(event => ({
-        name: event.name,
-        ticketsBooked: event.ticketsBooked,
-        totalTickets: event.totalTickets,
-        percentage: ((event.ticketsBooked / event.totalTickets) * 100).toFixed(1),
-        revenue: event.revenue || 0,
-        status: event.status || 'upcoming',
-        date: new Date(event.date),
-      }));
+    const calculateTotalStats = () => {
+        return events.reduce((acc, event) => ({
+            totalEvents: acc.totalEvents + 1,
+            totalTicketsSold: acc.totalTicketsSold + (event.ticketsSold || 0),
+            totalRevenue: acc.totalRevenue + ((event.ticketsSold || 0) * (event.price || 0)),
+            soldOutEvents: acc.soldOutEvents + (event.ticketsSold >= event.totalTickets ? 1 : 0)
+        }), { totalEvents: 0, totalTicketsSold: 0, totalRevenue: 0, soldOutEvents: 0 });
+    };
 
-      setEventData(formattedData);
-      
-      // Calculate totals
-      const revenue = formattedData.reduce((sum, event) => sum + event.revenue, 0);
-      const tickets = formattedData.reduce((sum, event) => sum + event.ticketsBooked, 0);
-      setTotalRevenue(revenue);
-      setTotalTickets(tickets);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to fetch event analytics');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const pieChartData = () => {
+        const data = formatChartData().map(event => ({
+            name: event.name,
+            value: event.ticketsSold,
+            fullName: event.fullName
+        }));
+        return data.filter(item => item.value > 0);
+    };
 
-  useEffect(() => {
-    fetchEventData();
-  }, [navigate, dateRange]);
+    const COLORS = ['#977DFF', '#C4B5FD', '#E9D5FF', '#F3E8FF', '#DDD6FE'];
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'active':
-        return { ...styles.statusIndicator, ...styles.statusActive };
-      case 'upcoming':
-        return { ...styles.statusIndicator, ...styles.statusUpcoming };
-      case 'completed':
-        return { ...styles.statusIndicator, ...styles.statusCompleted };
-      default:
-        return { ...styles.statusIndicator, ...styles.statusUpcoming };
-    }
-  };
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div style={{
+                    backgroundColor: 'rgba(0,0,0,0.9)',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(151, 125, 255, 0.3)'
+                }}>
+                    <p style={{ color: '#C4B5FD', marginBottom: '0.5rem' }}>{data.fullName}</p>
+                    <p style={{ color: '#fff' }}>{`Tickets Sold: ${data.ticketsSold}/${data.totalTickets}`}</p>
+                    <p style={{ color: '#fff' }}>{`Percentage: ${data.percentage}%`}</p>
+                    <p style={{ color: '#fff' }}>{`Revenue: $${data.revenue}`}</p>
+                </div>
+            );
+        }
+        return null;
+    };
 
-  if (loading) {
-    return (
-      <div style={styles.loading}>
-        <div style={styles.spinner}></div>
-      </div>
-    );
-  }
-
-  if (eventData.length === 0) {
-    return (
-      <div style={styles.container}>
-        <h2 style={styles.title}>No events found</h2>
-      </div>
-    );
-  }
-
-  return (
-    <div style={styles.outer}>
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Event Analytics</h1>
-          <select
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-            style={styles.select}
-          >
-            <option value="all">All Time</option>
-            <option value="1">Last Month</option>
-            <option value="3">Last 3 Months</option>
-            <option value="6">Last 6 Months</option>
-            <option value="12">Last Year</option>
-          </select>
-        </div>
-
-        <div style={styles.summaryCards}>
-          <div style={styles.summaryCard}>
-            <h3 style={styles.cardTitle}>Total Revenue</h3>
-            <div style={styles.summaryValue}>${totalRevenue.toLocaleString()}</div>
-          </div>
-          <div style={styles.summaryCard}>
-            <h3 style={styles.cardTitle}>Total Tickets Sold</h3>
-            <div style={styles.summaryValue}>{totalTickets.toLocaleString()}</div>
-          </div>
-          <div style={styles.summaryCard}>
-            <h3 style={styles.cardTitle}>Active Events</h3>
-            <div style={styles.summaryValue}>
-              {eventData.filter(e => e.status === 'active').length}
+    if (loading) {
+        return (
+            <div style={styles.container}>
+                <div style={styles.loading}>
+                    <div style={{
+                        border: '3px solid rgba(151, 125, 255, 0.3)',
+                        borderTop: '3px solid #977DFF',
+                        borderRadius: '50%',
+                        width: '40px',
+                        height: '40px',
+                        animation: 'spin 1s linear infinite',
+                        marginRight: '1rem'
+                    }}></div>
+                    Loading analytics...
+                </div>
             </div>
-          </div>
-        </div>
+        );
+    }
 
-        <div style={styles.chartContainer}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={eventData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border} />
-              <XAxis dataKey="name" stroke={theme.colors.text.secondary} />
-              <YAxis stroke={theme.colors.text.secondary} />
-              <Tooltip
-                formatter={(value, name) => {
-                  if (name === 'percentage') return [`${value}%`, 'Booking Percentage'];
-                  if (name === 'revenue') return [`$${value.toLocaleString()}`, 'Revenue'];
-                  return [value, name === 'ticketsBooked' ? 'Tickets Booked' : 'Total Tickets'];
-                }}
-                contentStyle={{
-                  backgroundColor: theme.colors.white,
-                  border: `1.5px solid ${theme.colors.border}`,
-                  borderRadius: theme.borderRadius.md,
-                  color: theme.colors.text.primary,
-                }}
-              />
-              <Legend />
-              <Bar dataKey="ticketsBooked" fill={theme.colors.primary} name="Tickets Booked" />
-              <Bar dataKey="revenue" fill={theme.colors.primaryLight} name="Revenue" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div style={styles.grid}>
-          {eventData.map((event) => (
-            <div key={event.name} style={styles.card}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.md }}>
-                <h3 style={styles.cardTitle}>{event.name}</h3>
-                <span style={getStatusStyle(event.status)}>
-                  {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                </span>
-              </div>
-              <div style={styles.stat}>
-                <span>Date:</span>
-                <span>{format(event.date, 'MMM d, yyyy')}</span>
-              </div>
-              <div style={styles.stat}>
-                <span>Tickets Booked:</span>
-                <span>{event.ticketsBooked}</span>
-              </div>
-              <div style={styles.stat}>
-                <span>Total Tickets:</span>
-                <span>{event.totalTickets}</span>
-              </div>
-              <div style={styles.stat}>
-                <span>Booking Rate:</span>
-                <span>{event.percentage}%</span>
-              </div>
-              <div style={styles.stat}>
-                <span>Revenue:</span>
-                <span>${event.revenue.toLocaleString()}</span>
-              </div>
+    if (error) {
+        return (
+            <div style={styles.container}>
+                <div style={styles.error}>
+                    <p>{error}</p>
+                    <button 
+                        onClick={fetchAnalytics}
+                        style={{
+                            marginTop: '1rem',
+                            padding: '0.75rem 1.5rem',
+                            backgroundColor: '#977DFF',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Try Again
+                    </button>
+                </div>
             </div>
-          ))}
+        );
+    }
+
+    if (!events || events.length === 0) {
+        return (
+            <div style={styles.container}>
+                <div style={styles.header}>
+                    <h1 style={styles.title}>Your Event Analytics</h1>
+                    <p style={styles.subtitle}>Track your event performance and ticket sales</p>
+                </div>
+                <div style={styles.noData}>
+                    <p>No events found. Create your first event to see analytics!</p>
+                </div>
+            </div>
+        );
+    }
+
+    const stats = calculateTotalStats();
+    const chartData = formatChartData();
+    const pieData = pieChartData();
+
+    return (
+        <div style={styles.container}>
+            <style>
+                {`
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                `}
+            </style>
+            
+            <div style={styles.header}>
+                <h1 style={styles.title}>Your Event Analytics</h1>
+                <p style={styles.subtitle}>Track your event performance and ticket sales</p>
+            </div>
+
+            {/* Stats Overview */}
+            <div style={styles.statsGrid}>
+                <div style={styles.statCard}>
+                    <div style={styles.statNumber}>{stats.totalEvents}</div>
+                    <div style={styles.statLabel}>Total Events</div>
+                </div>
+                <div style={styles.statCard}>
+                    <div style={styles.statNumber}>{stats.totalTicketsSold}</div>
+                    <div style={styles.statLabel}>Tickets Sold</div>
+                </div>
+                <div style={styles.statCard}>
+                    <div style={styles.statNumber}>${stats.totalRevenue}</div>
+                    <div style={styles.statLabel}>Total Revenue</div>
+                </div>
+                <div style={styles.statCard}>
+                    <div style={styles.statNumber}>{stats.soldOutEvents}</div>
+                    <div style={styles.statLabel}>Sold Out Events</div>
+                </div>
+            </div>
+
+            {/* Charts */}
+            <div style={styles.chartsContainer}>
+                {/* Bar Chart */}
+                <div style={styles.chartCard}>
+                    <h3 style={styles.chartTitle}>Ticket Sales by Event</h3>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                            <XAxis 
+                                dataKey="name" 
+                                stroke="#C4B5FD"
+                                fontSize={12}
+                                angle={-45}
+                                textAnchor="end"
+                                height={80}
+                            />
+                            <YAxis stroke="#C4B5FD" fontSize={12} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Bar dataKey="percentage" fill="#977DFF" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Pie Chart */}
+                {pieData.length > 0 && (
+                    <div style={styles.chartCard}>
+                        <h3 style={styles.chartTitle}>Tickets Distribution</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={pieData}
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={80}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                >
+                                    {pieData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                )}
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default EventAnalytics; 

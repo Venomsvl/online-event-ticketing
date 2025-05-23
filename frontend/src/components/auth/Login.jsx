@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import axios from '../utils/axios';
+import axios from '../../utils/axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import theme from '../styles/theme';
+import theme from '../../styles/theme';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function LoginForm() {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import EventCard from '../components/EventCard';
+import EventCard from '../components/events/EventCard';
 import { format } from 'date-fns';
 import theme from '../styles/theme';
 
@@ -15,6 +15,8 @@ const AdminEventsPage = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedEvents, setSelectedEvents] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [error, setError] = useState(null);
+  const [bulkAction, setBulkAction] = useState('');
   const navigate = useNavigate();
 
   const styles = {
@@ -50,6 +52,10 @@ const AdminEventsPage = () => {
       ...theme.typography.h1,
       color: '#fff',
       margin: 0,
+    },
+    subtitle: {
+      fontSize: '1.125rem',
+      color: 'rgba(255,255,255,0.7)'
     },
     controls: {
       display: 'flex',
@@ -152,6 +158,111 @@ const AdminEventsPage = () => {
       color: '#fff',
       cursor: 'pointer',
     },
+    filterButtons: {
+      display: 'flex',
+      gap: '0.5rem',
+      flexWrap: 'wrap'
+    },
+    filterButton: {
+      padding: '0.5rem 1rem',
+      borderRadius: '8px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '0.875rem',
+      fontWeight: '500',
+      transition: 'all 0.2s'
+    },
+    activeFilter: {
+      backgroundColor: '#977DFF',
+      color: '#fff'
+    },
+    inactiveFilter: {
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      color: 'rgba(255,255,255,0.7)',
+      border: '1px solid rgba(151, 125, 255, 0.3)'
+    },
+    actionButton: {
+      padding: '0.5rem 1rem',
+      borderRadius: '6px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '0.875rem',
+      fontWeight: '500'
+    },
+    approveButton: {
+      backgroundColor: '#10b981',
+      color: '#fff'
+    },
+    rejectButton: {
+      backgroundColor: '#ef4444',
+      color: '#fff'
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
+      backgroundColor: 'rgba(255,255,255,0.05)',
+      borderRadius: '12px',
+      overflow: 'hidden'
+    },
+    tableHeader: {
+      backgroundColor: 'rgba(151, 125, 255, 0.2)',
+      padding: '1rem',
+      textAlign: 'left',
+      fontSize: '0.875rem',
+      fontWeight: '600',
+      color: '#C4B5FD'
+    },
+    tableCell: {
+      padding: '1rem',
+      borderBottom: '1px solid rgba(255,255,255,0.1)',
+      fontSize: '0.875rem'
+    },
+    statusBadge: {
+      padding: '0.25rem 0.75rem',
+      borderRadius: '12px',
+      fontSize: '0.75rem',
+      fontWeight: '500',
+      textTransform: 'capitalize'
+    },
+    pendingStatus: {
+      backgroundColor: 'rgba(245, 158, 11, 0.2)',
+      color: '#fbbf24',
+      border: '1px solid rgba(245, 158, 11, 0.3)'
+    },
+    approvedStatus: {
+      backgroundColor: 'rgba(16, 185, 129, 0.2)',
+      color: '#10b981',
+      border: '1px solid rgba(16, 185, 129, 0.3)'
+    },
+    rejectedStatus: {
+      backgroundColor: 'rgba(239, 68, 68, 0.2)',
+      color: '#ef4444',
+      border: '1px solid rgba(239, 68, 68, 0.3)'
+    },
+    actionButtons: {
+      display: 'flex',
+      gap: '0.5rem'
+    },
+    smallButton: {
+      padding: '0.25rem 0.75rem',
+      borderRadius: '6px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '0.75rem',
+      fontWeight: '500'
+    },
+    error: {
+      textAlign: 'center',
+      color: '#ef4444',
+      fontSize: '1.125rem',
+      padding: '2rem'
+    },
+    noData: {
+      textAlign: 'center',
+      color: 'rgba(255,255,255,0.7)',
+      fontSize: '1.125rem',
+      padding: '2rem'
+    }
   };
 
   useEffect(() => {
@@ -160,8 +271,11 @@ const AdminEventsPage = () => {
         setLoading(true);
         const response = await axios.get('/api/v1/events');
         setEvents(response.data);
-      } catch (error) {
-        toast.error(error.response?.data?.message || 'Failed to fetch events');
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        setError(err.response?.data?.message || 'Failed to load events');
+        toast.error('Failed to load events');
       } finally {
         setLoading(false);
       }
@@ -176,13 +290,19 @@ const AdminEventsPage = () => {
       setEvents(events.map(event => 
         event._id === eventId ? { ...event, status } : event
       ));
-      toast.success('Event status updated successfully');
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update event status');
+      toast.success(`Event ${status} successfully`);
+    } catch (err) {
+      console.error('Error updating event status:', err);
+      toast.error(err.response?.data?.message || 'Failed to update event status');
     }
   };
 
-  const handleBulkStatusUpdate = async (newStatus) => {
+  const handleBulkAction = async () => {
+    if (!bulkAction || selectedEvents.size === 0) {
+      toast.error('Please select events and an action');
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
       const eventIds = Array.from(selectedEvents);
@@ -190,20 +310,22 @@ const AdminEventsPage = () => {
       await Promise.all(eventIds.map(eventId =>
         axios.put(
           `http://localhost:3000/api/v1/admin/events/${eventId}/status`,
-          { status: newStatus },
+          { status: bulkAction },
           { headers: { Authorization: `Bearer ${token}` } }
         )
       ));
 
       setEvents(events.map(event => 
-        selectedEvents.has(event._id) ? { ...event, status: newStatus } : event
+        selectedEvents.has(event._id) ? { ...event, status: bulkAction } : event
       ));
-
+      
+      toast.success(`${selectedEvents.size} events updated to ${bulkAction}`);
       setSelectedEvents(new Set());
       setSelectAll(false);
-      toast.success(`Successfully updated ${eventIds.length} events to ${newStatus}`);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update events status');
+      setBulkAction('');
+    } catch (err) {
+      console.error('Error with bulk action:', err);
+      toast.error('Failed to perform bulk action');
     }
   };
 
@@ -217,41 +339,46 @@ const AdminEventsPage = () => {
   };
 
   const handleSelectEvent = (eventId) => {
-    const newSelected = new Set(selectedEvents);
-    if (newSelected.has(eventId)) {
-      newSelected.delete(eventId);
+    const newSelectedEvents = new Set(selectedEvents);
+    if (newSelectedEvents.has(eventId)) {
+      newSelectedEvents.delete(eventId);
     } else {
-      newSelected.add(eventId);
+      newSelectedEvents.add(eventId);
     }
-    setSelectedEvents(newSelected);
-    setSelectAll(newSelected.size === filteredAndSortedEvents.length);
+    setSelectedEvents(newSelectedEvents);
+    setSelectAll(newSelectedEvents.size === filteredAndSortedEvents.length);
   };
 
   const exportToCSV = () => {
-    const headers = ['Event Name', 'Date', 'Location', 'Status', 'Tickets Booked', 'Total Tickets', 'Organizer'];
-    const csvData = filteredAndSortedEvents.map(event => [
-      event.name,
-      format(new Date(event.date), 'PPP'),
-      event.location,
-      event.status,
-      event.ticketsBooked,
-      event.totalTickets,
-      event.organizer.name
-    ]);
+    const csvData = filteredAndSortedEvents.map(event => ({
+      Title: event.title,
+      Date: format(new Date(event.date), 'PPP'),
+      Location: event.location,
+      Price: `$${event.price}`,
+      Status: event.status,
+      'Tickets Sold': event.ticketsSold || 0,
+      Category: event.category,
+      Organizer: event.organizer?.name || 'Unknown'
+    }));
 
     const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => row.join(','))
+      Object.keys(csvData[0]).join(','),
+      ...csvData.map(row => 
+        Object.values(row).map(value => 
+          typeof value === 'string' && value.includes(',') 
+            ? `"${value}"` 
+            : value
+        ).join(',')
+      )
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `events_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `events-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const handleSort = (field) => {
@@ -259,39 +386,76 @@ const AdminEventsPage = () => {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortBy(field);
-      setSortOrder('asc');
+      setSortOrder('desc');
     }
   };
 
+  // Filter and sort events
   const filteredAndSortedEvents = events
     .filter(event => {
       const matchesFilter = filter === 'all' || event.status === filter;
-      const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           event.organizer.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           event.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     })
     .sort((a, b) => {
       let comparison = 0;
+      
       switch (sortBy) {
         case 'date':
           comparison = new Date(a.date) - new Date(b.date);
           break;
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
           break;
-        case 'tickets':
-          comparison = a.ticketsBooked - b.ticketsBooked;
+        case 'price':
+          comparison = a.price - b.price;
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status);
           break;
         default:
           comparison = 0;
       }
+      
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
   if (loading) {
     return (
-      <div style={styles.loading}>
-        <div style={styles.spinner}></div>
+      <div style={styles.outer}>
+        <div style={styles.loading}>
+          <div style={styles.spinner}></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={styles.outer}>
+        <div style={styles.error}>
+          <p>{error}</p>
+          <button 
+            onClick={() => {
+              setLoading(true);
+              setError(null);
+              fetchEvents();
+            }}
+            style={{
+              marginTop: '1rem',
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#977DFF',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -300,7 +464,14 @@ const AdminEventsPage = () => {
     <div style={styles.outer}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <h1 style={styles.title}>Event Management</h1>
+          <h1 style={styles.title}>Manage Events</h1>
+          <p style={styles.subtitle}>Review and approve events from organizers</p>
+          <button
+            style={styles.button}
+            onClick={() => navigate('/admin/create-event')}
+          >
+            Create New Event
+          </button>
         </div>
 
         <div style={styles.controls}>
@@ -311,73 +482,97 @@ const AdminEventsPage = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             style={styles.input}
           />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            style={styles.select}
+          
+          <div style={styles.filterButtons}>
+            {['all', 'pending', 'approved', 'rejected'].map(filterType => (
+              <button
+                key={filterType}
+                onClick={() => setFilter(filterType)}
+                style={{
+                  ...styles.filterButton,
+                  ...(filter === filterType ? styles.activeFilter : styles.inactiveFilter)
+                }}
+              >
+                {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+                {filterType !== 'all' && (
+                  <span style={{ marginLeft: '0.5rem' }}>
+                    ({events.filter(e => e.status === filterType).length})
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <button
+            style={styles.button}
+            onClick={exportToCSV}
           >
-            <option value="all">All Events</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          <select
-            value={sortBy}
-            onChange={(e) => handleSort(e.target.value)}
-            style={styles.select}
-          >
-            <option value="date">Sort by Date</option>
-            <option value="name">Sort by Name</option>
-            <option value="tickets">Sort by Tickets</option>
-          </select>
+            Export CSV
+          </button>
         </div>
 
         {selectedEvents.size > 0 && (
           <div style={styles.bulkActions}>
-            <label style={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={selectAll}
-                onChange={handleSelectAll}
-                style={styles.checkbox}
-              />
-              Select All
-            </label>
-            <button
-              onClick={() => handleBulkStatusUpdate('active')}
-              style={styles.button}
+            <span style={styles.checkboxLabel}>
+              {selectedEvents.size} event(s) selected
+            </span>
+            <select
+              value={bulkAction}
+              onChange={(e) => setBulkAction(e.target.value)}
+              style={styles.select}
             >
-              Activate Selected
-            </button>
+              <option value="">Select Action</option>
+              <option value="approved">Approve</option>
+              <option value="rejected">Reject</option>
+            </select>
             <button
-              onClick={() => handleBulkStatusUpdate('cancelled')}
               style={styles.button}
+              onClick={handleBulkAction}
             >
-              Cancel Selected
-            </button>
-            <button
-              onClick={exportToCSV}
-              style={styles.button}
-            >
-              Export to CSV
+              Apply to {selectedEvents.size} events
             </button>
           </div>
         )}
 
+        <div style={styles.bulkActions}>
+          <label style={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={selectAll}
+              onChange={handleSelectAll}
+              style={styles.checkbox}
+            />
+            Select All ({filteredAndSortedEvents.length} events)
+          </label>
+        </div>
+
         {filteredAndSortedEvents.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">No events found</p>
+          <div style={styles.noData}>
+            <p>No {filter !== 'all' ? filter : ''} events found.</p>
           </div>
         ) : (
           <div style={styles.grid}>
-            {filteredAndSortedEvents.map((event) => (
-              <EventCard
-                key={event._id}
-                event={event}
-                onStatusUpdate={handleStatusUpdate}
-                isSelected={selectedEvents.has(event._id)}
-                onSelect={() => handleSelectEvent(event._id)}
-              />
+            {filteredAndSortedEvents.map(event => (
+              <div key={event._id} style={{ position: 'relative' }}>
+                <input
+                  type="checkbox"
+                  checked={selectedEvents.has(event._id)}
+                  onChange={() => handleSelectEvent(event._id)}
+                  style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    zIndex: 10,
+                    accentColor: '#977DFF',
+                    transform: 'scale(1.2)',
+                  }}
+                />
+                <EventCard
+                  event={event}
+                  isAdmin={true}
+                  onStatusUpdate={handleStatusUpdate}
+                />
+              </div>
             ))}
           </div>
         )}

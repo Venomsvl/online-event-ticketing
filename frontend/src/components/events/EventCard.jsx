@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { eventAPI } from '../utils/api';
+import { eventAPI } from '../../utils/api';
 
 const EventCard = ({ event, onStatusUpdate, isSelected, onSelect }) => {
     const [isBooking, setIsBooking] = useState(false);

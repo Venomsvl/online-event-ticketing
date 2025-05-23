@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "../utils/axios";
+import axios from "../../utils/axios";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from '../context/AuthContext';
-import theme from '../styles/theme';
+import { useAuth } from '../../context/AuthContext';
+import theme from '../../styles/theme';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';

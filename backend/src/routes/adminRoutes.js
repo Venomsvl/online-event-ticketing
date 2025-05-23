@@ -1,13 +1,15 @@
 const express = require('express');
 const { body } = require('express-validator'); // Import express-validator
 const router = express.Router();
+const { verifyToken } = require('../middlewares/authMiddleware');
+const { isAdmin } = require('../middlewares/roleMiddleware');
+
 const {
     listUsers,
     getUser,
     updateUserRole,
     deleteUser
-} = require('../Controllers/AdminController'); // Import admin controllers
-const { verifyToken } = require('../middlewares/authMiddleware'); // Import authentication middleware
+} = require('../controllers/AdminController.js'); // Changed path to be more explicit
 const adminMiddleware = require('../middlewares/adminMiddleware'); // Import admin middleware
 
 // Admin routes
