@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
-const User = require('../models/User'); // Adjust if your folder is 'model'
-const PasswordReset = require('../models/passwordReset'); // Adjust if your folder is 'model'
+const User = require('../model/User'); // Adjust if your folder is 'model'
+const PasswordReset = require('../model/passwordReset'); // Adjust if your folder is 'model'
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');

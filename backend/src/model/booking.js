@@ -31,6 +31,22 @@ const BookingSchema = new Schema({
         type: String,
         enum: ['Pending', 'Confirmed', 'Cancelled'],
         required: true
+    },
+    //extra functionalities 
+        ticketType: {
+        type: String,
+        required: true,
+        enum: ['standard', 'vip']
+    },
+        quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 10
+    },
+        ticketsBooked: {
+        type: Number,
+        required: true
     }
 });
 

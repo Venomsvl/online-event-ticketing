@@ -1,6 +1,6 @@
 const mongoose=require('mongoose');
-//const User=require('./src/model/User');
-const Admin=require('../model/Admins');
+const User=require('backend/src/model/User');
+const Admin=require('backend/src/model/Admins');
 
 async function connectdb() {
     await mongoose.connect('mongodb://localhost:27017/online-event-ticketing'), {

@@ -13,11 +13,15 @@ const passwordResetSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    createdAt: {
+    //extra
+        createdAt: {
         type: Date,
         default: Date.now,
         expires: 600 // Document will be automatically deleted after 10 minutes
     }
 });
 
-module.exports = mongoose.model('PasswordReset', passwordResetSchema); 
+// Automatically remove expired OTPs
+passwordResetSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+module.exports = mongoose.model('PasswordReset', passwordResetSchema);

@@ -1,11 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const authRoutes = require('./src/routes/authRoutes');
-const userRoutes = require('./src/routes/userRoutes');
-const adminRoutes = require('./src/routes/adminRoutes');
-const eventRoutes = require('./src/routes/eventRoutes');
-const bookingRoutes = require('./src/routes/bookingRoutes');
-const errorHandler = require('./src/middlewares/errorHandler');
+const authRoutes = require('./backend/src/routes/authRoutes');
+const userRoutes = require('./backend/src/routes/userRoutes');
+const adminRoutes = require('./backend/src/routes/adminRoutes');
+const eventRoutes = require('./backend/src/routes/eventRoutes');
+const bookingRoutes = require('./backend/src/routes/bookingRoutes');
+const errorHandler = require('./backend/src/middlewares/errorHandler');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
@@ -73,10 +73,7 @@ app.use(errorHandler);
 mongoose.set('strictQuery', false);
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-ticketing', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/event-ticketing');
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     
     // Clear any existing models to prevent the OverwriteModelError
