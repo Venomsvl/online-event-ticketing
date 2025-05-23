@@ -12,6 +12,7 @@ import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
 import Profile from './pages/Profile'
 import AdminLogin from './pages/AdminLogin'
+import BookingsPage from './pages/BookingsPage'
 
 function App() {
   return (
@@ -34,6 +35,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              <Route 
+                path="/bookings" 
+                element={
+                  <ProtectedRoute>
+                    <BookingsPage />
                   </ProtectedRoute>
                 } 
               />

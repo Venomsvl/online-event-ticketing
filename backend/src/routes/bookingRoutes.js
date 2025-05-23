@@ -2,6 +2,25 @@ const express = require('express');
 const router = express.Router();
 const Booking = require('../model/booking');
 
+// Get all bookings
+router.get('/', async (req, res) => {
+    console.log('GET /api/bookings');
+    try {
+        const bookings = await Booking.find();
+        res.json({
+            success: true,
+            bookings
+        });
+    } catch (error) {
+        console.error('Error fetching bookings:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching bookings',
+            error: error.message
+        });
+    }
+});
+
 // Create a new booking
 router.post('/', async (req, res) => {
     console.log('Received booking request:', req.body);
@@ -67,6 +86,41 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error fetching booking',
+            error: error.message
+        });
+    }
+});
+
+// Cancel booking
+router.put('/:id/cancel', async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Booking not found'
+            });
+        }
+
+        if (booking.bookingStatus === 'CANCELLED') {
+            return res.status(400).json({
+                success: false,
+                message: 'Booking is already cancelled'
+            });
+        }
+
+        booking.bookingStatus = 'CANCELLED';
+        await booking.save();
+
+        res.json({
+            success: true,
+            message: 'Booking cancelled successfully',
+            booking
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error cancelling booking',
             error: error.message
         });
     }

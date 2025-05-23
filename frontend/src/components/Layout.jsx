@@ -80,9 +80,12 @@ export default function Layout() {
             </>
           )}
           {user && (
-            <button onClick={logout} style={styles.logoutButton}>
-              Logout
-            </button>
+            <>
+              <Link to="/bookings" style={styles.link}>My Bookings</Link>
+              <button onClick={logout} style={styles.logoutButton}>
+                Logout
+              </button>
+            </>
           )}
         </nav>
       </header>
