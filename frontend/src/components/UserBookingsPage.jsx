@@ -48,13 +48,15 @@ const UserBookingsPage = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="grid gap-4">
-                {bookings.length === 0 ? (
-                    <div className="text-center text-gray-500">
-                        No bookings found
-                    </div>
-                ) : (
-                    bookings.map((booking) => (
+            <h1 className="text-3xl font-bold mb-6">My Bookings</h1>
+            
+            {bookings.length === 0 ? (
+                <div className="text-center text-gray-500">
+                    No bookings found
+                </div>
+            ) : (
+                <div className="grid gap-4">
+                    {bookings.map((booking) => (
                         <div 
                             key={booking._id} 
                             className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
@@ -86,11 +88,11 @@ const UserBookingsPage = () => {
                                 )}
                             </div>
                         </div>
-                    ))
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
 
-export default UserBookingsPage; 
+export default UserBookingsPage;
