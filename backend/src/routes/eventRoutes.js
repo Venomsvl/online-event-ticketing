@@ -22,8 +22,7 @@ router.get('/:id', getEventById);
 router.get('/my/events', verifyToken, getMyEvents);
 router.get('/my/analytics', verifyToken, getMyEventsAnalytics);
 
-// Organizer-only routes
-router.post('/', verifyToken, isOrganizer, createEvent);
+// Organizer and Admin routesrouter.post('/', verifyToken, isOrganizerOrAdmin, createEvent);
 router.put('/:id', verifyToken, isOrganizer, updateEvent);
 router.delete('/:id', verifyToken, isOrganizer, deleteEvent);
 

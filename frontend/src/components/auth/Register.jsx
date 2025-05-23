@@ -198,38 +198,49 @@ export default function RegisterForm() {
   const styles = {
     outer: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #FFCCF2 0%, #977DFF 50%, #0033FF 100%)',
+      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
       color: '#fff',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       position: 'relative',
+      padding: '2rem',
     },
     container: {
-      maxWidth: '420px',
+      maxWidth: '480px',
       width: '100%',
-      margin: '40px auto',
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      padding: '2.5rem 2rem',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      margin: '0 auto',
+      background: 'rgba(255,255,255,0.05)',
+      borderRadius: '20px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      border: '1px solid rgba(151, 125, 255, 0.2)',
+      padding: '3rem 2.5rem',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      animation: 'fadeIn 0.6s ease-out',
     },
     title: {
-      fontSize: '2rem',
-      marginBottom: '2rem',
+      fontSize: '2.5rem',
+      marginBottom: '2.5rem',
       textAlign: 'center',
-      color: '#fff',
+      background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 50%, #E9D5FF 100%)',
+      backgroundClip: 'text',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
       fontWeight: 700,
-      letterSpacing: '0.5px',
-      textShadow: '0 2px 8px rgba(0,0,0,0.12)',
+      textShadow: '0 0 30px rgba(151, 125, 255, 0.5)',
+    },
+    subtitle: {
+      fontSize: '1.1rem',
+      color: 'rgba(255,255,255,0.7)',
+      textAlign: 'center',
+      marginBottom: '2rem',
+      marginTop: '-1.5rem'
     },
     form: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '1.5rem',
+      gap: '1.75rem',
     },
     inputGroup: {
       display: 'flex',
@@ -238,139 +249,167 @@ export default function RegisterForm() {
       position: 'relative',
     },
     label: {
-      fontSize: '1.15rem',
-      color: '#fff',
-      fontWeight: '500',
-      marginBottom: '0.25rem',
-      textShadow: '0 1px 4px rgba(0,0,0,0.10)',
+      fontSize: '1.1rem',
+      color: '#C4B5FD',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
     },
     input: {
-      background: 'rgba(255,255,255,0.7)',
-      border: '1.5px solid #977DFF',
+      background: 'rgba(255,255,255,0.1)',
+      border: '1px solid rgba(151, 125, 255, 0.3)',
       borderRadius: '12px',
-      color: '#0033FF',
-      padding: '0.75rem',
+      color: '#ffffff',
+      padding: '1rem 1.5rem',
       fontSize: '1rem',
-      marginBottom: '0.5rem',
       boxSizing: 'border-box',
       fontWeight: 500,
       outline: 'none',
-      boxShadow: '0 1px 4px 0 rgba(0,0,0,0.08)',
-      transition: 'border 0.2s',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(10px)',
     },
     select: {
-      background: 'rgba(255,255,255,0.7)',
-      border: '1.5px solid #977DFF',
+      background: 'rgba(255,255,255,0.18)',
+      border: '2px solid rgba(151, 125, 255, 0.5)',
       borderRadius: '12px',
-      color: '#0033FF',
-      padding: '0.75rem',
-      fontSize: '1rem',
-      marginBottom: '0.5rem',
-      boxSizing: 'border-box',
+      color: '#ffffff',
+      padding: '1rem 1.5rem',
+      fontSize: '1.1rem',
       cursor: 'pointer',
-      fontWeight: 500,
+      fontWeight: 600,
       outline: 'none',
-      boxShadow: '0 1px 4px 0 rgba(0,0,0,0.08)',
-      transition: 'border 0.2s, box-shadow 0.2s, background 0.2s',
+      boxShadow: '0 4px 20px rgba(151, 125, 255, 0.2), inset 0 2px 8px rgba(255,255,255,0.1)',
+      transition: 'all 0.3s ease',
+      backdropFilter: 'blur(15px)',
+      appearance: 'none',
+      backgroundImage: 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%23ffffff\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e")',
+      backgroundPosition: 'right 1rem center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: '1.8em 1.8em',
+      paddingRight: '3.5rem',
+      textShadow: '0 1px 2px rgba(0,0,0,0.5)',
     },
     selectFocus: {
-      background: 'rgba(255,255,255,0.95)',
-      border: '2px solid #C8102E',
-      boxShadow: '0 4px 24px 0 rgba(151,125,255,0.18)',
-      color: '#0033FF',
+      background: 'rgba(255,255,255,0.25)',
+      border: '2px solid #977DFF',
+      boxShadow: '0 0 0 4px rgba(151, 125, 255, 0.3), 0 6px 25px rgba(151, 125, 255, 0.4)',
+      transform: 'scale(1.02)',
     },
     passwordToggle: {
       position: 'absolute',
-      right: 12,
+      right: '1.25rem',
       top: '50%',
       transform: 'translateY(-50%)',
       zIndex: 2,
       background: 'none',
       border: 'none',
-      color: '#0033FF',
+      color: '#977DFF',
       padding: 0,
-      fontSize: 22,
+      fontSize: '1.25rem',
       height: 32,
       width: 32,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      borderRadius: '6px',
     },
     button: {
-      background: 'linear-gradient(90deg, #0033FF 0%, #977DFF 100%)',
+      background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
       color: '#fff',
       border: 'none',
-      borderRadius: '16px',
+      borderRadius: '12px',
       fontWeight: 700,
-      padding: '0.9rem 2rem',
+      padding: '1rem 2rem',
       fontSize: '1.1rem',
       marginTop: '1rem',
-      transition: 'background 0.2s',
-      boxShadow: '0 2px 12px 0 rgba(0, 51, 255, 0.10)',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 15px rgba(151, 125, 255, 0.3)',
+      textTransform: 'uppercase',
       letterSpacing: '0.5px',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.75rem',
     },
     message: {
-      marginTop: '1rem',
+      marginTop: '1.5rem',
       textAlign: 'center',
       color: '#fff',
       fontSize: '1rem',
-      padding: '1rem',
-      borderRadius: '8px',
-      backgroundColor: 'rgba(151,125,255,0.18)',
-      textShadow: '0 1px 4px rgba(0,0,0,0.10)',
+      padding: '1rem 1.5rem',
+      borderRadius: '12px',
+      backgroundColor: 'rgba(16, 185, 129, 0.2)',
+      border: '1px solid rgba(16, 185, 129, 0.3)',
+      backdropFilter: 'blur(10px)',
     },
     errorMessage: {
-      marginTop: '1rem',
+      marginTop: '1.5rem',
       textAlign: 'center',
       color: '#fff',
-      fontSize: '0.95rem',
-      padding: '1rem',
+      fontSize: '1rem',
+      padding: '1rem 1.5rem',
       borderRadius: '12px',
       backgroundColor: 'rgba(239, 68, 68, 0.2)',
       border: '1px solid rgba(239, 68, 68, 0.3)',
+      backdropFilter: 'blur(10px)',
     },
     error: {
-      color: '#C8102E',
-      fontSize: '1.05rem',
-      fontWeight: 700,
-      marginTop: '0.25rem',
+      color: '#fbbf24',
+      fontSize: '0.9rem',
+      fontWeight: 600,
+      marginTop: '0.5rem',
+      backgroundColor: 'rgba(245, 158, 11, 0.2)',
+      padding: '0.75rem',
+      borderRadius: '8px',
+      border: '1px solid rgba(245, 158, 11, 0.3)',
+      backdropFilter: 'blur(10px)',
     },
     strengthBar: {
-      height: '4px',
-      backgroundColor: '#977DFF',
-      borderRadius: '2px',
-      marginTop: '0.5rem',
+      height: '6px',
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      borderRadius: '3px',
+      marginTop: '0.75rem',
       overflow: 'hidden',
+      backdropFilter: 'blur(5px)',
     },
     strengthFill: {
       height: '100%',
-      transition: 'all 0.2s',
+      transition: 'all 0.3s ease',
+      borderRadius: '3px',
     },
     strengthText: {
-      fontSize: '0.95rem',
-      fontWeight: 400,
-      marginTop: '0.25rem',
+      fontSize: '1rem',
+      fontWeight: 600,
+      marginTop: '0.5rem',
       display: 'inline-block',
-      // color will be set inline based on strength
     },
     requirementsPopup: {
       position: 'absolute',
-      right: '-220px',
+      right: '-240px',
       top: '0',
-      width: '200px',
-      backgroundColor: theme.colors.white,
-      padding: theme.spacing.md,
-      borderRadius: theme.borderRadius.sm,
-      boxShadow: theme.shadows.sm,
+      width: '220px',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      padding: '1rem',
+      borderRadius: '12px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
       zIndex: 1000,
+      border: '1px solid rgba(151, 125, 255, 0.2)',
+      backdropFilter: 'blur(20px)',
     },
     requirementItem: {
-      ...theme.typography.small,
-      color: theme.colors.text.secondary,
-      marginBottom: theme.spacing.sm,
+      fontSize: '0.9rem',
+      color: '#1f2937',
+      marginBottom: '0.5rem',
       display: 'flex',
       alignItems: 'center',
-      gap: theme.spacing.sm,
+      gap: '0.5rem',
+      fontWeight: '500',
     },
     requirementIcon: {
       width: '16px',
@@ -378,102 +417,132 @@ export default function RegisterForm() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: theme.colors.success,
+      color: '#10b981',
+      fontWeight: '600',
     },
     loadingSpinner: {
-      width: '20px',
-      height: '20px',
-      border: '2px solid #ffffff',
-      borderTop: '2px solid transparent',
+      width: '24px',
+      height: '24px',
+      border: '3px solid rgba(255,255,255,0.3)',
+      borderTop: '3px solid #ffffff',
       borderRadius: '50%',
       animation: 'spin 1s linear infinite',
     },
     loginLink: {
-      marginTop: '1.5rem',
+      marginTop: '2rem',
       textAlign: 'center',
-      fontSize: '0.95rem',
-      color: '#fff',
+      fontSize: '1rem',
+      color: 'rgba(255,255,255,0.8)',
+      background: 'rgba(255,255,255,0.03)',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      border: '1px solid rgba(151, 125, 255, 0.1)',
+      backdropFilter: 'blur(10px)',
     },
     link: {
-      color: '#C8102E',
+      color: '#977DFF',
       textDecoration: 'none',
-      fontWeight: '500',
-      transition: theme.transitions.default,
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      position: 'relative',
     },
     requirements: {
-      color: '#fff',
+      color: 'rgba(255,255,255,0.8)',
       fontSize: '0.95rem',
-      marginTop: '0.25rem',
+      marginTop: '0.5rem',
       fontWeight: 500,
       textAlign: 'left',
-      textShadow: '0 1px 4px rgba(0,0,0,0.10)',
+      backgroundColor: 'rgba(151, 125, 255, 0.1)',
+      padding: '0.75rem',
+      borderRadius: '8px',
+      border: '1px solid rgba(151, 125, 255, 0.2)',
+      backdropFilter: 'blur(10px)',
+    },
+    logoContainer: {
+      position: 'absolute',
+      top: '2rem',
+      left: '2rem',
+      zIndex: 1000,
+    },
+    logo: {
+      height: '160px',
+      width: 'auto',
+      transition: 'all 0.3s ease',
+      filter: 'drop-shadow(0 8px 20px rgba(151, 125, 255, 0.5))',
     },
   };
 
   return (
-    <div className="register-outer" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', background: styles.outer.background }}>
-      <style>{`
-        .register-outer {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          box-sizing: border-box;
-          width: 100vw;
-          overflow-x: hidden;
+    <div style={styles.outer}>
+      <style>
+        {`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        .register-logo {
-          position: fixed;
-          top: 24px;
-          left: 24px;
-          z-index: 1000;
-          height: 192px;
-          width: auto;
-          transition: all 0.2s;
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
-        .register-logo img {
-          height: 192px;
-          width: auto;
-          display: block;
+        .btn-hover:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(151, 125, 255, 0.4);
         }
-        .register-card {
-          margin-top: 80px;
-          margin-bottom: 32px;
+        .input-focus:focus {
+          border-color: #977DFF;
+          box-shadow: 0 0 0 3px rgba(151, 125, 255, 0.2);
+          background: rgba(255,255,255,0.15);
         }
-        @media (max-width: 600px) {
-          .register-logo {
-            position: static !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 32px 0 24px 0;
-            height: auto;
-            width: 100%;
-          }
-          .register-logo img {
-            height: 160px !important;
-            max-width: 90vw;
-            width: auto;
-            display: block;
-            margin: 0 auto;
-          }
-          .register-card {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 32px auto;
-            border-radius: 18px;
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
-            background: rgba(255,255,255,0.18);
-            padding: 1.5rem 1rem;
-            box-sizing: border-box;
-          }
+        .select-focus:focus {
+          border-color: #977DFF;
+          box-shadow: 0 0 0 3px rgba(151, 125, 255, 0.2);
+          background: rgba(255,255,255,0.15);
         }
-      `}</style>
-      <div className="register-logo">
+        .logo-hover:hover {
+          transform: scale(1.1);
+          filter: drop-shadow(0 12px 24px rgba(151, 125, 255, 0.7));
+        }
+        select option {
+          background: rgba(26, 26, 46, 0.95) !important;
+          color: #ffffff !important;
+          padding: 8px 12px !important;
+          font-weight: 600 !important;
+          border: none !important;
+          backdrop-filter: blur(10px) !important;
+        }
+        select option:hover {
+          background: rgba(151, 125, 255, 0.8) !important;
+          color: #ffffff !important;
+        }
+        select option:checked {
+          background: linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%) !important;
+          color: #ffffff !important;
+        }
+        .link-hover:hover {
+          color: #C4B5FD;
+          text-shadow: 0 0 8px rgba(151, 125, 255, 0.5);
+        }
+        .toggle-hover:hover {
+          background: rgba(151, 125, 255, 0.2);
+          color: #C4B5FD;
+        }
+        ::placeholder {
+          color: rgba(255,255,255,0.5) !important;
+        }
+        `}
+      </style>
+      
+      <div style={styles.logoContainer}>
         <Link to="/">
-          <img src="/LogoGradientDark.png" alt="Logo" />
+          <img 
+            src="/LogoWhite.png" 
+            alt="Logo" 
+            style={styles.logo}
+            className="logo-hover"
+          />
         </Link>
       </div>
+      
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -484,43 +553,55 @@ export default function RegisterForm() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme="dark"
+        toastStyle={{
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(151, 125, 255, 0.2)',
+          color: '#fff'
+        }}
       />
-      <div className="register-card" style={styles.container}>
-        <h1 style={styles.title}>Create Your Account</h1>
+      
+      <div style={styles.container}>
+        <h1 style={styles.title}>🎉 Create Your Account</h1>
+        <p style={styles.subtitle}>✨ Join our community and discover amazing events</p>
+        
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Name</label>
+            <label style={styles.label}>👤 Full Name</label>
             <input
-              placeholder="Enter your name"
-              style={{ ...styles.input, ...(errors.name ? { border: '2px solid #C8102E' } : {}) }}
+              placeholder="Enter your full name"
+              style={{ ...styles.input, ...(errors.name ? { border: '1px solid #fbbf24' } : {}) }}
+              className="input-focus"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               disabled={loading}
             />
-            {errors.name && <span style={styles.error}>{errors.name}</span>}
+            {errors.name && <span style={styles.error}>⚠️ {errors.name}</span>}
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Email</label>
+            <label style={styles.label}>📧 Email Address</label>
             <input
               type="email"
-              placeholder="Enter your email"
-              style={{ ...styles.input, ...(errors.email ? { border: '2px solid #C8102E' } : {}) }}
+              placeholder="Enter your email address"
+              style={{ ...styles.input, ...(errors.email ? { border: '1px solid #fbbf24' } : {}) }}
+              className="input-focus"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               disabled={loading}
             />
-            {errors.email && <span style={styles.error}>{errors.email}</span>}
+            {errors.email && <span style={styles.error}>⚠️ {errors.email}</span>}
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Password</label>
+            <label style={styles.label}>🔐 Password</label>
             <div style={{ position: 'relative', width: '100%' }}>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                style={{ ...styles.input, width: '100%', paddingRight: 44, ...(errors.password ? { border: '2px solid #C8102E' } : {}) }}
+                placeholder="Create a strong password"
+                style={{ ...styles.input, width: '100%', paddingRight: '3.5rem', ...(errors.password ? { border: '1px solid #fbbf24' } : {}) }}
+                className="input-focus"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 onFocus={() => setShowPasswordRequirements(true)}
@@ -530,6 +611,7 @@ export default function RegisterForm() {
               <button
                 type="button"
                 style={styles.passwordToggle}
+                className="toggle-hover"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
                 tabIndex={-1}
@@ -538,60 +620,72 @@ export default function RegisterForm() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16, marginBottom: 8 }}>
-              {[1,2,3].map((seg) => (
-                <div
-                  key={seg}
-                  style={{
-                    flex: 1,
-                    height: 6,
-                    borderRadius: 3,
-                    background: passwordStrength.score >= seg ? getStrengthColor(passwordStrength.score) : 'rgba(255,255,255,0.3)',
-                    transition: 'all 0.3s ease',
-                    boxShadow: passwordStrength.score >= seg ? '0 0 8px rgba(151,125,255,0.3)' : 'none'
-                  }}
-                />
-              ))}
-            </div>
-            <div style={{
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: '1.1rem',
-              marginBottom: 8,
-              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}>
-              Password Strength: {getStrengthLabel(passwordStrength.score)}
-            </div>
-            {form.password && !passwordStrength.isValid && (
-              <div style={styles.requirements}>
-                Password must be at least 8 characters long and contain at least one letter and one number. Special characters are allowed and recommended for better security.
+            
+            {form.password && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 16, marginBottom: 8 }}>
+                {[1,2,3].map((seg) => (
+                  <div
+                    key={seg}
+                    style={{
+                      flex: 1,
+                      height: 6,
+                      borderRadius: 3,
+                      background: passwordStrength.score >= seg ? getStrengthColor(passwordStrength.score) : 'rgba(255,255,255,0.3)',
+                      transition: 'all 0.3s ease',
+                      boxShadow: passwordStrength.score >= seg ? '0 0 8px rgba(151,125,255,0.3)' : 'none'
+                    }}
+                  />
+                ))}
               </div>
             )}
+            
+            {form.password && (
+              <div style={{
+                color: getStrengthColor(passwordStrength.score),
+                fontWeight: 600,
+                fontSize: '1rem',
+                marginBottom: 8,
+                textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                🔒 Password Strength: {getStrengthLabel(passwordStrength.score)}
+              </div>
+            )}
+            
+            {form.password && !passwordStrength.isValid && (
+              <div style={styles.requirements}>
+                💡 Password must be at least 8 characters long and contain at least one letter and one number. Special characters are recommended for better security.
+              </div>
+            )}
+            
             {showPasswordRequirements && (
               <div style={styles.requirementsPopup}>
-                <div style={{ marginBottom: '8px', fontWeight: '500', color: '#1f2937' }}>
-                  Password Requirements:
+                <div style={{ marginBottom: '8px', fontWeight: '600', color: '#1f2937' }}>
+                  📋 Password Requirements:
                 </div>
                 {passwordRequirements.map((req, index) => (
                   <div key={index} style={styles.requirementItem}>
                     <div style={styles.requirementIcon}>
-                      {form.password && validatePassword(form.password).score >= index + 1 ? '✓' : '○'}
+                      {form.password && validatePassword(form.password).score >= index + 1 ? '✅' : '⭕'}
                     </div>
                     {req}
                   </div>
                 ))}
               </div>
             )}
-            {errors.password && <span style={styles.error}>{errors.password}</span>}
+            {errors.password && <span style={styles.error}>⚠️ {errors.password}</span>}
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Confirm Password</label>
+            <label style={styles.label}>🔐 Confirm Password</label>
             <div style={{ position: 'relative', width: '100%' }}>
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Confirm your password"
-                style={{ ...styles.input, width: '100%', paddingRight: 44 }}
+                style={{ ...styles.input, width: '100%', paddingRight: '3.5rem', ...(errors.confirmPassword ? { border: '1px solid #fbbf24' } : {}) }}
+                className="input-focus"
                 value={form.confirmPassword}
                 onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                 disabled={loading}
@@ -599,6 +693,7 @@ export default function RegisterForm() {
               <button
                 type="button"
                 style={styles.passwordToggle}
+                className="toggle-hover"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
                 tabIndex={-1}
@@ -607,44 +702,54 @@ export default function RegisterForm() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+            {errors.confirmPassword && <span style={styles.error}>⚠️ {errors.confirmPassword}</span>}
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Role</label>
+            <label style={styles.label}>👥 Account Type</label>
             <select
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              style={{ ...styles.select, ...(isSelectFocused ? styles.selectFocus : {}), ...(errors.role ? { border: '2px solid #C8102E' } : {}) }}
+              style={{ ...styles.select, ...(isSelectFocused ? styles.selectFocus : {}), ...(errors.role ? { border: '1px solid #fbbf24' } : {}) }}
+              className="select-focus"
               disabled={loading}
               onFocus={() => setIsSelectFocused(true)}
               onBlur={() => setIsSelectFocused(false)}
             >
-              <option value="user">User</option>
-              <option value="organizer">Organizer</option>
+              <option value="user">🎫 Event Attendee</option>
+              <option value="organizer">🎪 Event Organizer</option>
             </select>
+            {errors.role && <span style={styles.error}>⚠️ {errors.role}</span>}
           </div>
 
-          <button type="submit" style={styles.button} disabled={loading}>
+          <button 
+            type="submit" 
+            style={styles.button} 
+            className="btn-hover"
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <div style={styles.loadingSpinner} />
                 Creating Account...
               </>
             ) : (
-              'Create Account'
+              <>
+                🚀 Create Account
+              </>
             )}
           </button>
 
           {message && (
             <p style={message.includes('failed') ? styles.errorMessage : styles.message}>
-              {message}
+              {message.includes('failed') ? '❌' : '✅'} {message}
             </p>
           )}
 
           <div style={styles.loginLink}>
-            Already have an account?{' '}
-            <Link to="/login" style={styles.link}>
-              Login here
+            🔑 Already have an account?{' '}
+            <Link to="/login" style={styles.link} className="link-hover">
+              Sign in here
             </Link>
           </div>
         </form>

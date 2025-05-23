@@ -8,6 +8,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const errorHandler = require('./middlewares/errorHandler');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -46,7 +47,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// Hardcoded admin login route
+// JWT for admin authentication
 const ADMIN_USERS = [
     { username: 'Lana', password: 'lana123' },
     { username: 'Salma', password: 'salma123' },
@@ -61,7 +62,22 @@ app.post('/api/v1/admin-login', (req, res) => {
         (u) => u.username === username && u.password === password
     );
     if (admin) {
-        return res.json({ success: true, role: 'admin', username });
+        // Generate JWT token for admin
+        const token = jwt.sign(
+            { id: 'admin-' + admin.username, role: 'admin', username: admin.username },
+            process.env.JWT_SECRET || 'your_jwt_secret',
+            { expiresIn: '1h' }
+        );
+
+        // Set JWT as HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000 // 1 hour
+        });
+
+        return res.json({ success: true, role: 'admin', username: admin.username });
     } else {
         return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
     }
@@ -74,7 +90,22 @@ app.post('/api/auth/admin-login', (req, res) => {
         (u) => u.username === username && u.password === password
     );
     if (admin) {
-        return res.json({ success: true, role: 'admin', username });
+        // Generate JWT token for admin
+        const token = jwt.sign(
+            { id: 'admin-' + admin.username, role: 'admin', username: admin.username },
+            process.env.JWT_SECRET || 'your_jwt_secret',
+            { expiresIn: '1h' }
+        );
+
+        // Set JWT as HTTP-only cookie
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 1000 // 1 hour
+        });
+
+        return res.json({ success: true, role: 'admin', username: admin.username });
     } else {
         return res.status(401).json({ success: false, message: 'Invalid admin credentials' });
     }

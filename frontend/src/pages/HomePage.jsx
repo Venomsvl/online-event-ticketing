@@ -7,273 +7,321 @@ import ConnectionTest from '../components/shared/ConnectionTest';
 const styles = {
   container: {
     backgroundColor: '#000000',
-    color: '#ffffff'
+    color: '#ffffff',
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)'
   },
   heroSection: {
     position: 'relative',
-    background: 'linear-gradient(to bottom right, #4C1D95, #7C3AED)',
-    padding: '3rem 0',
-    '@media (min-width: 768px)': {
-      padding: '5rem 0'
+    background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 50%, #E9D5FF 100%)',
+    padding: '4rem 0',
+    overflow: 'hidden',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0, 0, 0, 0.3)',
+      pointerEvents: 'none'
     }
   },
   heroOverlay: {
     position: 'absolute',
     inset: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    background: 'linear-gradient(135deg, rgba(151, 125, 255, 0.8) 0%, rgba(196, 181, 253, 0.6) 50%, rgba(233, 213, 255, 0.4) 100%)',
     pointerEvents: 'none'
   },
   heroContent: {
     position: 'relative',
     maxWidth: '80rem',
     margin: '0 auto',
-    padding: '0 1rem',
-    textAlign: 'center'
+    padding: '0 2rem',
+    textAlign: 'center',
+    zIndex: 1
   },
   welcomeSection: {
-    marginBottom: '2rem'
+    marginBottom: '3rem'
   },
   welcomeText: {
-    fontSize: '1.5rem',
-    color: '#E9D5FF',
+    fontSize: '2rem',
+    color: '#ffffff',
     marginBottom: '1rem',
+    fontWeight: '300',
+    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
     '@media (min-width: 768px)': {
-      fontSize: '1.875rem'
+      fontSize: '2.5rem'
     }
   },
   logoContainer: {
     display: 'flex',
     justifyContent: 'center',
-    marginBottom: '1.5rem'
+    marginBottom: '2rem'
   },
   logo: {
-    width: '16rem',
+    width: '20rem',
     height: 'auto',
+    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))',
     '@media (min-width: 768px)': {
-      width: '20rem'
+      width: '24rem'
     }
   },
   heroDescription: {
-    fontSize: '1.125rem',
-    color: '#F3E8FF',
-    marginBottom: '2rem',
+    fontSize: '1.25rem',
+    color: '#ffffff',
+    marginBottom: '3rem',
+    fontWeight: '300',
+    maxWidth: '600px',
+    margin: '0 auto 3rem auto',
+    textShadow: '0 2px 4px rgba(0,0,0,0.2)',
     '@media (min-width: 768px)': {
-      fontSize: '1.25rem',
-      marginBottom: '3rem'
+      fontSize: '1.5rem'
     }
   },
   countdownContainer: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '1rem',
-    marginBottom: '2rem',
+    gap: '1.5rem',
+    marginBottom: '3rem',
+    maxWidth: '600px',
+    margin: '0 auto',
     '@media (min-width: 768px)': {
-      display: 'flex',
-      justifyContent: 'center',
-      gap: '1rem',
-      marginBottom: '3rem'
+      gridTemplateColumns: 'repeat(4, 1fr)',
+      gap: '2rem'
     }
   },
   countdownBox: {
-    padding: '1rem',
-    borderRadius: '0.5rem',
-    backgroundColor: 'rgba(76, 29, 149, 0.5)'
+    padding: '2rem 1rem',
+    borderRadius: '20px',
+    background: 'rgba(255,255,255,0.15)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    textAlign: 'center',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
   },
   countdownNumber: {
-    fontSize: '1.875rem',
+    fontSize: '2.5rem',
     fontWeight: 'bold',
+    color: '#ffffff',
+    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+    marginBottom: '0.5rem',
     '@media (min-width: 768px)': {
-      fontSize: '2.25rem'
+      fontSize: '3rem'
     }
   },
   countdownLabel: {
-    fontSize: '0.875rem',
-    color: '#D8B4FE'
+    fontSize: '1rem',
+    color: 'rgba(255,255,255,0.9)',
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: '1px'
   },
   eventSection: {
     maxWidth: '80rem',
     margin: '0 auto',
-    padding: '2rem 1rem',
-    '@media (min-width: 768px)': {
-      padding: '3rem 1rem'
-    }
+    padding: '4rem 2rem',
+  },
+  sectionTitle: {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    marginBottom: '2rem',
+    textAlign: 'center',
+    background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 50%, #E9D5FF 100%)',
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    textShadow: '0 0 30px rgba(151, 125, 255, 0.5)'
   },
   eventList: {
     position: 'relative',
     overflowX: 'auto',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none',
+    paddingBottom: '2rem',
     '&::-webkit-scrollbar': {
       display: 'none'
     }
   },
   eventContainer: {
     display: 'flex',
-    gap: '1rem',
+    gap: '2rem',
     paddingBottom: '1rem',
-    '@media (min-width: 768px)': {
-      gap: '1.5rem'
-    }
   },
   eventCard: {
-    backgroundColor: '#4C1D95',
-    borderRadius: '0.5rem',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: '20px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
     flex: '0 0 auto',
-    width: '18rem',
+    width: '20rem',
     overflow: 'hidden',
+    border: '1px solid rgba(151, 125, 255, 0.2)',
+    backdropFilter: 'blur(20px)',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
     '@media (min-width: 768px)': {
-      width: '20rem'
+      width: '22rem'
     }
   },
   eventImage: {
     width: '100%',
-    height: '10rem',
+    height: '12rem',
     objectFit: 'cover',
-    '@media (min-width: 768px)': {
-      height: '12rem'
-    }
   },
   eventDate: {
     position: 'absolute',
     top: '1rem',
     left: '1rem',
-    backgroundColor: '#7C3AED',
+    background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
     color: '#ffffff',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '0.375rem'
+    padding: '0.5rem 1rem',
+    borderRadius: '12px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    boxShadow: '0 4px 12px rgba(151, 125, 255, 0.3)',
+    backdropFilter: 'blur(10px)'
   },
   eventContent: {
-    padding: '1rem'
+    padding: '1.5rem'
   },
   eventTitle: {
-    fontSize: '1.125rem',
-    fontWeight: 600,
-    marginBottom: '0.5rem',
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    marginBottom: '1rem',
     color: '#ffffff',
-    '@media (min-width: 768px)': {
-      fontSize: '1.25rem'
-    }
+    textShadow: '0 2px 4px rgba(0,0,0,0.2)'
   },
   eventInfo: {
-    color: '#D8B4FE',
-    fontSize: '0.875rem',
-    marginBottom: '0.5rem',
-    '@media (min-width: 768px)': {
-      fontSize: '1rem'
-    }
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: '1rem',
+    marginBottom: '1rem',
+    lineHeight: '1.5'
   },
   eventFooter: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: '1rem'
+    marginTop: '1.5rem'
   },
   eventPrice: {
-    fontSize: '1.125rem',
+    fontSize: '1.5rem',
     fontWeight: 'bold',
-    color: '#C4B5FD'
+    color: '#977DFF',
+    textShadow: '0 0 10px rgba(151, 125, 255, 0.3)'
   },
   bookButton: {
-    backgroundColor: '#7C3AED',
+    background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
     color: '#ffffff',
-    padding: '0.25rem 0.75rem',
-    borderRadius: '9999px',
-    fontSize: '0.875rem',
-    '@media (min-width: 768px)': {
-      padding: '0.5rem 1rem',
-      fontSize: '1rem'
-    },
+    padding: '0.75rem 1.5rem',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(151, 125, 255, 0.3)',
     '&:hover': {
-      backgroundColor: '#6D28D9'
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 20px rgba(151, 125, 255, 0.4)'
     }
   },
   scrollButton: {
-    display: 'none',
     position: 'absolute',
     top: '50%',
     transform: 'translateY(-50%)',
-    backgroundColor: '#7C3AED',
-    padding: '0.5rem',
-    borderRadius: '9999px',
+    background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
+    padding: '1rem',
+    borderRadius: '50%',
     color: '#ffffff',
-    '@media (min-width: 768px)': {
-      display: 'block'
-    },
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 15px rgba(151, 125, 255, 0.3)',
+    backdropFilter: 'blur(10px)',
+    zIndex: 10,
     '&:hover': {
-      backgroundColor: '#6D28D9'
+      transform: 'translateY(-50%) scale(1.1)',
+      boxShadow: '0 6px 20px rgba(151, 125, 255, 0.4)'
     }
   },
   leftButton: {
-    left: 0
+    left: '-1rem'
   },
   rightButton: {
-    right: 0
+    right: '-1rem'
   },
   categoriesSection: {
     maxWidth: '80rem',
     margin: '0 auto',
-    padding: '2rem 1rem',
-    '@media (min-width: 768px)': {
-      padding: '3rem 1rem'
-    }
+    padding: '4rem 2rem',
   },
   categoriesHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '1.5rem',
-    '@media (min-width: 768px)': {
-      marginBottom: '2rem'
-    }
+    marginBottom: '3rem',
   },
   categoriesTitle: {
-    fontSize: '1.25rem',
+    fontSize: '2.5rem',
     fontWeight: 'bold',
-    '@media (min-width: 768px)': {
-      fontSize: '1.5rem'
-    }
+    background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 50%, #E9D5FF 100%)',
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    textShadow: '0 0 30px rgba(151, 125, 255, 0.5)'
   },
   categoriesLink: {
     color: '#C4B5FD',
+    textDecoration: 'none',
+    fontSize: '1.1rem',
+    fontWeight: '500',
+    transition: 'all 0.3s ease',
     '&:hover': {
-      color: '#D8B4FE'
+      color: '#977DFF',
+      textShadow: '0 0 10px rgba(151, 125, 255, 0.5)'
     }
   },
   categoriesGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '0.75rem',
-    '@media (min-width: 768px)': {
-      gridTemplateColumns: 'repeat(3, 1fr)',
-      gap: '1rem'
-    },
-    '@media (min-width: 1024px)': {
-      gridTemplateColumns: 'repeat(6, 1fr)'
-    }
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1.5rem',
   },
   categoryCard: {
     position: 'relative',
-    borderRadius: '0.5rem',
+    borderRadius: '20px',
     overflow: 'hidden',
-    aspectRatio: '1'
+    aspectRatio: '1',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(151, 125, 255, 0.2)',
+    backdropFilter: 'blur(20px)',
+    transition: 'all 0.3s ease',
+    cursor: 'pointer',
+    '&:hover': {
+      transform: 'translateY(-5px)',
+      boxShadow: '0 10px 30px rgba(151, 125, 255, 0.3)'
+    }
   },
   categoryImage: {
     width: '100%',
     height: '100%',
-    objectFit: 'cover'
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease'
   },
   categoryOverlay: {
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(to top, #4C1D95, transparent)'
+    background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(151, 125, 255, 0.3) 50%, transparent 100%)'
   },
   categoryName: {
     position: 'absolute',
-    bottom: '1rem',
-    left: '1rem',
+    bottom: '1.5rem',
+    left: '1.5rem',
     color: '#ffffff',
-    fontWeight: 600
+    fontWeight: '600',
+    fontSize: '1.1rem',
+    textShadow: '0 2px 4px rgba(0,0,0,0.5)'
   }
 };
 
@@ -393,7 +441,7 @@ const HomePage = () => {
   const createEventCard = (event) => {
     const date = new Date(event.date);
     return (
-      <div key={event.id} style={styles.eventCard}>
+      <div key={event.id} style={styles.eventCard} className="event-card">
         <div style={{ position: 'relative' }}>
           <img src={event.image} alt={event.title} style={styles.eventImage} />
           <div style={styles.eventDate}>
@@ -403,8 +451,8 @@ const HomePage = () => {
         <div style={styles.eventContent}>
           <h3 style={styles.eventTitle}>{event.title}</h3>
           <div style={styles.eventInfo}>
-            <p>{date.toLocaleDateString()} at {event.time}</p>
-            <p>{event.location}</p>
+            <p>📅 {date.toLocaleDateString()} at {event.time}</p>
+            <p>📍 {event.location}</p>
           </div>
           <div style={styles.eventFooter}>
             <span style={styles.eventPrice}>${event.price}</span>
@@ -412,7 +460,7 @@ const HomePage = () => {
               onClick={() => bookEvent(event.id)}
               style={styles.bookButton}
             >
-              Book Now
+              🎫 Book Now
             </button>
           </div>
         </div>
@@ -422,12 +470,44 @@ const HomePage = () => {
 
   return (
     <div style={styles.container}>
+      <style>
+        {`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .countdown-box:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 40px rgba(151, 125, 255, 0.2);
+        }
+        .event-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 12px 40px rgba(151, 125, 255, 0.3);
+        }
+        .category-card:hover .category-image {
+          transform: scale(1.1);
+        }
+        .scroll-btn:hover {
+          transform: translateY(-50%) scale(1.1);
+          box-shadow: 0 6px 20px rgba(151, 125, 255, 0.4);
+        }
+        `}
+      </style>
+
       {/* Hero Section with Countdown */}
       <div style={styles.heroSection}>
         <div style={styles.heroOverlay}></div>
         <div style={styles.heroContent}>
           <div style={styles.welcomeSection}>
-            <div style={styles.welcomeText}>Welcome to</div>
+            <div style={styles.welcomeText}>✨ Welcome to</div>
             <div style={styles.logoContainer}>
               <img
                 src="/images/take3gradient.png"
@@ -441,25 +521,25 @@ const HomePage = () => {
               />
             </div>
             <p style={styles.heroDescription}>
-              Explore the vibrant events happening locally and globally.
+              🎪 Discover amazing events happening locally and globally. From concerts to conferences, we've got you covered!
             </p>
           </div>
 
-          {/* Countdown Timer */}
+          {/* Enhanced Countdown Timer */}
           <div style={styles.countdownContainer}>
-            <div style={styles.countdownBox}>
+            <div style={styles.countdownBox} className="countdown-box">
               <div style={styles.countdownNumber}>{countdown.days}</div>
               <div style={styles.countdownLabel}>Days</div>
             </div>
-            <div style={styles.countdownBox}>
+            <div style={styles.countdownBox} className="countdown-box">
               <div style={styles.countdownNumber}>{countdown.hours}</div>
               <div style={styles.countdownLabel}>Hours</div>
             </div>
-            <div style={styles.countdownBox}>
+            <div style={styles.countdownBox} className="countdown-box">
               <div style={styles.countdownNumber}>{countdown.minutes}</div>
               <div style={styles.countdownLabel}>Minutes</div>
             </div>
-            <div style={styles.countdownBox}>
+            <div style={styles.countdownBox} className="countdown-box">
               <div style={styles.countdownNumber}>{countdown.seconds}</div>
               <div style={styles.countdownLabel}>Seconds</div>
             </div>
@@ -469,15 +549,17 @@ const HomePage = () => {
 
       {/* Event List Section */}
       <div style={styles.eventSection}>
+        <h2 style={styles.sectionTitle}>🎟️ Featured Events</h2>
         <div style={{ position: 'relative' }}>
           <div style={styles.eventList}>
             <div style={styles.eventContainer} id="eventContainer">
               {events.map(createEventCard)}
             </div>
           </div>
-          {/* Navigation Arrows */}
+          {/* Enhanced Navigation Arrows */}
           <button
             style={{ ...styles.scrollButton, ...styles.leftButton }}
+            className="scroll-btn"
             onClick={() => scrollEvents('left')}
           >
             <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -486,6 +568,7 @@ const HomePage = () => {
           </button>
           <button
             style={{ ...styles.scrollButton, ...styles.rightButton }}
+            className="scroll-btn"
             onClick={() => scrollEvents('right')}
           >
             <svg style={{ width: '1.5rem', height: '1.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,27 +578,87 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Event Categories */}
+      {/* Enhanced Event Categories */}
       <div style={styles.categoriesSection}>
         <div style={styles.categoriesHeader}>
-          <h2 style={styles.categoriesTitle}>Event Categories</h2>
+          <h2 style={styles.categoriesTitle}>🎨 Event Categories</h2>
           <Link to="/categories" style={styles.categoriesLink}>
-            See all categories →
+            Explore all categories →
           </Link>
         </div>
         <div style={styles.categoriesGrid}>
           <Link to="/category/music" style={{ display: 'block' }}>
-            <div style={styles.categoryCard}>
+            <div style={styles.categoryCard} className="category-card">
               <img
                 src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=300&fit=crop"
                 alt="Music"
                 style={styles.categoryImage}
+                className="category-image"
               />
               <div style={styles.categoryOverlay}></div>
-              <div style={styles.categoryName}>Music</div>
+              <div style={styles.categoryName}>🎵 Music</div>
             </div>
           </Link>
-          {/* Add more category cards as needed */}
+          <Link to="/category/tech" style={{ display: 'block' }}>
+            <div style={styles.categoryCard} className="category-card">
+              <img
+                src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=500&h=300&fit=crop"
+                alt="Technology"
+                style={styles.categoryImage}
+                className="category-image"
+              />
+              <div style={styles.categoryOverlay}></div>
+              <div style={styles.categoryName}>💻 Technology</div>
+            </div>
+          </Link>
+          <Link to="/category/food" style={{ display: 'block' }}>
+            <div style={styles.categoryCard} className="category-card">
+              <img
+                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500&h=300&fit=crop"
+                alt="Food & Drink"
+                style={styles.categoryImage}
+                className="category-image"
+              />
+              <div style={styles.categoryOverlay}></div>
+              <div style={styles.categoryName}>🍽️ Food & Drink</div>
+            </div>
+          </Link>
+          <Link to="/category/sports" style={{ display: 'block' }}>
+            <div style={styles.categoryCard} className="category-card">
+              <img
+                src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=300&fit=crop"
+                alt="Sports"
+                style={styles.categoryImage}
+                className="category-image"
+              />
+              <div style={styles.categoryOverlay}></div>
+              <div style={styles.categoryName}>⚽ Sports</div>
+            </div>
+          </Link>
+          <Link to="/category/arts" style={{ display: 'block' }}>
+            <div style={styles.categoryCard} className="category-card">
+              <img
+                src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop"
+                alt="Arts & Culture"
+                style={styles.categoryImage}
+                className="category-image"
+              />
+              <div style={styles.categoryOverlay}></div>
+              <div style={styles.categoryName}>🎨 Arts & Culture</div>
+            </div>
+          </Link>
+          <Link to="/category/business" style={{ display: 'block' }}>
+            <div style={styles.categoryCard} className="category-card">
+              <img
+                src="https://images.unsplash.com/photo-1560472355-536de3962603?w=500&h=300&fit=crop"
+                alt="Business"
+                style={styles.categoryImage}
+                className="category-image"
+              />
+              <div style={styles.categoryOverlay}></div>
+              <div style={styles.categoryName}>💼 Business</div>
+            </div>
+          </Link>
         </div>
       </div>
 

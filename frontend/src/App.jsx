@@ -13,6 +13,7 @@ import Register from './components/auth/Register'
 import Unauthorized from './pages/Unauthorized'
 import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
+import CreateEventPage from './pages/CreateEventPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminLogin from './components/auth/AdminLogin'
 
@@ -58,6 +59,14 @@ function App() {
                 element={
                   <RoleBasedRoute allowedRoles={['admin']}>
                     <AdminEventsPage />
+                  </RoleBasedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/create-event" 
+                element={
+                  <RoleBasedRoute allowedRoles={['admin', 'organizer']}>
+                    <CreateEventPage />
                   </RoleBasedRoute>
                 } 
               />

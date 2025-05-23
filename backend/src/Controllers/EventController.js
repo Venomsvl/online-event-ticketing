@@ -79,35 +79,7 @@ const EventController = {
         return res.status(403).json({ message: "You are not authorized to view this event" });
     }),
 
-    // Create a new event (Organizer only)
-    createEvent: asyncHandler(async (req, res) => {
-        const {
-            title,
-            description,
-            date,
-            location,
-            category,
-            image,
-            ticket_price,
-            total_tickets,
-        } = req.body;
-
-        const event = await Event.create({
-            title,
-            description,
-            date,
-            location,
-            category,
-            image,
-            ticket_price,
-            total_tickets,
-            remaining_tickets: total_tickets,
-            organizer: req.user._id,
-            event_status: "pending", // default status for new events
-        });
-
-        res.status(201).json(event);
-    }),
+        // Create a new event (Organizer only)    createEvent: asyncHandler(async (req, res) => {        const {            title,            description,            date,            location,            category,            image,            ticket_price,            total_tickets,            event_status        } = req.body;        // Default status for new events        let initialStatus = "pending";                // Only admins can set custom initial status        if (req.user.role === "System Admin" && event_status) {            if (["approved", "pending", "declined"].includes(event_status)) {                initialStatus = event_status;            }        }        const event = await Event.create({            title,            description,            date,            location,            category,            image,            ticket_price,            total_tickets,            remaining_tickets: total_tickets,            organizer: req.user._id,            event_status: initialStatus,        });        res.status(201).json(event);    }),
 
     // Update an existing event
     updateEvent: asyncHandler(async (req, res) => {
@@ -182,13 +154,51 @@ const EventController = {
         res.status(200).json(events);
     }),
 
-    // Get analytics for organizer's events
+    // Get analytics for organizer's events (or all events for admin)
     getMyEventsAnalytics: asyncHandler(async (req, res) => {
-        const events = await Event.find({ organizer: req.user._id });
+        let events;
+
+        // If user is admin, get analytics for ALL events across all organizers
+        if (req.user.role === 'admin') {
+            // Get all events and populate organizer information
+            events = await Event.find({}).populate('organizer', 'name email');
+            
+            const analytics = events.map((e) => ({
+                name: e.title,  // Frontend expects 'name'
+                ticketsSold: e.total_tickets - e.remaining_tickets,  // Calculate tickets sold
+                totalTickets: e.total_tickets,  // Frontend expects 'totalTickets'
+                price: e.ticket_price || 0,  // Frontend expects 'price'
+                category: e.category,
+                location: e.location,
+                date: e.date,
+                status: e.event_status,
+                // Additional admin-specific fields
+                organizer: e.organizer ? {
+                    name: e.organizer.name,
+                    email: e.organizer.email,
+                    id: e.organizer._id
+                } : null,
+                eventId: e._id,
+                revenue: (e.total_tickets - e.remaining_tickets) * (e.ticket_price || 0)
+            }));
+
+            return res.status(200).json(analytics);
+        }
+
+        // For regular organizers, find only their events
+        events = await Event.find({ organizer: req.user._id });
 
         const analytics = events.map((e) => ({
-            title: e.title,
-            percentBooked: e.total_tickets === 0 ? 0 : Math.round(((e.total_tickets - e.remaining_tickets) / e.total_tickets) * 100),
+            name: e.title,  // Frontend expects 'name'
+            ticketsSold: e.total_tickets - e.remaining_tickets,  // Calculate tickets sold
+            totalTickets: e.total_tickets,  // Frontend expects 'totalTickets'
+            price: e.ticket_price || 0,  // Frontend expects 'price'
+            category: e.category,
+            location: e.location,
+            date: e.date,
+            status: e.event_status,
+            eventId: e._id,
+            revenue: (e.total_tickets - e.remaining_tickets) * (e.ticket_price || 0)
         }));
 
         res.status(200).json(analytics);

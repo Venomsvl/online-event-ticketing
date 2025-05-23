@@ -1,331 +1,249 @@
 import React, { useState, useEffect } from 'react';
-import axios from '../utils/axios';
-import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import EventCard from '../components/events/EventCard';
 import { format } from 'date-fns';
-import theme from '../styles/theme';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import EventCard from '../components/events/EventCard';
 
 const AdminEventsPage = () => {
-  const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('date');
-  const [sortOrder, setSortOrder] = useState('desc');
   const [selectedEvents, setSelectedEvents] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
-  const [error, setError] = useState(null);
-  const [bulkAction, setBulkAction] = useState('');
   const navigate = useNavigate();
 
   const styles = {
     outer: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #977DFF 0%, #0033FF 50%, #0600AB 100%)',
-      color: '#fff',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
       padding: '2rem',
+      color: '#fff',
     },
     container: {
-      width: '100%',
-      maxWidth: '1200px',
+      maxWidth: '1400px',
       margin: '0 auto',
-      padding: '2rem',
     },
     header: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: '2rem',
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      padding: '1.5rem 2rem',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      flexWrap: 'wrap',
+      gap: '1rem',
     },
     title: {
-      ...theme.typography.h1,
-      color: '#fff',
+      fontSize: '2.5rem',
+      fontWeight: 'bold',
+      background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
       margin: 0,
     },
     subtitle: {
-      fontSize: '1.125rem',
-      color: 'rgba(255,255,255,0.7)'
+      color: 'rgba(255,255,255,0.8)',
+      fontSize: '1.1rem',
+      margin: '0.5rem 0 0 0',
+    },
+    statsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gap: '1.5rem',
+      marginBottom: '2rem',
+    },
+    statCard: {
+      background: 'rgba(255,255,255,0.18)',
+      borderRadius: '20px',
+      padding: '1.5rem',
+      textAlign: 'center',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      border: '1px solid rgba(151,125,255,0.3)',
+      transition: 'transform 0.3s ease',
     },
     controls: {
       display: 'flex',
       gap: '1rem',
       marginBottom: '2rem',
       flexWrap: 'wrap',
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      padding: '1.5rem',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      alignItems: 'center',
     },
     input: {
-      background: 'rgba(255,255,255,0.7)',
-      border: '1.5px solid #977DFF',
-      borderRadius: '12px',
-      color: '#0033FF',
-      padding: '0.75rem',
-      fontSize: '1rem',
       flex: '1',
-      minWidth: '200px',
+      minWidth: '300px',
+      padding: '1rem 1.5rem',
+      borderRadius: '15px',
+      border: '1px solid rgba(151,125,255,0.3)',
+      background: 'rgba(255,255,255,0.1)',
+      color: '#fff',
+      fontSize: '1rem',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       outline: 'none',
-      boxShadow: '0 1px 4px 0 rgba(0,0,0,0.08)',
-      transition: 'border 0.2s',
-    },
-    select: {
-      background: 'rgba(255,255,255,0.7)',
-      border: '1.5px solid #977DFF',
-      borderRadius: '12px',
-      color: '#0033FF',
-      padding: '0.75rem',
-      fontSize: '1rem',
-      cursor: 'pointer',
-      minWidth: '150px',
-      outline: 'none',
-      boxShadow: '0 1px 4px 0 rgba(0,0,0,0.08)',
-      transition: 'border 0.2s',
-    },
-    button: {
-      background: 'linear-gradient(135deg, #977DFF 0%, #0033FF 100%)',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '12px',
-      padding: '0.75rem 1.5rem',
-      fontSize: '1rem',
-      cursor: 'pointer',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    },
-    buttonDisabled: {
-      background: 'rgba(255,255,255,0.3)',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '12px',
-      padding: '0.75rem 1.5rem',
-      fontSize: '1rem',
-      cursor: 'not-allowed',
-      opacity: 0.7,
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-      gap: '2rem',
-    },
-    loading: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '400px',
-    },
-    spinner: {
-      width: '3rem',
-      height: '3rem',
-      border: '4px solid rgba(255,255,255,0.3)',
-      borderTop: '4px solid #fff',
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-    },
-    bulkActions: {
-      display: 'flex',
-      gap: '1rem',
-      marginBottom: '2rem',
-      padding: '1.5rem',
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-    },
-    checkbox: {
-      marginRight: '0.5rem',
-      cursor: 'pointer',
-      accentColor: '#977DFF',
-    },
-    checkboxLabel: {
-      ...theme.typography.body,
-      color: '#fff',
-      cursor: 'pointer',
+      transition: 'all 0.3s ease',
     },
     filterButtons: {
       display: 'flex',
-      gap: '0.5rem',
-      flexWrap: 'wrap'
+      gap: '0.75rem',
+      flexWrap: 'wrap',
     },
     filterButton: {
-      padding: '0.5rem 1rem',
-      borderRadius: '8px',
+      padding: '0.75rem 1.5rem',
+      borderRadius: '12px',
       border: 'none',
       cursor: 'pointer',
-      fontSize: '0.875rem',
-      fontWeight: '500',
-      transition: 'all 0.2s'
+      fontSize: '0.95rem',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
     },
     activeFilter: {
-      backgroundColor: '#977DFF',
-      color: '#fff'
+      background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
+      color: '#fff',
+      boxShadow: '0 4px 15px rgba(151, 125, 255, 0.4)',
     },
     inactiveFilter: {
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      color: 'rgba(255,255,255,0.7)',
-      border: '1px solid rgba(151, 125, 255, 0.3)'
+      background: 'rgba(255,255,255,0.1)',
+      color: 'rgba(255,255,255,0.8)',
+      border: '1px solid rgba(151,125,255,0.2)',
     },
-    actionButton: {
-      padding: '0.5rem 1rem',
-      borderRadius: '6px',
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: '0.875rem',
-      fontWeight: '500'
-    },
-    approveButton: {
-      backgroundColor: '#10b981',
-      color: '#fff'
-    },
-    rejectButton: {
-      backgroundColor: '#ef4444',
-      color: '#fff'
-    },
-    table: {
-      width: '100%',
-      borderCollapse: 'collapse',
-      backgroundColor: 'rgba(255,255,255,0.05)',
+    button: {
+      padding: '0.75rem 1.5rem',
       borderRadius: '12px',
-      overflow: 'hidden'
-    },
-    tableHeader: {
-      backgroundColor: 'rgba(151, 125, 255, 0.2)',
-      padding: '1rem',
-      textAlign: 'left',
-      fontSize: '0.875rem',
+      border: 'none',
+      background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
+      color: '#fff',
+      cursor: 'pointer',
+      fontSize: '0.95rem',
       fontWeight: '600',
-      color: '#C4B5FD'
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 15px rgba(151, 125, 255, 0.3)',
     },
-    tableCell: {
-      padding: '1rem',
-      borderBottom: '1px solid rgba(255,255,255,0.1)',
-      fontSize: '0.875rem'
-    },
-    statusBadge: {
-      padding: '0.25rem 0.75rem',
-      borderRadius: '12px',
-      fontSize: '0.75rem',
-      fontWeight: '500',
-      textTransform: 'capitalize'
-    },
-    pendingStatus: {
-      backgroundColor: 'rgba(245, 158, 11, 0.2)',
-      color: '#fbbf24',
-      border: '1px solid rgba(245, 158, 11, 0.3)'
-    },
-    approvedStatus: {
-      backgroundColor: 'rgba(16, 185, 129, 0.2)',
-      color: '#10b981',
-      border: '1px solid rgba(16, 185, 129, 0.3)'
-    },
-    rejectedStatus: {
-      backgroundColor: 'rgba(239, 68, 68, 0.2)',
-      color: '#ef4444',
-      border: '1px solid rgba(239, 68, 68, 0.3)'
-    },
-    actionButtons: {
+    bulkActions: {
       display: 'flex',
-      gap: '0.5rem'
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      background: 'rgba(255,255,255,0.1)',
+      borderRadius: '15px',
+      padding: '1rem 1.5rem',
+      marginBottom: '1.5rem',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      border: '1px solid rgba(151,125,255,0.2)',
     },
-    smallButton: {
-      padding: '0.25rem 0.75rem',
-      borderRadius: '6px',
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: '0.75rem',
-      fontWeight: '500'
-    },
-    error: {
-      textAlign: 'center',
-      color: '#ef4444',
-      fontSize: '1.125rem',
-      padding: '2rem'
+    grid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
+      gap: '2rem',
     },
     noData: {
       textAlign: 'center',
-      color: 'rgba(255,255,255,0.7)',
-      fontSize: '1.125rem',
-      padding: '2rem'
-    }
+      padding: '4rem 2rem',
+      background: 'rgba(255,255,255,0.1)',
+      borderRadius: '20px',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      border: '1px solid rgba(151,125,255,0.2)',
+    },
+    loading: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '60vh',
+    },
+    spinner: {
+      width: '50px',
+      height: '50px',
+      border: '4px solid rgba(151, 125, 255, 0.3)',
+      borderTop: '4px solid #977DFF',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '1rem',
+    },
+    error: {
+      textAlign: 'center',
+      padding: '4rem 2rem',
+      background: 'rgba(239, 68, 68, 0.1)',
+      borderRadius: '20px',
+      border: '1px solid rgba(239, 68, 68, 0.3)',
+    },
+    statusDropdown: {
+      padding: '0.5rem 1rem',
+      borderRadius: '8px',
+      border: '1px solid rgba(151,125,255,0.3)',
+      background: 'rgba(26, 26, 46, 0.95)',
+      color: '#fff',
+      fontSize: '0.9rem',
+      cursor: 'pointer',
+      outline: 'none',
+      minWidth: '120px',
+    },
   };
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('/api/v1/events');
-        setEvents(response.data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        setError(err.response?.data?.message || 'Failed to load events');
-        toast.error('Failed to load events');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
   }, []);
 
-  const handleStatusUpdate = async (eventId, status) => {
+  const fetchEvents = async () => {
     try {
-      await axios.put(`/api/v1/events/${eventId}`, { status });
-      setEvents(events.map(event => 
-        event._id === eventId ? { ...event, status } : event
-      ));
-      toast.success(`Event ${status} successfully`);
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get('/api/v1/events', {
+        withCredentials: true
+      });
+      
+      if (response.data && response.data.events) {
+        setEvents(response.data.events);
+      } else if (Array.isArray(response.data)) {
+        setEvents(response.data);
+      } else {
+        setEvents([]);
+      }
     } catch (err) {
-      console.error('Error updating event status:', err);
-      toast.error(err.response?.data?.message || 'Failed to update event status');
+      console.error('Error fetching events:', err);
+      setError(err.response?.data?.message || 'Failed to fetch events');
+      setEvents([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBulkAction = async () => {
-    if (!bulkAction || selectedEvents.size === 0) {
-      toast.error('Please select events and an action');
-      return;
-    }
-
+  const handleStatusUpdate = async (eventId, status) => {
     try {
-      const token = localStorage.getItem('token');
-      const eventIds = Array.from(selectedEvents);
+      const backendStatus = status === 'rejected' ? 'declined' : status;
       
-      await Promise.all(eventIds.map(eventId =>
-        axios.put(
-          `http://localhost:3000/api/v1/admin/events/${eventId}/status`,
-          { status: bulkAction },
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-      ));
-
+      await axios.put(`/api/v1/events/${eventId}/status`, { 
+        status: backendStatus 
+      }, {
+        withCredentials: true
+      });
+      
       setEvents(events.map(event => 
-        selectedEvents.has(event._id) ? { ...event, status: bulkAction } : event
+        event._id === eventId ? { ...event, status: backendStatus, event_status: backendStatus } : event
       ));
       
-      toast.success(`${selectedEvents.size} events updated to ${bulkAction}`);
-      setSelectedEvents(new Set());
-      setSelectAll(false);
-      setBulkAction('');
+      toast.success(`Event ${status} successfully! 🎉`);
     } catch (err) {
-      console.error('Error with bulk action:', err);
-      toast.error('Failed to perform bulk action');
+      console.error('Error updating event status:', err);
+      toast.error(err.response?.data?.message || 'Failed to update event status');
+      throw err;
+    }
+  };
+
+  const handleDirectStatusChange = async (eventId, newStatus) => {
+    try {
+      await handleStatusUpdate(eventId, newStatus);
+    } catch (err) {
+      // Error already handled in handleStatusUpdate
     }
   };
 
@@ -351,14 +269,17 @@ const AdminEventsPage = () => {
 
   const exportToCSV = () => {
     const csvData = filteredAndSortedEvents.map(event => ({
-      Title: event.title,
-      Date: format(new Date(event.date), 'PPP'),
-      Location: event.location,
-      Price: `$${event.price}`,
-      Status: event.status,
-      'Tickets Sold': event.ticketsSold || 0,
-      Category: event.category,
-      Organizer: event.organizer?.name || 'Unknown'
+      Title: event.title || event.name || 'Untitled Event',
+      Date: format(new Date(event.date || event.event_date || new Date()), 'PPP'),
+      Location: event.location || event.venue || 'TBD',
+      Price: `$${event.price || event.ticket_price || 0}`,
+      Status: event.status || event.event_status || 'pending',
+      'Tickets Sold': event.ticketsSold || event.tickets_sold || (event.total_tickets - event.remaining_tickets) || 0,
+      'Total Tickets': event.totalTickets || event.total_tickets || 100,
+      Category: event.category || 'General',
+      Organizer: event.organizer?.name || event.organizer?.username || 'Unknown',
+      'Organizer Email': event.organizer?.email || 'unknown@email.com',
+      'Created At': event.createdAt ? format(new Date(event.createdAt), 'PPP') : 'Unknown'
     }));
 
     const csvContent = [
@@ -381,52 +302,44 @@ const AdminEventsPage = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  const handleSort = (field) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('desc');
-    }
-  };
-
   // Filter and sort events
   const filteredAndSortedEvents = events
     .filter(event => {
-      const matchesFilter = filter === 'all' || event.status === filter;
-      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           event.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const eventStatus = event.status || event.event_status;
+      const matchesFilter = filter === 'all' || eventStatus === filter || 
+                           (filter === 'rejected' && eventStatus === 'declined');
+      const matchesSearch = (event.title || event.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (event.location || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (event.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (event.organizer?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     })
     .sort((a, b) => {
-      let comparison = 0;
-      
-      switch (sortBy) {
-        case 'date':
-          comparison = new Date(a.date) - new Date(b.date);
-          break;
-        case 'title':
-          comparison = a.title.localeCompare(b.title);
-          break;
-        case 'price':
-          comparison = a.price - b.price;
-          break;
-        case 'status':
-          comparison = a.status.localeCompare(b.status);
-          break;
-        default:
-          comparison = 0;
-      }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
+      const dateA = new Date(a.date || a.event_date || a.createdAt);
+      const dateB = new Date(b.date || b.event_date || b.createdAt);
+      return dateB - dateA; // Most recent first
     });
+
+  const getStatValue = (status) => {
+    return events.filter(e => (e.status || e.event_status) === status).length;
+  };
 
   if (loading) {
     return (
       <div style={styles.outer}>
+        <style>
+          {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          `}
+        </style>
         <div style={styles.loading}>
           <div style={styles.spinner}></div>
+          <p style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.8)' }}>
+            ✨ Loading events...
+          </p>
         </div>
       </div>
     );
@@ -436,24 +349,18 @@ const AdminEventsPage = () => {
     return (
       <div style={styles.outer}>
         <div style={styles.error}>
-          <p>{error}</p>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>❌</div>
+          <h2 style={{ color: '#ef4444', fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            Something went wrong!
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem', marginBottom: '2rem' }}>
+            {error}
+          </p>
           <button 
-            onClick={() => {
-              setLoading(true);
-              setError(null);
-              fetchEvents();
-            }}
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 1.5rem',
-              backgroundColor: '#977DFF',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
+            onClick={() => window.location.reload()}
+            style={styles.button}
           >
-            Try Again
+            🔄 Try Again
           </button>
         </div>
       </div>
@@ -462,25 +369,135 @@ const AdminEventsPage = () => {
 
   return (
     <div style={styles.outer}>
+      <style>
+        {`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-hover:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(151, 125, 255, 0.4);
+        }
+        .filter-btn:hover {
+          transform: translateY(-2px);
+        }
+        .input-focus:focus {
+          border-color: #977DFF;
+          box-shadow: 0 0 0 3px rgba(151, 125, 255, 0.2);
+          background: rgba(255,255,255,0.15);
+        }
+        .fade-in {
+          animation: fadeIn 0.6s ease-out;
+        }
+        .card-hover:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 12px 40px rgba(151, 125, 255, 0.3);
+        }
+        ::placeholder {
+          color: rgba(255,255,255,0.5) !important;
+        }
+        select option {
+          background: #1a1a2e !important;
+          color: #ffffff !important;
+          border: none !important;
+          padding: 0.75rem !important;
+        }
+        select option:hover {
+          background: rgba(151, 125, 255, 0.3) !important;
+          color: #ffffff !important;
+        }
+        select option:checked {
+          background: #977DFF !important;
+          color: #ffffff !important;
+        }
+        `}
+      </style>
+      
       <div style={styles.container}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Manage Events</h1>
-          <p style={styles.subtitle}>Review and approve events from organizers</p>
-          <button
-            style={styles.button}
-            onClick={() => navigate('/admin/create-event')}
-          >
-            Create New Event
-          </button>
+        <div style={styles.header} className="fade-in">
+          <div>
+            <h1 style={styles.title}>⚙️ Admin Events Dashboard</h1>
+            <p style={styles.subtitle}>📋 Review and manage all events from organizers</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              style={styles.button}
+              className="btn-hover"
+              onClick={() => window.location.reload()}
+            >
+              🔄 Refresh Data
+            </button>
+            <button
+              style={styles.button}
+              className="btn-hover"
+              onClick={() => navigate('/admin/create-event')}
+            >
+              ➕ Create New Event
+            </button>
+          </div>
         </div>
 
-        <div style={styles.controls}>
+        {/* Statistics Summary */}
+        <div style={styles.statsGrid} className="fade-in">
+          {[
+            { 
+              label: 'Total Events', 
+              value: events.length, 
+              icon: '📊',
+              color: '#977DFF'
+            },
+            { 
+              label: 'Pending Review', 
+              value: getStatValue('pending'), 
+              icon: '⏳',
+              color: '#f59e0b'
+            },
+            { 
+              label: 'Approved Events', 
+              value: getStatValue('approved'), 
+              icon: '✅',
+              color: '#10b981'
+            },
+            { 
+              label: 'Rejected Events', 
+              value: getStatValue('declined'), 
+              icon: '❌',
+              color: '#ef4444'
+            }
+          ].map((stat, index) => (
+            <div key={index} style={{
+              ...styles.statCard,
+              border: `1px solid ${stat.color}40`
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{stat.icon}</div>
+              <div style={{ 
+                fontSize: '2rem', 
+                fontWeight: 'bold', 
+                color: stat.color,
+                marginBottom: '0.25rem'
+              }}>
+                {stat.value}
+              </div>
+              <div style={{ 
+                color: 'rgba(255,255,255,0.8)', 
+                fontSize: '0.9rem',
+                fontWeight: '500'
+              }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={styles.controls} className="fade-in">
           <input
             type="text"
-            placeholder="Search events..."
+            placeholder="🔍 Search events, organizers, locations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={styles.input}
+            className="input-focus"
           />
           
           <div style={styles.filterButtons}>
@@ -492,11 +509,23 @@ const AdminEventsPage = () => {
                   ...styles.filterButton,
                   ...(filter === filterType ? styles.activeFilter : styles.inactiveFilter)
                 }}
+                className="filter-btn"
               >
+                {filterType === 'all' && '📊'} 
+                {filterType === 'pending' && '⏳'} 
+                {filterType === 'approved' && '✅'} 
+                {filterType === 'rejected' && '❌'} 
+                {' '}
                 {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
                 {filterType !== 'all' && (
-                  <span style={{ marginLeft: '0.5rem' }}>
-                    ({events.filter(e => e.status === filterType).length})
+                  <span style={{ 
+                    marginLeft: '0.5rem',
+                    background: 'rgba(255,255,255,0.2)',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem'
+                  }}>
+                    {getStatValue(filterType === 'rejected' ? 'declined' : filterType)}
                   </span>
                 )}
               </button>
@@ -505,72 +534,97 @@ const AdminEventsPage = () => {
 
           <button
             style={styles.button}
+            className="btn-hover"
             onClick={exportToCSV}
           >
-            Export CSV
+            📥 Export CSV
           </button>
         </div>
 
         {selectedEvents.size > 0 && (
-          <div style={styles.bulkActions}>
-            <span style={styles.checkboxLabel}>
-              {selectedEvents.size} event(s) selected
+          <div style={styles.bulkActions} className="fade-in">
+            <span style={{ color: '#fff', fontSize: '1rem', fontWeight: '500' }}>
+              🎯 {selectedEvents.size} event(s) selected
             </span>
-            <select
-              value={bulkAction}
-              onChange={(e) => setBulkAction(e.target.value)}
-              style={styles.select}
-            >
-              <option value="">Select Action</option>
-              <option value="approved">Approve</option>
-              <option value="rejected">Reject</option>
-            </select>
             <button
               style={styles.button}
-              onClick={handleBulkAction}
+              className="btn-hover"
+              onClick={() => {
+                setSelectedEvents(new Set());
+                setSelectAll(false);
+              }}
             >
-              Apply to {selectedEvents.size} events
+              ❌ Clear Selection
             </button>
           </div>
         )}
 
-        <div style={styles.bulkActions}>
-          <label style={styles.checkboxLabel}>
+        <div style={styles.bulkActions} className="fade-in">
+          <label style={{ color: '#fff', cursor: 'pointer', fontSize: '1rem', fontWeight: '500' }}>
             <input
               type="checkbox"
               checked={selectAll}
               onChange={handleSelectAll}
-              style={styles.checkbox}
+              style={{ marginRight: '0.75rem', accentColor: '#977DFF', transform: 'scale(1.2)' }}
             />
-            Select All ({filteredAndSortedEvents.length} events)
+            📌 Select All ({filteredAndSortedEvents.length} events)
           </label>
+          <div style={{ color: 'rgba(255,255,255,0.7)' }}>
+            Showing {filteredAndSortedEvents.length} of {events.length} events
+          </div>
         </div>
 
         {filteredAndSortedEvents.length === 0 ? (
-          <div style={styles.noData}>
-            <p>No {filter !== 'all' ? filter : ''} events found.</p>
+          <div style={styles.noData} className="fade-in">
+            <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>📭</div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1.2rem', fontWeight: '500' }}>
+              No {filter !== 'all' ? filter : ''} events found.
+              {filter !== 'all' && ' Try changing the filter or create a new event.'}
+            </p>
           </div>
         ) : (
-          <div style={styles.grid}>
+          <div style={styles.grid} className="fade-in">
             {filteredAndSortedEvents.map(event => (
-              <div key={event._id} style={{ position: 'relative' }}>
+              <div key={event._id} style={{ position: 'relative' }} className="card-hover">
                 <input
                   type="checkbox"
                   checked={selectedEvents.has(event._id)}
                   onChange={() => handleSelectEvent(event._id)}
                   style={{
                     position: 'absolute',
-                    top: '1rem',
-                    right: '1rem',
+                    top: '1.5rem',
+                    left: '1.5rem',
                     zIndex: 10,
                     accentColor: '#977DFF',
-                    transform: 'scale(1.2)',
+                    transform: 'scale(1.3)',
+                    cursor: 'pointer'
                   }}
                 />
+                
+                {/* Status Dropdown for Easy Status Changes */}
+                <select
+                  value={event.status || event.event_status || 'pending'}
+                  onChange={(e) => handleDirectStatusChange(event._id, e.target.value)}
+                  style={{
+                    ...styles.statusDropdown,
+                    position: 'absolute',
+                    top: '1.5rem',
+                    right: '1.5rem',
+                    zIndex: 10,
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <option value="pending">⏳ Pending</option>
+                  <option value="approved">✅ Approved</option>
+                  <option value="rejected">❌ Rejected</option>
+                </select>
+                
                 <EventCard
                   event={event}
                   isAdmin={true}
                   onStatusUpdate={handleStatusUpdate}
+                  isSelected={selectedEvents.has(event._id)}
+                  onSelect={() => handleSelectEvent(event._id)}
                 />
               </div>
             ))}
