@@ -43,10 +43,6 @@ const BookingSchema = new Schema({
         required: true,
         min: 1,
         max: 10
-    },
-        ticketsBooked: {
-        type: Number,
-        required: true
     }
 });
 
