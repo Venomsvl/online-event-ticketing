@@ -8,7 +8,6 @@ const {
     verifyOTP,
     resetPassword
 } = require('../Controllers/AuthController');
-const router = express.Router();
 
 // Register route
 router.post(

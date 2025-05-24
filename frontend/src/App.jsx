@@ -12,6 +12,7 @@ import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
 import Profile from './pages/Profile'
 import AdminLogin from './pages/AdminLogin'
+import Home from './pages/Home'
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
             
             <Route element={<Layout />}>
               {/* Public routes */}
-              <Route path="/" element={<div>Home Page</div>} />
+              <Route path="/" element={<Home />} />
               
               {/* Protected routes */}
               <Route 
