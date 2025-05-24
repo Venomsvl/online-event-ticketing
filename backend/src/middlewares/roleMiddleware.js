@@ -7,9 +7,9 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-// Middleware to check if user has organizer role
+// Middleware to check if user has organizer role or is admin
 const isOrganizer = (req, res, next) => {
-    if (req.user && req.user.role === 'organizer') {
+    if (req.user && (req.user.role === 'organizer' || req.user.role === 'admin')) {
         next();
     } else {
         res.status(403).json({ message: 'Access denied. Organizer role required.' });

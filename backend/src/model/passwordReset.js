@@ -5,7 +5,7 @@ const passwordResetSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    otp: {
+    token: {
         type: String,
         required: true
     },
@@ -13,6 +13,8 @@ const passwordResetSchema = new mongoose.Schema({
         type: Date,
         required: true
     }
+}, {
+    timestamps: true
 });
 
 // Automatically remove expired OTPs

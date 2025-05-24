@@ -40,6 +40,13 @@ const eventSchema = mongoose.Schema({
         require: true
     },
     
+    // Reference to the organizer (User)
+    organizer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        require: true
+    },
+    
      //adding an event status field
     event_status:{
         type: String,

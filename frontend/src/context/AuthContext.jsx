@@ -10,12 +10,25 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get('/api/auth/profile');
+      // First check if there's an admin user in localStorage
+      const adminUser = localStorage.getItem('adminUser');
+      if (adminUser) {
+        const parsedAdminUser = JSON.parse(adminUser);
+        setUser(parsedAdminUser);
+        localStorage.setItem('userRole', 'admin');
+        return parsedAdminUser;
+      }
+
+      // Otherwise, check for regular user authentication
+      const res = await axios.get('/api/v1/users/profile');
       setUser(res.data);
+      localStorage.setItem('userRole', res.data.role);
       return res.data;
     } catch (error) {
       console.error('Auth check failed:', error);
       setUser(null);
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('adminUser');
       return null;
     } finally {
       setLoading(false);
@@ -28,10 +41,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      // First, attempt to login
-      const response = await axios.post('/api/auth/login', credentials);
+      const response = await axios.post('/api/v1/login', credentials);
       
-      // Use the user data from the login response
       const userData = response.data.user;
       
       if (!userData) {
@@ -39,21 +50,37 @@ export const AuthProvider = ({ children }) => {
       }
       
       setUser(userData);
+      localStorage.setItem('userRole', userData.role);
       return userData;
     } catch (error) {
       console.error('Login failed:', error);
       setUser(null);
+      localStorage.removeItem('userRole');
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await axios.post('/api/auth/logout');
+      // Check if it's an admin user
+      const adminUser = localStorage.getItem('adminUser');
+      
+      if (!adminUser) {
+        // Regular user logout - call API
+        await axios.post('/api/v1/logout');
+      }
+      
+      // Clear all user data
       setUser(null);
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('adminUser');
       toast.success('Logged out successfully');
     } catch (error) {
       console.error('Logout failed:', error);
+      // Still clear local data even if API call fails
+      setUser(null);
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('adminUser');
       toast.error('Failed to logout');
     }
   };

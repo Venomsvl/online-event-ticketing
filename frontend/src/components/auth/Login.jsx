@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import axios from '../utils/axios';
+import axios from '../../utils/axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import theme from '../styles/theme';
+import theme from '../../styles/theme';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export default function LoginForm() {
@@ -88,68 +88,83 @@ export default function LoginForm() {
   const styles = {
     outer: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #977DFF 0%, #0033FF 50%, #0600AB 100%)',
+      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
       color: '#fff',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       position: 'relative',
+      padding: '2rem',
     },
     container: {
-      maxWidth: '420px',
+      maxWidth: '450px',
       width: '100%',
-      margin: '40px auto',
-      background: 'rgba(255,255,255,0.18)',
-      borderRadius: '28px',
-      boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-      border: '1.5px solid rgba(151,125,255,0.3)',
-      padding: '2.5rem 2rem',
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      margin: '0 auto',
+      background: 'rgba(255,255,255,0.05)',
+      borderRadius: '20px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+      border: '1px solid rgba(151, 125, 255, 0.2)',
+      padding: '3rem 2.5rem',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      animation: 'fadeIn 0.6s ease-out',
     },
     title: {
-      fontSize: '2rem',
+      fontSize: '2.5rem',
       fontWeight: 'bold',
-      marginBottom: '2rem',
+      marginBottom: '2.5rem',
       textAlign: 'center',
-      color: '#fff',
-      textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 50%, #E9D5FF 100%)',
+      backgroundClip: 'text',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      textShadow: '0 0 30px rgba(151, 125, 255, 0.5)',
+    },
+    subtitle: {
+      fontSize: '1.1rem',
+      color: 'rgba(255,255,255,0.7)',
+      textAlign: 'center',
+      marginBottom: '2rem',
+      marginTop: '-1rem'
     },
     form: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '1.5rem',
+      gap: '2rem',
     },
     inputGroup: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.5rem',
+      gap: '0.75rem',
       position: 'relative',
     },
     label: {
-      color: '#fff',
-      fontSize: '1rem',
-      fontWeight: '500',
-      marginBottom: '0.25rem',
+      color: '#C4B5FD',
+      fontSize: '1.1rem',
+      fontWeight: '600',
+      marginBottom: '0.5rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
     },
     input: {
-      background: 'rgba(255,255,255,0.7)',
-      border: '1.5px solid #977DFF',
+      background: 'rgba(255,255,255,0.1)',
+      border: '1px solid rgba(151, 125, 255, 0.3)',
       borderRadius: '12px',
-      color: '#0033FF',
-      padding: '0.75rem',
+      color: '#ffffff',
+      padding: '1rem 1.5rem',
       fontSize: '1rem',
-      marginBottom: '0.5rem',
       boxSizing: 'border-box',
-      fontWeight: 500,
+      fontWeight: '500',
       outline: 'none',
-      boxShadow: '0 1px 4px 0 rgba(0,0,0,0.08)',
-      transition: 'all 0.2s ease',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease',
       width: '100%',
+      backdropFilter: 'blur(10px)',
     },
     passwordToggle: {
       position: 'absolute',
-      right: '1rem',
+      right: '1.25rem',
       top: '50%',
       transform: 'translateY(-50%)',
       background: 'none',
@@ -163,142 +178,150 @@ export default function LoginForm() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      transition: 'color 0.2s ease',
+      transition: 'all 0.3s ease',
+      borderRadius: '6px',
     },
     button: {
-      background: 'linear-gradient(135deg, #977DFF 0%, #0033FF 100%)',
+      background: 'linear-gradient(135deg, #977DFF 0%, #C4B5FD 100%)',
       color: '#fff',
       border: 'none',
       borderRadius: '12px',
-      padding: '0.75rem 1.5rem',
-      fontSize: '1rem',
+      padding: '1rem 2rem',
+      fontSize: '1.1rem',
       fontWeight: '600',
       cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 15px rgba(151, 125, 255, 0.3)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '0.5rem',
+      gap: '0.75rem',
       marginTop: '1rem',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
     },
     message: {
-      marginTop: '1rem',
+      marginTop: '1.5rem',
       textAlign: 'center',
       color: '#fff',
-      fontSize: '0.95rem',
-      padding: '1rem',
+      fontSize: '1rem',
+      padding: '1rem 1.5rem',
       borderRadius: '12px',
       backgroundColor: 'rgba(16, 185, 129, 0.2)',
       border: '1px solid rgba(16, 185, 129, 0.3)',
+      backdropFilter: 'blur(10px)',
     },
     errorMessage: {
-      marginTop: '1rem',
+      marginTop: '1.5rem',
       textAlign: 'center',
       color: '#fff',
-      fontSize: '0.95rem',
-      padding: '1rem',
+      fontSize: '1rem',
+      padding: '1rem 1.5rem',
       borderRadius: '12px',
       backgroundColor: 'rgba(239, 68, 68, 0.2)',
       border: '1px solid rgba(239, 68, 68, 0.3)',
+      backdropFilter: 'blur(10px)',
     },
     error: {
-      color: '#fff',
-      fontSize: '0.875rem',
-      marginTop: '0.25rem',
-      backgroundColor: 'rgba(239, 68, 68, 0.2)',
-      padding: '0.5rem',
+      color: '#fbbf24',
+      fontSize: '0.9rem',
+      marginTop: '0.5rem',
+      backgroundColor: 'rgba(245, 158, 11, 0.2)',
+      padding: '0.75rem',
       borderRadius: '8px',
-      border: '1px solid rgba(239, 68, 68, 0.3)',
+      border: '1px solid rgba(245, 158, 11, 0.3)',
+      backdropFilter: 'blur(10px)',
     },
     loadingSpinner: {
-      width: '20px',
-      height: '20px',
-      border: '2px solid #ffffff',
-      borderTop: '2px solid transparent',
+      width: '24px',
+      height: '24px',
+      border: '3px solid rgba(255,255,255,0.3)',
+      borderTop: '3px solid #ffffff',
       borderRadius: '50%',
       animation: 'spin 1s linear infinite',
     },
     registerLink: {
-      marginTop: '1.5rem',
+      marginTop: '2rem',
       textAlign: 'center',
-      fontSize: '0.95rem',
-      color: '#fff',
+      fontSize: '1rem',
+      color: 'rgba(255,255,255,0.8)',
+      background: 'rgba(255,255,255,0.03)',
+      padding: '1.5rem',
+      borderRadius: '12px',
+      border: '1px solid rgba(151, 125, 255, 0.1)',
+      backdropFilter: 'blur(10px)',
     },
     link: {
-      color: '#C8102E',
+      color: '#977DFF',
       textDecoration: 'none',
       fontWeight: '600',
-      transition: 'all 0.2s ease',
-      borderBottom: '1px solid rgba(255,255,255,0.3)',
-      paddingBottom: '2px',
+      transition: 'all 0.3s ease',
+      position: 'relative',
+    },
+    logoContainer: {
+      position: 'absolute',
+      top: '2rem',
+      left: '2rem',
+      zIndex: 1000,
+    },
+    logo: {
+      height: '160px',
+      width: 'auto',
+      transition: 'all 0.3s ease',
+      filter: 'drop-shadow(0 8px 20px rgba(151, 125, 255, 0.5))',
     },
   };
 
   return (
-    <div className="login-outer" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', background: styles.outer.background }}>
-      <style>{`
-        .login-outer {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          box-sizing: border-box;
-          width: 100vw;
-          overflow-x: hidden;
+    <div style={styles.outer}>
+      <style>
+        {`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        .login-logo {
-          position: fixed;
-          top: 24px;
-          left: 24px;
-          z-index: 1000;
-          height: 192px;
-          width: auto;
-          transition: all 0.2s;
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
-        .login-logo img {
-          height: 192px;
-          width: auto;
-          display: block;
+        .btn-hover:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(151, 125, 255, 0.4);
         }
-        .login-card {
-          margin-top: 80px;
-          margin-bottom: 32px;
+        .input-focus:focus {
+          border-color: #977DFF;
+          box-shadow: 0 0 0 3px rgba(151, 125, 255, 0.2);
+          background: rgba(255,255,255,0.15);
         }
-        @media (max-width: 600px) {
-          .login-logo {
-            position: static !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 32px 0 24px 0;
-            height: auto;
-            width: 100%;
-          }
-          .login-logo img {
-            height: 160px !important;
-            max-width: 90vw;
-            width: auto;
-            display: block;
-            margin: 0 auto;
-          }
-          .login-card {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 32px auto;
-            border-radius: 18px;
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
-            background: rgba(255,255,255,0.18);
-            padding: 1.5rem 1rem;
-            box-sizing: border-box;
-          }
+        .logo-hover:hover {
+          transform: scale(1.1);
+          filter: drop-shadow(0 12px 24px rgba(151, 125, 255, 0.7));
         }
-      `}</style>
-      <div className="login-logo">
+        .link-hover:hover {
+          color: #C4B5FD;
+          text-shadow: 0 0 8px rgba(151, 125, 255, 0.5);
+        }
+        .toggle-hover:hover {
+          background: rgba(151, 125, 255, 0.2);
+          color: #C4B5FD;
+        }
+        ::placeholder {
+          color: rgba(255,255,255,0.5) !important;
+        }
+        `}
+      </style>
+      
+      <div style={styles.logoContainer}>
         <Link to="/">
-          <img src="/LogoWhite.png" alt="Logo" />
+          <img 
+            src="/LogoWhite.png" 
+            alt="Logo" 
+            style={styles.logo}
+            className="logo-hover"
+          />
         </Link>
       </div>
+      
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -309,31 +332,42 @@ export default function LoginForm() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="light"
+        theme="dark"
+        toastStyle={{
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(151, 125, 255, 0.2)',
+          color: '#fff'
+        }}
       />
-      <div className="login-card" style={styles.container}>
-        <h1 style={styles.title}>Welcome Back</h1>
+      
+      <div style={styles.container}>
+        <h1 style={styles.title}>🔐 Welcome Back</h1>
+        <p style={styles.subtitle}>🎉 Sign in to access your account and explore amazing events</p>
+        
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Email</label>
+            <label style={styles.label}>📧 Email Address</label>
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="Enter your email address"
               style={styles.input}
+              className="input-focus"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               disabled={loading}
             />
-            {errors.email && <span style={styles.error}>{errors.email}</span>}
+            {errors.email && <span style={styles.error}>⚠️ {errors.email}</span>}
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Password</label>
+            <label style={styles.label}>🔑 Password</label>
             <div style={{ position: 'relative', width: '100%' }}>
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                style={{ ...styles.input, width: '100%', paddingRight: 44 }}
+                style={{ ...styles.input, paddingRight: '3.5rem' }}
+                className="input-focus"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 disabled={loading}
@@ -341,6 +375,7 @@ export default function LoginForm() {
               <button
                 type="button"
                 style={styles.passwordToggle}
+                className="toggle-hover"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}
                 tabIndex={-1}
@@ -349,34 +384,43 @@ export default function LoginForm() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
-            {errors.password && <span style={styles.error}>{errors.password}</span>}
+            {errors.password && <span style={styles.error}>⚠️ {errors.password}</span>}
           </div>
 
-          <button type="submit" style={styles.button} disabled={loading}>
+          <button 
+            type="submit" 
+            style={styles.button} 
+            className="btn-hover"
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <div style={styles.loadingSpinner} />
-                Logging in...
+                Signing In...
               </>
             ) : (
-              'Login'
+              <>
+                🚀 Sign In
+              </>
             )}
           </button>
 
           {message && (
             <p style={message.includes('failed') ? styles.errorMessage : styles.message}>
-              {message}
+              {message.includes('failed') ? '❌' : '✅'} {message}
             </p>
           )}
 
           <div style={styles.registerLink}>
-            Don't have an account?{' '}
-            <Link to="/register" style={styles.link}>
-              Register here
-            </Link>
-            <div style={{ marginTop: '1rem' }}>
-              <span style={{ color: '#fff' }}>Are you an admin? </span>
-              <Link to="/admin-login" style={{ ...styles.link, color: '#C8102E' }}>
+            <div style={{ marginBottom: '1rem' }}>
+              🆕 Don't have an account?{' '}
+              <Link to="/register" style={styles.link} className="link-hover">
+                Create one here
+              </Link>
+            </div>
+            <div>
+              👑 Are you an admin?{' '}
+              <Link to="/admin-login" style={styles.link} className="link-hover">
                 Admin Login
               </Link>
             </div>

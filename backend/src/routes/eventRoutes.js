@@ -1,4 +1,5 @@
 const express = require('express');
+const { body } = require('express-validator');
 const router = express.Router();
 const {
     getAllEvents,
@@ -9,9 +10,9 @@ const {
     updateEvent,
     deleteEvent,
     approveOrReject
-} = require('../Controllers/EventController');
+} = require('../controllers/EventController');
 const { verifyToken } = require('../middlewares/authMiddleware');
-const { isAdmin, isOrganizer } = require('../middlewares/roleMiddleware');
+const { isAdmin, isOrganizer, isOrganizerOrAdmin } = require('../middlewares/roleMiddleware');
 
 // Public routes
 router.get('/', getAllEvents);
@@ -21,8 +22,7 @@ router.get('/:id', getEventById);
 router.get('/my/events', verifyToken, getMyEvents);
 router.get('/my/analytics', verifyToken, getMyEventsAnalytics);
 
-// Organizer-only routes
-router.post('/', verifyToken, isOrganizer, createEvent);
+// Organizer and Admin routesrouter.post('/', verifyToken, isOrganizerOrAdmin, createEvent);
 router.put('/:id', verifyToken, isOrganizer, updateEvent);
 router.delete('/:id', verifyToken, isOrganizer, deleteEvent);
 

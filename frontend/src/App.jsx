@@ -3,16 +3,19 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { AuthProvider } from './context/AuthContext'
-import ProtectedRoute from './components/ProtectedRoute'
-import Layout from './components/Layout'
-import Login from './pages/Login'
-import Register from './pages/Register'
+import ProtectedRoute from './components/shared/ProtectedRoute'
+import RoleBasedRoute from './components/shared/RoleBasedRoute'
+import Layout from './components/shared/Layout'
+import HomePage from './pages/HomePage'
+import EventDetail from './pages/EventDetail'
+import Login from './components/auth/Login'
+import Register from './components/auth/Register'
 import Unauthorized from './pages/Unauthorized'
 import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
-import Profile from './pages/Profile'
-import AdminLogin from './pages/AdminLogin'
-import Home from './pages/Home'
+import CreateEventPage from './pages/CreateEventPage'
+import ProfilePage from './pages/ProfilePage'
+import AdminLogin from './components/auth/AdminLogin'
 
 function App() {
   return (
@@ -27,14 +30,15 @@ function App() {
             
             <Route element={<Layout />}>
               {/* Public routes */}
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/event/:id" element={<EventDetail />} />
               
               {/* Protected routes */}
               <Route 
                 path="/profile" 
                 element={
                   <ProtectedRoute>
-                    <Profile />
+                    <ProfilePage />
                   </ProtectedRoute>
                 } 
               />
@@ -43,9 +47,9 @@ function App() {
               <Route 
                 path="/my-events/analytics" 
                 element={
-                  <ProtectedRoute allowedRoles={['organizer']}>
+                  <RoleBasedRoute allowedRoles={['organizer']}>
                     <EventAnalytics />
-                  </ProtectedRoute>
+                  </RoleBasedRoute>
                 } 
               />
               
@@ -53,17 +57,25 @@ function App() {
               <Route 
                 path="/admin/events" 
                 element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <RoleBasedRoute allowedRoles={['admin']}>
                     <AdminEventsPage />
-                  </ProtectedRoute>
+                  </RoleBasedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/create-event" 
+                element={
+                  <RoleBasedRoute allowedRoles={['admin', 'organizer']}>
+                    <CreateEventPage />
+                  </RoleBasedRoute>
                 } 
               />
               <Route 
                 path="/admin/analytics" 
                 element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <RoleBasedRoute allowedRoles={['admin']}>
                     <EventAnalytics />
-                  </ProtectedRoute>
+                  </RoleBasedRoute>
                 } 
               />
             </Route>

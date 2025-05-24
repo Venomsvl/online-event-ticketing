@@ -1,13 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const {
-    register,
-    login,
-    sendOTP,
-    verifyOTP,
-    resetPassword
-} = require('../Controllers/AuthController');
+const authController = require('../controllers/AuthController');
+const { verifyToken } = require('../middlewares/authMiddleware');
 
 // Register route
 router.post(
@@ -26,13 +21,13 @@ router.post(
         body('role')
             .isIn(['user', 'organizer']).withMessage('Role must be either user or organizer')
     ],
-    register
+    authController.register
 );
 
-// Routes
-router.post('/register', registerValidation, authController.register);
+// Other auth routes
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
+router.get('/profile', verifyToken, authController.getProfile);
 router.post('/send-otp', authController.sendOTP);
 router.post('/verify-otp', authController.verifyOTP);
 router.post('/reset-password', authController.resetPassword);
