@@ -1,0 +1,166 @@
+From 295fbeb6ec00d507d1f2d8cce06cb40b87dda9f2 Mon Sep 17 00:00:00 2001
+From: Venomsvl <Lana.elgayed@student.giu-uni.de>
+Date: Sun, 25 May 2025 21:27:38 +0300
+Subject: [PATCH] i finally figured out the database problem
+
+---
+ backend/src/model/passwordReset.js            |  2 +-
+ backend/src/server.js                         | 41 +++++++++++++++++++
+ frontend/src/components/auth/AdminLogin.jsx   |  2 +-
+ frontend/src/components/auth/Register.jsx     |  2 +-
+ .../src/components/shared/ConnectionTest.jsx  | 21 ++++++----
+ 5 files changed, 56 insertions(+), 12 deletions(-)
+
+diff --git a/backend/src/model/passwordReset.js b/backend/src/model/passwordReset.js
+index c697d05..5b2e3a1 100644
+--- a/backend/src/model/passwordReset.js
++++ b/backend/src/model/passwordReset.js
+@@ -5,7 +5,7 @@ const passwordResetSchema = new mongoose.Schema({
+         type: String,
+         required: true
+     },
+-    token: {
++    otp: {
+         type: String,
+         required: true
+     },
+diff --git a/backend/src/server.js b/backend/src/server.js
+index 0d3a6d6..35b32ed 100644
+--- a/backend/src/server.js
++++ b/backend/src/server.js
+@@ -152,6 +152,47 @@ app.get('/api/v1', (req, res) => {
+     });
+ });
+ 
++// Debug route to check database contents
++app.get('/api/v1/debug/users', async (req, res) => {
++    try {
++        const User = require('./model/User');
++        const users = await User.find({}).select('-password');
++        res.json({
++            message: 'Users found in database',
++            database: 'event-ticketing',
++            collection: 'users',
++            count: users.length,
++            users: users
++        });
++    } catch (error) {
++        res.status(500).json({
++            message: 'Error fetching users',
++            error: error.message
++        });
++    }
++});
++
++// Debug route to check database connection
++app.get('/api/v1/debug/db', async (req, res) => {
++    try {
++        const dbState = mongoose.connection.readyState;
++        const dbName = mongoose.connection.name;
++        
++        res.json({
++            message: 'Database connection status',
++            connectionState: dbState === 1 ? 'Connected' : 'Not Connected',
++            databaseName: dbName,
++            host: mongoose.connection.host,
++            port: mongoose.connection.port
++        });
++    } catch (error) {
++        res.status(500).json({
++            message: 'Error checking database',
++            error: error.message
++        });
++    }
++});
++
+ // Start server
+ const PORT = process.env.PORT || 3000;
+ app.listen(PORT, () => {
+diff --git a/frontend/src/components/auth/AdminLogin.jsx b/frontend/src/components/auth/AdminLogin.jsx
+index 7fdd2e6..b78de20 100644
+--- a/frontend/src/components/auth/AdminLogin.jsx
++++ b/frontend/src/components/auth/AdminLogin.jsx
+@@ -25,7 +25,7 @@ export default function AdminLogin() {
+       const loadingToast = toast.loading('Authenticating...');
+       
+       // Call the admin login endpoint
+-      const response = await axios.post('/api/auth/admin-login', form);
++      const response = await axios.post('/api/v1/admin-login', form);
+       
+       if (response.data.success) {
+         // Set admin user data in localStorage
+diff --git a/frontend/src/components/auth/Register.jsx b/frontend/src/components/auth/Register.jsx
+index 415bef5..9312348 100644
+--- a/frontend/src/components/auth/Register.jsx
++++ b/frontend/src/components/auth/Register.jsx
+@@ -109,7 +109,7 @@ export default function RegisterForm() {
+       const loadingToast = toast.loading('Creating your account...');
+       
+       // Register user
+-      const response = await axios.post('/api/auth/register', {
++      const response = await axios.post('/api/v1/register', {
+         name: form.name,
+         email: form.email.toLowerCase().trim(),
+         password: form.password,
+diff --git a/frontend/src/components/shared/ConnectionTest.jsx b/frontend/src/components/shared/ConnectionTest.jsx
+index 0a92c99..5c1fc5e 100644
+--- a/frontend/src/components/shared/ConnectionTest.jsx
++++ b/frontend/src/components/shared/ConnectionTest.jsx
+@@ -11,22 +11,21 @@ const ConnectionTest = () => {
+     setTestResult(null);
+     
+     try {
+-      // Test v1 API connection
+-      const response = await axios.get('/api/v1/events');
++      const response = await axios.get('/api/v1');
+       setTestResult({
+         success: true,
+-        message: 'Backend v1 API connection successful!',
+-        data: `Received ${response.data?.length || 0} events from the database.`
++        message: 'Connection successful!',
++        data: `Backend API v1 is running. Version: ${response.data?.version}`
+       });
+-      toast.success('✅ Backend v1 API connection successful!');
++      toast.success('✅ Backend connection successful!');
+     } catch (error) {
+       setTestResult({
+         success: false,
+-        message: 'Backend v1 API connection failed!',
++        message: 'Connection failed!',
+         error: error.message,
+         details: error.response?.data?.message || 'No additional details'
+       });
+-      toast.error('❌ Backend v1 API connection failed!');
++      toast.error('❌ Backend connection failed!');
+     } finally {
+       setLoading(false);
+     }
+@@ -70,19 +69,23 @@ const ConnectionTest = () => {
+         role: 'user'
+       };
+       
++      console.log('Testing registration with:', testUser);
+       const response = await axios.post('/api/v1/register', testUser);
++      console.log('Registration response:', response.data);
++      
+       setTestResult({
+         success: true,
+         message: 'Test registration successful! User saved to MongoDB via v1 API.',
+-        data: `User ID: ${response.data?.user?.id}\nAPI Version: v1`
++        data: `User ID: ${response.data?.user?.id}\nAPI Version: v1\nUser Name: ${response.data?.user?.name}`
+       });
+       toast.success('✅ Registration test successful - Data saved to MongoDB via v1 API!');
+     } catch (error) {
++      console.error('Registration test error:', error);
+       setTestResult({
+         success: false,
+         message: 'Registration test failed!',
+         error: error.message,
+-        details: error.response?.data?.message || 'No additional details'
++        details: error.response?.data?.message || error.response?.data?.errors || 'No additional details'
+       });
+       toast.error('❌ Registration test failed!');
+     } finally {
+-- 
+2.49.0.windows.1
+

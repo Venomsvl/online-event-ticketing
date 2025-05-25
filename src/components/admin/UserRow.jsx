@@ -1,91 +1,62 @@
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import PropTypes from 'prop-types';
 import UpdateUserRoleModal from './UpdateUserRoleModal';
 import ConfirmationDialog from './ConfirmationDialog';
 
-const UserRow = ({ user, onUpdateRole, onDeleteUser, currentUserRole }) => {
+const UserRow = ({ user, onUpdateRole, onDelete }) => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleUpdate = (newRole) => {
-    onUpdateRole(user._id, newRole);
+  const handleUpdateRole = (newRole) => {
+    onUpdateRole(user.id, newRole);
     setShowUpdateModal(false);
   };
 
   const handleDelete = () => {
-    onDeleteUser(user._id);
+    onDelete(user.id);
     setShowDeleteDialog(false);
   };
 
   return (
-    <tr>
-      <td>{user.name}</td>
-      <td>{user.email}</td>
-      <td className="text-capitalize">{user.role}</td>
+    <div className="user-row p-3 border-bottom d-flex justify-content-between align-items-center">
+      <div className="user-info">
+        <h5 className="mb-1">{user.name}</h5>
+        <p className="mb-1 text-muted">{user.email}</p>
+        <span className="badge bg-primary">{user.role}</span>
+      </div>
       
-      {/* Status indicator column */}
-      <td>
-        {user.active ? (
-          <FaCheckCircle className="text-success" />
-        ) : (
-          <FaTimesCircle className="text-danger" />
-        )}
-      </td>
-
-      <td>
+      <div className="user-actions">
         <Button 
-          variant="warning" 
-          size="sm" 
-          onClick={() => setShowUpdateModal(true)}
+          variant="outline-primary" 
           className="me-2"
+          onClick={() => setShowUpdateModal(true)}
         >
           Update Role
         </Button>
-        
-        {/* Role-based delete button */}
-        {currentUserRole === 'admin' && (
-          <Button 
-            variant="danger" 
-            size="sm" 
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            Delete
-          </Button>
-        )}
-      </td>
+        <Button 
+          variant="outline-danger"
+          onClick={() => setShowDeleteDialog(true)}
+        >
+          Delete
+        </Button>
+      </div>
 
-      {/* Modals */}
       <UpdateUserRoleModal
         show={showUpdateModal}
         onHide={() => setShowUpdateModal(false)}
+        onUpdateRole={handleUpdateRole}
         currentRole={user.role}
-        onUpdate={handleUpdate}
       />
 
       <ConfirmationDialog
         show={showDeleteDialog}
         onHide={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}
-        title="Confirm User Deletion"
-        message={`Are you sure you want to delete ${user.name}? This action cannot be undone.`}
+        title="Delete User"
+        message={`Are you sure you want to delete ${user.name}?`}
       />
-    </tr>
+    </div>
   );
-};
-
-UserRow.propTypes = {
-  user: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired,
-    role: PropTypes.string.isRequired,
-    active: PropTypes.bool
-  }).isRequired,
-  onUpdateRole: PropTypes.func.isRequired,
-  onDeleteUser: PropTypes.func.isRequired,
-  currentUserRole: PropTypes.string.isRequired
 };
 
 export default UserRow;
