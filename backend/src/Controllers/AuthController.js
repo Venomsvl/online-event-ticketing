@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
-const User = require('../model/User');
-const PasswordReset = require('../model/passwordReset');
+const User = require('../models/User');
+const PasswordReset = require('../models/PasswordReset');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');

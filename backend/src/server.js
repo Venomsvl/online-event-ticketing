@@ -15,14 +15,17 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: ['http://localhost:3001', 'http://localhost:3002'],
+    origin: ['http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/event-ticketing')
+mongoose.connect('mongodb://localhost:27017/event-ticketing', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
     .then(() => {
         console.log('Connected to MongoDB');
         console.log('Database: event-ticketing');
@@ -63,8 +66,30 @@ app.post('/api/auth/admin-login', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Start server with port fallback
+const startServer = async (port) => {
+    try {
+        await new Promise((resolve, reject) => {
+            const server = app.listen(port, () => {
+                console.log(`Server is running on http://localhost:${port}`);
+                resolve();
+            });
+
+            server.on('error', (error) => {
+                if (error.code === 'EADDRINUSE') {
+                    console.log(`Port ${port} is busy, trying ${port + 1}`);
+                    server.close();
+                    startServer(port + 1);
+                } else {
+                    reject(error);
+                }
+            });
+        });
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+// Start with initial port
+startServer(3000);

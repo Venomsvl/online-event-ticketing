@@ -1,194 +1,77 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { eventAPI } from '../utils/api';
 
-const EventCard = ({ event, onStatusUpdate, isSelected, onSelect }) => {
-    const [isBooking, setIsBooking] = useState(false);
-    const [error, setError] = useState(null);
+const EventCard = ({ event, isOrganizer, onEdit }) => {
+  const eventDate = new Date(event.date);
 
-    const cardStyle = {
-        background: 'rgba(255,255,255,0.18)',
-        borderRadius: '28px',
-        boxShadow: '0 8px 32px 0 rgba(0,0,0,0.2)',
-        border: '1.5px solid rgba(151,125,255,0.3)',
-        overflow: 'hidden',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        position: 'relative',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        cursor: 'pointer',
-        color: '#fff',
-    };
-
-    const imageStyle = {
-        width: '100%',
-        height: '200px',
-        objectFit: 'cover',
-        borderBottom: '1.5px solid rgba(151,125,255,0.3)',
-    };
-
-    const contentStyle = {
-        padding: '1.5rem',
-    };
-
-    const titleStyle = {
-        fontSize: '1.25rem',
-        fontWeight: 'bold',
-        marginBottom: '0.75rem',
-        color: '#fff',
-    };
-
-    const descriptionStyle = {
-        color: 'rgba(255,255,255,0.8)',
-        marginBottom: '1rem',
-        fontSize: '0.95rem',
-        lineHeight: '1.5',
-    };
-
-    const infoStyle = {
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '0.75rem',
-        color: 'rgba(255,255,255,0.9)',
-        fontSize: '0.95rem',
-    };
-
-    const iconStyle = {
-        width: '1.25rem',
-        height: '1.25rem',
-        marginRight: '0.75rem',
-        color: '#977DFF',
-    };
-
-    const statusStyle = {
-        position: 'absolute',
-        top: '1rem',
-        right: '1rem',
-        padding: '0.5rem 1rem',
-        borderRadius: '12px',
-        fontSize: '0.875rem',
-        fontWeight: '500',
-        background: event.status === 'active' ? 'rgba(16, 185, 129, 0.9)' : 
-                   event.status === 'cancelled' ? 'rgba(239, 68, 68, 0.9)' : 
-                   'rgba(245, 158, 11, 0.9)',
-        color: '#fff',
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-        border: '1px solid rgba(255,255,255,0.2)',
-    };
-
-    const checkboxStyle = {
-        position: 'absolute',
-        top: '1rem',
-        left: '1rem',
-        width: '1.5rem',
-        height: '1.5rem',
-        accentColor: '#977DFF',
-        cursor: 'pointer',
-        zIndex: 1,
-    };
-
-    const handleClick = (e) => {
-        if (e.target.type === 'checkbox') return;
-        if (onSelect) onSelect();
-    };
-
-    const handleBookTicket = async () => {
-        try {
-            setIsBooking(true);
-            setError(null);
-            const response = await eventAPI.bookTicket(event._id, {
-                quantity: 1,
-                // Add any other required booking data
-            });
-            if (response.data.success) {
-                // Handle successful booking
-                alert('Ticket booked successfully!');
-                // You might want to refresh the event data or update the UI
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to book ticket');
-        } finally {
-            setIsBooking(false);
-        }
-    };
-
-    return (
-        <div style={cardStyle} onClick={handleClick}>
-            {onSelect && (
-                <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={onSelect}
-                    style={checkboxStyle}
-                />
-            )}
-            <div style={{ position: 'relative' }}>
-                <img 
-                    src={event.image || 'https://via.placeholder.com/400x200'} 
-                    alt={event.name}
-                    style={imageStyle}
-                />
-                <span style={statusStyle}>
-                    {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                </span>
-            </div>
-            <div style={contentStyle}>
-                <h3 style={titleStyle}>{event.name}</h3>
-                <p style={descriptionStyle}>{event.description}</p>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    {format(new Date(event.date), 'PPP')}
-                </div>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {event.location}
-                </div>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                    </svg>
-                    {event.ticketsSold} / {event.totalTickets} tickets sold
-                </div>
-                <div style={infoStyle}>
-                    <svg style={iconStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    ${event.price}
-                </div>
-                <button 
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleBookTicket();
-                    }}
-                    disabled={isBooking || event.ticketsSold >= event.totalTickets}
-                    style={{
-                        background: '#977DFF',
-                        color: '#fff',
-                        padding: '0.75rem 1.5rem',
-                        borderRadius: '12px',
-                        border: 'none',
-                        cursor: isBooking || event.ticketsSold >= event.totalTickets ? 'not-allowed' : 'pointer',
-                        opacity: isBooking || event.ticketsSold >= event.totalTickets ? 0.7 : 1,
-                        width: '100%',
-                        marginTop: '1rem',
-                    }}
-                >
-                    {isBooking ? 'Booking...' : 'Book Ticket'}
-                </button>
-                {error && (
-                    <p style={{ color: '#ef4444', marginTop: '0.5rem', fontSize: '0.875rem' }}>
-                        {error}
-                    </p>
-                )}
-            </div>
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {event.imageUrl && (
+        <img
+          src={event.imageUrl}
+          alt={event.title}
+          className="w-full h-48 object-cover"
+        />
+      )}
+      <div className="p-4">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">{event.title}</h3>
+        <p className="text-gray-600 mb-4 line-clamp-2">{event.description}</p>
+        
+        <div className="space-y-2">
+          <div className="flex items-center text-gray-600">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>{format(eventDate, 'MMMM d, yyyy')}</span>
+          </div>
+          
+          <div className="flex items-center text-gray-600">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{format(eventDate, 'h:mm a')}</span>
+          </div>
+          
+          <div className="flex items-center text-gray-600">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>{event.venue}</span>
+          </div>
+          
+          <div className="flex items-center text-gray-600">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+            </svg>
+            <span>${event.ticketPrice}</span>
+          </div>
         </div>
-    );
+
+        <div className="mt-4 flex justify-between items-center">
+          {isOrganizer ? (
+            <button
+              onClick={onEdit}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Edit Event
+            </button>
+          ) : (
+            <Link
+              to={`/events/${event._id}`}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              View Details
+            </Link>
+          )}
+          <span className="text-gray-500 text-sm">
+            {event.capacity} spots available
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default EventCard; 

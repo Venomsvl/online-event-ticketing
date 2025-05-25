@@ -1,4 +1,4 @@
-const Event = require('../model/Event');
+const Event = require('../models/Event');
 const asyncHandler = require('express-async-handler');
 
 const EventController = {
@@ -31,52 +31,71 @@ const EventController = {
 
     // Get all events with role-based access
     getAllEvents: asyncHandler(async (req, res) => {
-        let events;
+        try {
+            let query = {};
+            
+            // If not admin and requesting own events
+            if (req.user?.role !== 'admin' && req.query.mine === 'true') {
+                query.organizerId = req.user._id;
+            }
+            // If public access or regular user
+            else if (!req.user || req.user.role === 'user') {
+                query.status = 'PUBLISHED';
+            }
 
-        // Admin sees everything
-        if (req.user && req.user.role === "System Admin") {
-            events = await Event.find();
-        }
-        // Organizer asks to see their own events only
-        else if (req.user && req.user.role === "Organizer" && req.query.mine === "true") {
-            events = await Event.find({
-                $or: [{ event_status: "approved" }, { organizer: req.user._id }],
+            const events = await Event.find(query)
+                .populate('organizerId', 'name email')
+                .sort({ createdAt: -1 });
+
+            res.status(200).json({
+                success: true,
+                count: events.length,
+                events
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error fetching events',
+                error: error.message
             });
         }
-        // Everyone else (public, standard users, or organizer without ?mine)
-        else {
-            events = await Event.find({ event_status: "approved" });
-        }
-
-        res.status(200).json(events);
     }),
 
-    // Get event by ID with role-based access
+    // Get event by ID
     getEventById: asyncHandler(async (req, res) => {
-        const event = await Event.findById(req.params.id);
+        try {
+            const event = await Event.findById(req.params.id)
+                .populate('organizerId', 'name email');
 
-        if (!event) {
-            return res.status(404).json({ message: "Event not found" });
+            if (!event) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Event not found'
+                });
+            }
+
+            // Check access rights
+            if (event.status !== 'PUBLISHED' && 
+                (!req.user || 
+                (req.user.role !== 'admin' && 
+                event.organizerId.toString() !== req.user._id.toString()))) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                event
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error fetching event',
+                error: error.message
+            });
         }
-
-        // Admin can access everything
-        if (req.user && req.user.role === "System Admin") {
-            return res.status(200).json(event);
-        }
-
-        // Organizer can access if it's approved OR if it's their own event
-        if (req.user && req.user.role === "Organizer" &&
-            (event.event_status === "approved" || event.organizer.toString() === req.user._id.toString())) {
-            return res.status(200).json(event);
-        }
-
-        // Public or standard users can only access approved events
-        if (event.event_status === "approved") {
-            return res.status(200).json(event);
-        }
-
-        // Otherwise, forbidden
-        return res.status(403).json({ message: "You are not authorized to view this event" });
     }),
 
     // Create a new event (Organizer only)
@@ -85,101 +104,162 @@ const EventController = {
             title,
             description,
             date,
+            time,
             location,
             category,
-            image,
-            ticket_price,
-            total_tickets,
+            imageUrl,
+            ticketTypes,
+            totalTickets
         } = req.body;
 
-        const event = await Event.create({
-            title,
-            description,
-            date,
-            location,
-            category,
-            image,
-            ticket_price,
-            total_tickets,
-            remaining_tickets: total_tickets,
-            organizer: req.user._id,
-            event_status: "pending", // default status for new events
-        });
+        try {
+            // Validate required fields
+            if (!title || !description || !date || !time || !location || !category || !ticketTypes || !totalTickets) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Please provide all required fields'
+                });
+            }
 
-        res.status(201).json(event);
+            // Create the event
+            const event = await Event.create({
+                title,
+                description,
+                date,
+                time,
+                location,
+                category,
+                imageUrl: imageUrl || null,
+                ticketTypes,
+                totalTickets,
+                remainingTickets: totalTickets,
+                organizerId: req.user._id,
+                status: 'DRAFT'
+            });
+
+            res.status(201).json({
+                success: true,
+                message: 'Event created successfully',
+                event
+            });
+        } catch (error) {
+            console.error('Error creating event:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error creating event',
+                error: error.message
+            });
+        }
     }),
 
-    // Update an existing event
+    // Update event
     updateEvent: asyncHandler(async (req, res) => {
-        const event = await Event.findById(req.params.id);
+        try {
+            const event = await Event.findById(req.params.id);
 
-        if (!event) return res.status(404).json({ message: "Event not found" });
-
-        const isAdmin = req.user.role === "System Admin";
-        const isOrganizer = event.organizer.toString() === req.user._id.toString();
-
-        if (!isAdmin && !isOrganizer) {
-            return res.status(403).json({ message: "Not authorized" });
-        }
-
-        // Update fields if provided
-        const fields = [
-            "title",
-            "description",
-            "date",
-            "location",
-            "category",
-            "image",
-            "ticket_price",
-            "total_tickets",
-        ];
-
-        // Optional: Adjust remaining_tickets if total_tickets is updated
-        if (req.body.total_tickets) {
-            const ticketsSold = event.total_tickets - event.remaining_tickets;
-            event.total_tickets = req.body.total_tickets;
-            event.remaining_tickets = req.body.total_tickets - ticketsSold;
-        }
-
-        fields.forEach((field) => {
-            if (req.body[field] !== undefined) {
-                event[field] = req.body[field];
+            if (!event) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Event not found'
+                });
             }
-        });
 
-        if (req.body.event_status !== undefined) {
-            if (isAdmin) {
-                if (!["approved", "pending", "declined"].includes(req.body.event_status)) {
-                    return res.status(400).json({ message: "Invalid status value" });
+            // Check permissions
+            if (req.user.role !== 'admin' && event.organizerId.toString() !== req.user._id.toString()) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Not authorized to update this event'
+                });
+            }
+
+            // Update fields
+            const updatableFields = [
+                'title', 'description', 'date', 'time', 'location',
+                'category', 'imageUrl', 'ticketTypes', 'status'
+            ];
+
+            updatableFields.forEach(field => {
+                if (req.body[field] !== undefined) {
+                    event[field] = req.body[field];
                 }
-                event.event_status = req.body.event_status;
-            } else {
-                return res.status(403).json({ message: "Not authorized to change status" });
+            });
+
+            // Special handling for ticket updates
+            if (req.body.totalTickets !== undefined) {
+                const ticketDiff = req.body.totalTickets - event.totalTickets;
+                event.totalTickets = req.body.totalTickets;
+                event.remainingTickets = Math.max(0, event.remainingTickets + ticketDiff);
             }
-        }
 
-        await event.save();
-        res.status(200).json(event);
+            await event.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Event updated successfully',
+                event
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error updating event',
+                error: error.message
+            });
+        }
     }),
 
-    // Delete an event (Organizer or System Admin)
+    // Delete event
     deleteEvent: asyncHandler(async (req, res) => {
-        const event = await Event.findById(req.params.id);
+        try {
+            const event = await Event.findById(req.params.id);
 
-        if (!event) return res.status(404).json({ message: "Event not found" });
+            if (!event) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Event not found'
+                });
+            }
 
-        if (req.user.role !== "System Admin" && event.organizer.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: "Not authorized" });
+            // Check permissions
+            if (req.user.role !== 'admin' && event.organizerId.toString() !== req.user._id.toString()) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Not authorized to delete this event'
+                });
+            }
+
+            await event.deleteOne();
+
+            res.status(200).json({
+                success: true,
+                message: 'Event deleted successfully'
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error deleting event',
+                error: error.message
+            });
         }
-
-        await event.deleteOne();
-        res.status(200).json({ message: "Event deleted" });
     }),
 
-    // Get events created by the authenticated organizer
+    // Get organizer's events
     getMyEvents: asyncHandler(async (req, res) => {
-        const events = await Event.find({ organizer: req.user._id });
-        res.status(200).json(events);
+        try {
+            const events = await Event.find({ organizerId: req.user._id })
+                .sort({ createdAt: -1 });
+
+            res.status(200).json({
+                success: true,
+                count: events.length,
+                events
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                message: 'Error fetching your events',
+                error: error.message
+            });
+        }
     }),
 
     // Get analytics for organizer's events

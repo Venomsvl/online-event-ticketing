@@ -12,6 +12,8 @@ import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
 import Profile from './pages/Profile'
 import AdminLogin from './pages/AdminLogin'
+import MyEventsPage from './pages/organizer/MyEventsPage'
+import EventForm from './pages/organizer/EventForm'
 
 function App() {
   return (
@@ -65,6 +67,11 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+
+              {/* Organizer routes */}
+              <Route path="/my-events" element={<MyEventsPage />} />
+              <Route path="/my-events/new" element={<EventForm />} />
+              <Route path="/my-events/:id/edit" element={<EventForm />} />
             </Route>
           </Routes>
           <ToastContainer

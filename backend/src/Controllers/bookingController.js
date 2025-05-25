@@ -1,5 +1,5 @@
-const Event = require('../model/Event');
-const Booking = require('../model/booking');
+const Event = require('../models/Event');
+const Booking = require('../models/Booking');
 const mongoose = require('mongoose');
 
 createBooking = async (req, res) => {

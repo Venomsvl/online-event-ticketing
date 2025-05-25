@@ -1,4 +1,4 @@
-const User = require('../model/User');
+const User = require('../models/User');
 
 // GET /api/v1/admin/users
 // List all users (admin only)
