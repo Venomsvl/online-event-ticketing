@@ -25,7 +25,7 @@ export default function AdminLogin() {
       const loadingToast = toast.loading('Authenticating...');
       
       // Call the admin login endpoint
-      const response = await axios.post('/api/auth/admin-login', form);
+      const response = await axios.post('/api/v1/admin-login', form);
       
       if (response.data.success) {
         // Set admin user data in localStorage

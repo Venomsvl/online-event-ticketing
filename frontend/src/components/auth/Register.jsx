@@ -109,7 +109,7 @@ export default function RegisterForm() {
       const loadingToast = toast.loading('Creating your account...');
       
       // Register user
-      const response = await axios.post('/api/auth/register', {
+      const response = await axios.post('/api/v1/register', {
         name: form.name,
         email: form.email.toLowerCase().trim(),
         password: form.password,

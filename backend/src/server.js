@@ -152,6 +152,47 @@ app.get('/api/v1', (req, res) => {
     });
 });
 
+// Debug route to check database contents
+app.get('/api/v1/debug/users', async (req, res) => {
+    try {
+        const User = require('./model/User');
+        const users = await User.find({}).select('-password');
+        res.json({
+            message: 'Users found in database',
+            database: 'event-ticketing',
+            collection: 'users',
+            count: users.length,
+            users: users
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error fetching users',
+            error: error.message
+        });
+    }
+});
+
+// Debug route to check database connection
+app.get('/api/v1/debug/db', async (req, res) => {
+    try {
+        const dbState = mongoose.connection.readyState;
+        const dbName = mongoose.connection.name;
+        
+        res.json({
+            message: 'Database connection status',
+            connectionState: dbState === 1 ? 'Connected' : 'Not Connected',
+            databaseName: dbName,
+            host: mongoose.connection.host,
+            port: mongoose.connection.port
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error checking database',
+            error: error.message
+        });
+    }
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

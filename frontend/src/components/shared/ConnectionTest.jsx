@@ -11,22 +11,21 @@ const ConnectionTest = () => {
     setTestResult(null);
     
     try {
-      // Test v1 API connection
-      const response = await axios.get('/api/v1/events');
+      const response = await axios.get('/api/v1');
       setTestResult({
         success: true,
-        message: 'Backend v1 API connection successful!',
-        data: `Received ${response.data?.length || 0} events from the database.`
+        message: 'Connection successful!',
+        data: `Backend API v1 is running. Version: ${response.data?.version}`
       });
-      toast.success('✅ Backend v1 API connection successful!');
+      toast.success('✅ Backend connection successful!');
     } catch (error) {
       setTestResult({
         success: false,
-        message: 'Backend v1 API connection failed!',
+        message: 'Connection failed!',
         error: error.message,
         details: error.response?.data?.message || 'No additional details'
       });
-      toast.error('❌ Backend v1 API connection failed!');
+      toast.error('❌ Backend connection failed!');
     } finally {
       setLoading(false);
     }
@@ -70,19 +69,23 @@ const ConnectionTest = () => {
         role: 'user'
       };
       
+      console.log('Testing registration with:', testUser);
       const response = await axios.post('/api/v1/register', testUser);
+      console.log('Registration response:', response.data);
+      
       setTestResult({
         success: true,
         message: 'Test registration successful! User saved to MongoDB via v1 API.',
-        data: `User ID: ${response.data?.user?.id}\nAPI Version: v1`
+        data: `User ID: ${response.data?.user?.id}\nAPI Version: v1\nUser Name: ${response.data?.user?.name}`
       });
       toast.success('✅ Registration test successful - Data saved to MongoDB via v1 API!');
     } catch (error) {
+      console.error('Registration test error:', error);
       setTestResult({
         success: false,
         message: 'Registration test failed!',
         error: error.message,
-        details: error.response?.data?.message || 'No additional details'
+        details: error.response?.data?.message || error.response?.data?.errors || 'No additional details'
       });
       toast.error('❌ Registration test failed!');
     } finally {
