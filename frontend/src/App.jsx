@@ -16,6 +16,7 @@ import AdminEventsPage from './pages/AdminEventsPage'
 import CreateEventPage from './pages/CreateEventPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminLogin from './components/auth/AdminLogin'
+import AdminUsersPage from './pages/AdminUsersPage'
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
                 element={
                   <RoleBasedRoute allowedRoles={['admin']}>
                     <AdminEventsPage />
+                  </RoleBasedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/users" 
+                element={
+                  <RoleBasedRoute allowedRoles={['admin']}>
+                    <AdminUsersPage />
                   </RoleBasedRoute>
                 } 
               />

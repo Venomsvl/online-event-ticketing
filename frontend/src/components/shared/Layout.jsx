@@ -146,6 +146,7 @@ export default function Layout() {
           {user?.role === "admin" && (
             <>
               <Link to="/admin/events" className="nav-link">⚙️ Manage Events</Link>
+              <Link to="/admin/users" className="nav-link">👥 Manage Users</Link>
               <Link to="/admin/analytics" className="nav-link">📊 Analytics</Link>
             </>
           )}
