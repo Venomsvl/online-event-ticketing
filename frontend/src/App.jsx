@@ -14,6 +14,7 @@ import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
 import CreateEventPage from './pages/CreateEventPage'
 import ProfilePage from './pages/ProfilePage'
+import UserBookingsPage from './pages/UserBookingsPage'
 import AdminLogin from './components/auth/AdminLogin'
 import HomePage from './pages/HomePage'
 
@@ -24,6 +25,7 @@ function App() {
         <div className="min-h-screen bg-gray-50">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/bookings" element={<UserBookingsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin-login" element={<AdminLogin />} />

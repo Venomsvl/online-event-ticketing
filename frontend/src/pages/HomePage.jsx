@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+//import axios from 'axios';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axios';
+import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Home.css'
 
 function HomePage() {
@@ -10,6 +13,8 @@ function HomePage() {
     minutes: '00',
     seconds: '00'
   });
+
+  
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [events, setEvents] = useState([]);

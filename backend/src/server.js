@@ -16,7 +16,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:3002'],
+    origin: ['http://localhost:5173','http://localhost:5000', 'http://localhost:3001', 'http://localhost:3002'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -152,10 +152,7 @@ app.get('/api/v1', (req, res) => {
     });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
+ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-   // console.log('CORS enabled for frontend communication');
-   // console.log('API v1 endpoints available at http://localhost:' + PORT + '/api/v1');
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
