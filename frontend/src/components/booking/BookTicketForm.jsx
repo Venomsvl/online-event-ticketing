@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useParams } from 'react-router-dom'
-import BookTicketForm from '../components/BookTicketForm'
 import { AuthContext } from '../context/AuthContext'
 
 const EventDetail = () => {
