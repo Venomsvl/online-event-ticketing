@@ -53,6 +53,16 @@ const eventSchema = mongoose.Schema({
         enum: ['approved', 'pending', 'declined'],
         default: 'pending',
     },
+    creator :{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:'User',
+        require: true
+    },
+    timestamp :{
+        type: Date,
+        require: true,
+        default: Date.now
+    }
 })
 const Event = mongoose.model('Event', eventSchema);
 module.exports = Event;
