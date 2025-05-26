@@ -14,10 +14,6 @@ const eventSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    time: {
-        type: String,
-        required: true
-    },
     location: {
         type: String,
         required: true
@@ -26,55 +22,66 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    imageUrl: {
+    image: {
         type: String,
         required: false,
         default: null
     },
-    ticketTypes: [{
-        type: {
-            type: String,
-            required: true
-        },
-        price: {
-            type: Number,
-            required: true
-        },
-        quantity: {
-            type: Number,
-            required: true
-        }
-    }],
-    organizerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+    ticket_price: {
+        type: Number,
+        required: true,
+        min: 0
     },
-    status: {
-        type: String,
-        enum: ['DRAFT', 'PUBLISHED', 'CANCELLED'],
-        default: 'DRAFT'
-    },
-    totalTickets: {
+    total_tickets: {
         type: Number,
         required: true,
         min: 1
     },
-    remainingTickets: {
+    remaining_tickets: {
         type: Number,
         required: true,
         min: 0
+    },
+    organizer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    event_status: {
+        type: String,
+        enum: ['pending', 'approved', 'declined'],
+        default: 'pending'
     }
 }, {
     timestamps: true
 });
 
-// Add a pre-save hook to set remainingTickets if not set
+// Add a pre-save hook to set remaining_tickets if not set
 eventSchema.pre('save', function(next) {
-    if (this.isNew && !this.remainingTickets) {
-        this.remainingTickets = this.totalTickets;
+    if (this.isNew && !this.remaining_tickets) {
+        this.remaining_tickets = this.total_tickets;
     }
     next();
 });
+
+// Add method to check ticket availability
+eventSchema.methods.hasAvailableTickets = function(quantity) {
+    return this.remaining_tickets >= quantity;
+};
+
+// Add method to book tickets
+eventSchema.methods.bookTickets = function(quantity) {
+    if (!this.hasAvailableTickets(quantity)) {
+        throw new Error('Not enough tickets available');
+    }
+    this.remaining_tickets -= quantity;
+    return this.save();
+};
+
+// Add method to release tickets (for cancellations)
+eventSchema.methods.releaseTickets = function(quantity) {
+    this.remaining_tickets = Math.min(this.total_tickets, this.remaining_tickets + quantity);
+    return this.save();
+};
 
 module.exports = mongoose.models.Event || mongoose.model('Event', eventSchema); 

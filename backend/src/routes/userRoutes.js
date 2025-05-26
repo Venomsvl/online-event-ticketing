@@ -1,7 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { getUserProfile, updateUserProfile } = require('../Controllers/UserController');
-const { getMyEvents, getMyEventsAnalytics } = require('../Controllers/EventController');
+const { getUserProfile, updateUserProfile } = require('../controllers/UserController');
+const { getMyEvents, getMyEventsAnalytics } = require('../controllers/EventController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const { isOrganizer } = require('../middlewares/roleMiddleware');
 const router = express.Router();

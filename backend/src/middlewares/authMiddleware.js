@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Booking = require('../models/Booking');
+const Booking = require('../model/booking');
 const secretKey = process.env.JWT_SECRET || 'your_jwt_secret';
 
 // Middleware to verify the token

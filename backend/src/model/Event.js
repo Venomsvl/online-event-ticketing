@@ -1,51 +1,55 @@
 const mongoose = require('mongoose')
 
-const eventSchema = mongoose.Schema({
-
-    title : {
+// Check if the model is already defined
+const Event = mongoose.models.Event || mongoose.model('Event', new mongoose.Schema({
+    title: {
         type: String,
-        require : true
+        required: true
     },
-    description : {
-        type : String,
-        require : true
+    description: {
+        type: String,
+        required: true
     },
-    date : {
-        type : Date,
-        require : true
-
+    date: {
+        type: Date,
+        required: true
     },
     location: {
         type: String,
-        require : true 
+        required: true
     },
     category: {
         type: String,
-        require : true 
+        required: true
     },
     image: {
         type: String,
-        require : false 
+        required: false
     },
-    ticket_price:{
-        type : Number,
-        require : true 
-    },
-    total_tickets :{
+    ticket_price: {
         type: Number,
-        require : true 
+        required: true
     },
-    remaining_tickets:{
+    total_tickets: {
         type: Number,
-        require: true
+        required: true
     },
-    
-     //adding an event status field
-    event_status:{
+    remaining_tickets: {
+        type: Number,
+        required: true
+    },
+    // Reference to the organizer (User)
+    organizer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    //adding an event status field
+    event_status: {
         type: String,
         enum: ['approved', 'pending', 'declined'],
         default: 'pending',
     },
-})
-const Event = mongoose.model('Event', eventSchema);
+}));
+
 module.exports = Event;

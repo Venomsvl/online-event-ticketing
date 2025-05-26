@@ -6,11 +6,8 @@ const {
     logout,
     sendOTP,
     verifyOTP,
-    resetPassword,
-    deleteUser
+    resetPassword
 } = require('../Controllers/AuthController');
-const { verifyToken } = require('../middlewares/authMiddleware');
-
 const router = express.Router();
 
 // Register route with validation
@@ -34,34 +31,11 @@ router.post(
     register
 );
 
-// Login route
-router.post('/login', [
-    body('email').isEmail().withMessage('Invalid email'),
-    body('password').notEmpty().withMessage('Password is required')
-], login);
-
-// Protected routes
-router.post('/logout', verifyToken, logout);
-
-// Password reset routes
-router.post('/send-otp', [
-    body('email').isEmail().withMessage('Invalid email')
-], sendOTP);
-
-router.post('/verify-otp', [
-    body('email').isEmail().withMessage('Invalid email'),
-    body('otp').notEmpty().withMessage('OTP is required')
-], verifyOTP);
-
-router.post('/reset-password', [
-    body('email').isEmail().withMessage('Invalid email'),
-    body('newPassword')
-        .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-        .matches(/^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$/)
-        .withMessage('Password must contain at least one letter and one number')
-], resetPassword);
-
-// Admin routes
-router.delete('/users/:id', verifyToken, deleteUser);
+// Routes
+router.post('/login', login);
+router.post('/logout', logout);
+router.post('/send-otp', sendOTP);
+router.post('/verify-otp', verifyOTP);
+router.post('/reset-password', resetPassword);
 
 module.exports = router;
