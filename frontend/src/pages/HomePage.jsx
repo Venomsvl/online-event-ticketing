@@ -57,9 +57,40 @@ function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-12 px-4">
+<section className="welcome-section hero-section">
+  <h1 className="welcome-text gradient-text mb-4">Welcome to</h1>
+  <div className="logo-container mb-6">
+    <img
+      src="\public\take3gradient.png"
+      alt="Tixify Logo"
+      className="logo-animation"
+      style={{ width: '16rem', height: '8rem', objectFit: 'contain', display: 'block', margin: '0 auto' }}
+      onError={e => { e.target.className += ' error-loading'; e.target.src = ''; }}
+    />
+  </div>
+  <p className="welcome-text text-lg mb-8 text-center gradient-text" style={{ color: 'inherit' }}>
+    Explore the vibrant events happening locally and globally.
+  </p>
+  <div className="flex gap-4 justify-center">
+    <div className="countdown-box">
+      <span className="countdown-number">{countdown.days}</span>
+      <span className="countdown-label">Days</span>
+    </div>
+    <div className="countdown-box">
+      <span className="countdown-number">{countdown.hours}</span>
+      <span className="countdown-label">Hours</span>
+    </div>
+    <div className="countdown-box">
+      <span className="countdown-number">{countdown.minutes}</span>
+      <span className="countdown-label">Minutes</span>
+    </div>
+    <div className="countdown-box">
+      <span className="countdown-number">{countdown.seconds}</span>
+      <span className="countdown-label">Seconds</span>
+    </div>
+  </div>
+</section>
         {/* ...hero code... */}
-      </section>
 
       {/* Events Section */}
       <section className="py-12 px-4 bg-purple-900 bg-opacity-50">
@@ -77,6 +108,9 @@ function HomePage() {
                   <p className="text-purple-200">{event.location}</p>
                   <p className="text-purple-200">{event.category}</p>
                   <p className="text-purple-200">{event.ticket_price}</p>
+                   <Link to={`/event/id:${event._id}`}>
+                  <button className="booking-btn mt-4">Booking</button>
+                  </Link>
                 </div>
               ))
             )}
