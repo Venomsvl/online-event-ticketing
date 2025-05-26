@@ -140,8 +140,8 @@ exports.logout = (req, res) => {
     res.status(200).json({ message: 'Logged out' });
 };
 
-// Request OTP for password reset
-exports.sendOTP = async (req, res) => {
+// Request password reset
+exports.forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     try {
@@ -150,64 +150,57 @@ exports.sendOTP = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const otp = crypto.randomInt(100000, 999999).toString();
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-        await PasswordReset.create({ email, otp, expiresAt });
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = Date.now() + 3600000; // 1 hour
+
+        // Save reset token to user
+        user.resetToken = resetToken;
+        user.resetTokenExpiry = resetTokenExpiry;
+        await user.save();
+
+        // Create reset link
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3003'}/reset-password/${resetToken}`;
 
         const emailText = `
 Hello,
 
 You requested to reset your password.
 
-Your OTP code is: ${otp}
+Please click the following link to reset your password:
+${resetLink}
 
-This code will expire in 10 minutes.
+This link will expire in 1 hour.
 
 If you did not request this, please ignore this email.
         `;
 
-        await sendEmail(email, 'Your Password Reset OTP', emailText);
-        res.status(200).json({ message: 'OTP sent to your email' });
+        await sendEmail(email, 'Password Reset Request', emailText);
+        res.status(200).json({ message: 'Password reset link sent to your email' });
     } catch (error) {
-        console.error('Error during OTP generation:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-};
-
-// Verify OTP
-exports.verifyOTP = async (req, res) => {
-    const { email, otp } = req.body;
-
-    try {
-        const record = await PasswordReset.findOne({
-            email,
-            otp,
-            expiresAt: { $gt: Date.now() }
-        });
-        if (!record) {
-            return res.status(400).json({ message: 'Invalid or expired OTP' });
-        }
-
-        await PasswordReset.deleteOne({ _id: record._id });
-        res.status(200).json({ message: 'OTP verified successfully' });
-    } catch (error) {
-        console.error('Error during OTP verification:', error);
+        console.error('Error during password reset request:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
 // Reset Password
 exports.resetPassword = async (req, res) => {
-    const { email, newPassword } = req.body;
+    const { token, newPassword } = req.body;
 
     try {
-        const user = await User.findOne({ email });
+        const user = await User.findOne({
+            resetToken: token,
+            resetTokenExpiry: { $gt: Date.now() }
+        });
+
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(400).json({ message: 'Invalid or expired reset token' });
         }
 
-        // Update the password (it will be hashed by the User model's pre-save middleware)
+        // Update password and clear reset token
         user.password = newPassword;
+        user.resetToken = undefined;
+        user.resetTokenExpiry = undefined;
         await user.save();
 
         res.status(200).json({ message: 'Password reset successful' });

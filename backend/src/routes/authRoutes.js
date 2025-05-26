@@ -28,9 +28,14 @@ router.post(
 router.post('/login', authController.login);
 router.post('/logout', authController.logout);
 router.get('/profile', verifyToken, authController.getProfile);
-router.post('/send-otp', authController.sendOTP);
-router.post('/verify-otp', authController.verifyOTP);
-router.post('/reset-password', authController.resetPassword);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', [
+    body('token').notEmpty().withMessage('Reset token is required'),
+    body('newPassword')
+        .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+        .matches(/^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$/)
+        .withMessage('Password must contain at least one letter and one number')
+], authController.resetPassword);
 router.delete('/users/:id', authController.deleteUser);
 
 module.exports = router;

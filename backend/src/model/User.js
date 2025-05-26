@@ -32,6 +32,14 @@ const userSchema = new mongoose.Schema({
         enum: ['user', 'organizer', 'admin'],
         default: 'user'
     },
+    resetToken: {
+        type: String,
+        default: undefined
+    },
+    resetTokenExpiry: {
+        type: Date,
+        default: undefined
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -40,6 +48,8 @@ const userSchema = new mongoose.Schema({
     toJSON: {
         transform(doc, ret) {
             delete ret.password;           // Remove password from responses
+            delete ret.resetToken;         // Remove reset token from responses
+            delete ret.resetTokenExpiry;   // Remove reset token expiry from responses
             ret.id = ret._id;              // Add id alias
             delete ret._id;
             delete ret.__v;

@@ -2,19 +2,53 @@ import React, { useState, useEffect } from 'react';
 import axios from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import { FaUser, FaTicketAlt } from 'react-icons/fa';
+import UpdateProfileForm from '../components/profile/UpdateProfileForm';
+import { Link } from 'react-router-dom';
+import BookingDetails from '../components/bookings/BookingDetails';
 
 const ProfilePage = () => {
-  const { user, logout } = useAuth();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [loading, setLoading] = useState(false);
+  const { user, updateUser } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [activeTab, setActiveTab] = useState('profile');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user && user.role !== 'admin') {
+      fetchBookings();
+    }
+  }, [user]);
+
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('/api/v1/bookings/my-bookings');
+      setBookings(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfileUpdate = async (updatedData) => {
+    try {
+      await updateUser(updatedData);
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    }
+  };
+
+  const cancelBooking = async (bookingId) => {
+    try {
+      await axios.put(`/api/v1/bookings/${bookingId}/cancel`);
+      toast.success('Booking cancelled successfully');
+      fetchBookings();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to cancel booking');
+    }
+  };
 
   const styles = {
     container: {
@@ -34,6 +68,10 @@ const ProfilePage = () => {
       padding: '2rem',
       color: '#fff',
     },
+    header: {
+      textAlign: 'center',
+      marginBottom: '2rem',
+    },
     tabs: {
       display: 'flex',
       marginBottom: '2rem',
@@ -44,124 +82,100 @@ const ProfilePage = () => {
       cursor: 'pointer',
       borderBottom: '2px solid transparent',
       transition: 'all 0.3s ease',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      color: 'rgba(255,255,255,0.7)',
+      '&:hover': {
+        color: '#fff',
+      },
     },
     activeTab: {
       borderBottom: '2px solid #977DFF',
       color: '#977DFF',
     },
-    form: {
+    bookingCard: {
+      background: 'rgba(255,255,255,0.1)',
+      borderRadius: '16px',
+      padding: '1.5rem',
+      marginBottom: '1rem',
+      border: '1px solid rgba(255,255,255,0.2)',
+      transition: 'all 0.3s ease',
+    },
+    bookingTitle: {
+      fontSize: '1.25rem',
+      fontWeight: 'bold',
+      color: '#fff',
+      marginBottom: '1rem',
+    },
+    bookingInfo: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '1rem',
-    },
-    input: {
-      background: 'rgba(255,255,255,0.7)',
-      border: '1.5px solid #977DFF',
-      borderRadius: '12px',
-      color: '#0033FF',
-      padding: '0.75rem',
-      fontSize: '1rem',
-      outline: 'none',
+      gap: '0.5rem',
+      color: 'rgba(255,255,255,0.8)',
     },
     button: {
-      background: 'linear-gradient(135deg, #977DFF 0%, #0033FF 100%)',
+      background: '#ff6b6b',
       color: '#fff',
       border: 'none',
       borderRadius: '12px',
       padding: '0.75rem 1.5rem',
       fontSize: '1rem',
       cursor: 'pointer',
-      transition: 'transform 0.2s',
+      transition: 'all 0.3s ease',
+      marginTop: '1rem',
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 5px 15px rgba(255,107,107,0.4)',
+      },
     },
-    bookingCard: {
-      background: 'rgba(255,255,255,0.1)',
-      borderRadius: '12px',
-      padding: '1rem',
-      marginBottom: '1rem',
-      border: '1px solid rgba(255,255,255,0.2)',
-    },
-  };
-
-  useEffect(() => {
-    if (user) {
-      setFormData(prev => ({
-        ...prev,
-        name: user.name || '',
-        email: user.email || ''
-      }));
-    }
-    fetchBookings();
-  }, [user]);
-
-  const fetchBookings = async () => {
-    // Don't fetch bookings for admin users
-    if (user?.role === 'admin') {
-      return;
-    }
-    
-    try {
-      const response = await axios.get('/api/bookings/my-bookings');
-      setBookings(response.data);
-    } catch (error) {
-      toast.error('Failed to fetch bookings');
+    loadingText: {
+      textAlign: 'center',
+      color: 'rgba(255,255,255,0.7)',
+      fontSize: '1.1rem',
+      margin: '2rem 0',
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const BookingItem = ({ booking }) => (
+    <div style={styles.bookingCard}>
+      <h3 style={styles.bookingTitle}>{booking.event.title}</h3>
+      <div style={styles.bookingInfo}>
+        <p>Date: {new Date(booking.event.date).toLocaleDateString()}</p>
+        <p>Time: {new Date(booking.event.date).toLocaleTimeString()}</p>
+        <p>Tickets: {booking.quantity}</p>
+        <p>Status: {booking.status}</p>
+      </div>
+      {booking.status === 'confirmed' && (
+        <button
+          onClick={() => cancelBooking(booking._id)}
+          style={styles.button}
+        >
+          Cancel Booking
+        </button>
+      )}
+    </div>
+  );
 
-  const handleProfileUpdate = async (e) => {
-    e.preventDefault();
-    if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const updateData = {
-        name: formData.name,
-        email: formData.email
-      };
-
-      if (formData.newPassword) {
-        updateData.currentPassword = formData.currentPassword;
-        updateData.newPassword = formData.newPassword;
-      }
-
-      await axios.put('/api/users/profile', updateData);
-      toast.success('Profile updated successfully');
-      setFormData(prev => ({
-        ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      }));
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const cancelBooking = async (bookingId) => {
-    try {
-      await axios.put(`/api/bookings/${bookingId}/cancel`);
-      toast.success('Booking cancelled successfully');
-      fetchBookings();
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to cancel booking');
-    }
-  };
+  if (!user) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.content}>
+          <div style={styles.loadingText}>Loading profile...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
       <div style={styles.content}>
-        <h1>My Profile</h1>
+        <div style={styles.header}>
+          <h1>My Profile</h1>
+          <p style={{ color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem' }}>
+            Manage your profile and bookings
+          </p>
+        </div>
         
         <div style={styles.tabs}>
           <div
@@ -171,7 +185,7 @@ const ProfilePage = () => {
             }}
             onClick={() => setActiveTab('profile')}
           >
-            Profile Settings
+            <FaUser /> Profile Settings
           </div>
           {user?.role !== 'admin' && (
             <div
@@ -181,139 +195,29 @@ const ProfilePage = () => {
               }}
               onClick={() => setActiveTab('bookings')}
             >
-              My Bookings
-            </div>
-          )}
-          {user?.role === 'admin' && (
-            <div
-              style={{
-                ...styles.tab,
-                ...(activeTab === 'dashboard' ? styles.activeTab : {})
-              }}
-              onClick={() => setActiveTab('dashboard')}
-            >
-              Admin Dashboard
+              <FaTicketAlt /> My Bookings
             </div>
           )}
         </div>
 
         {activeTab === 'profile' && (
-          <form onSubmit={handleProfileUpdate} style={styles.form}>
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              value={formData.name}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleInputChange}
-              style={styles.input}
-              required
-            />
-            <input
-              type="password"
-              name="currentPassword"
-              placeholder="Current Password (leave blank if not changing)"
-              value={formData.currentPassword}
-              onChange={handleInputChange}
-              style={styles.input}
-            />
-            <input
-              type="password"
-              name="newPassword"
-              placeholder="New Password"
-              value={formData.newPassword}
-              onChange={handleInputChange}
-              style={styles.input}
-            />
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm New Password"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              style={styles.input}
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              style={styles.button}
-            >
-              {loading ? 'Updating...' : 'Update Profile'}
-            </button>
-          </form>
+          <UpdateProfileForm user={user} onUpdateSuccess={handleProfileUpdate} />
         )}
 
-        {activeTab === 'bookings' && user?.role !== 'admin' && (
+        {activeTab === 'bookings' && (
           <div>
-            <h2>My Event Bookings</h2>
-            {bookings.length === 0 ? (
-              <p>No bookings found</p>
+            <h2 style={{ marginBottom: '1.5rem' }}>My Bookings</h2>
+            {loading ? (
+              <div style={styles.loadingText}>Loading bookings...</div>
+            ) : bookings.length === 0 ? (
+              <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)' }}>
+                No bookings found.
+              </p>
             ) : (
               bookings.map(booking => (
-                <div key={booking._id} style={styles.bookingCard}>
-                  <h3>{booking.event?.title || 'Event Not Found'}</h3>
-                  <p>Date: {new Date(booking.event?.date).toLocaleDateString()}</p>
-                  <p>Tickets: {booking.quantity} x {booking.ticketType}</p>
-                  <p>Total: ${booking.totalAmount}</p>
-                  <p>Status: {booking.status}</p>
-                  {booking.status === 'confirmed' && (
-                    <button
-                      onClick={() => cancelBooking(booking._id)}
-                      style={{
-                        ...styles.button,
-                        background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)'
-                      }}
-                    >
-                      Cancel Booking
-                    </button>
-                  )}
-                </div>
+                <BookingItem key={booking._id} booking={booking} />
               ))
             )}
-          </div>
-        )}
-
-        {activeTab === 'dashboard' && user?.role === 'admin' && (
-          <div>
-            <h2>🎯 Admin Dashboard</h2>
-            <div style={styles.bookingCard}>
-              <h3>👑 Administrator Controls</h3>
-              <p style={{ marginBottom: '1rem' }}>Welcome to your admin profile! As an administrator, you have access to:</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <button
-                  onClick={() => window.location.href = '/admin/events'}
-                  style={{
-                    ...styles.button,
-                    background: 'linear-gradient(135deg, #977DFF 0%, #0033FF 100%)',
-                  }}
-                >
-                  📊 Manage Events
-                </button>
-                <button
-                  onClick={() => window.location.href = '/admin/analytics'}
-                  style={{
-                    ...styles.button,
-                    background: 'linear-gradient(135deg, #0033FF 0%, #0600AB 100%)',
-                  }}
-                >
-                  📈 View Analytics
-                </button>
-              </div>
-            </div>
-            <div style={styles.bookingCard}>
-              <h3>📋 Admin Information</h3>
-              <p><strong>Role:</strong> Administrator</p>
-              <p><strong>Access Level:</strong> Full System Access</p>
-              <p><strong>Responsibilities:</strong> Event Management, User Oversight, System Analytics</p>
-            </div>
           </div>
         )}
       </div>

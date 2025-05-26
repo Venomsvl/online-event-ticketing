@@ -16,6 +16,8 @@ import AdminEventsPage from './pages/AdminEventsPage'
 import CreateEventPage from './pages/CreateEventPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminLogin from './components/auth/AdminLogin'
+import ForgotPassword from './components/auth/ForgotPassword'
+import BookingDetailsPage from './pages/BookingDetailsPage'
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             
             <Route element={<Layout />}>
@@ -79,6 +82,7 @@ function App() {
                 } 
               />
             </Route>
+            <Route path="/bookings/:id" element={<BookingDetailsPage />} />
           </Routes>
           <ToastContainer
             position="top-right"

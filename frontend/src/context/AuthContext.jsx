@@ -85,12 +85,50 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUser = async (updatedData) => {
+    try {
+      // If it's an admin user, just update the local state
+      const adminUser = localStorage.getItem('adminUser');
+      if (adminUser) {
+        const updatedAdminUser = {
+          ...JSON.parse(adminUser),
+          ...updatedData
+        };
+        localStorage.setItem('adminUser', JSON.stringify(updatedAdminUser));
+        setUser(updatedAdminUser);
+        return updatedAdminUser;
+      }
+
+      // For regular users, update through the API
+      const response = await axios.put('/api/v1/users/profile', updatedData);
+      const newUserData = response.data;
+      
+      // Update local state with new user data
+      setUser(prev => ({
+        ...prev,
+        ...newUserData
+      }));
+
+      // Update role in localStorage if it changed
+      if (newUserData.role) {
+        localStorage.setItem('userRole', newUserData.role);
+      }
+
+      return newUserData;
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      // Re-throw the error so it can be handled by the component
+      throw error;
+    }
+  };
+
   const value = {
     user,
     login,
     logout,
     loading,
-    checkAuth
+    checkAuth,
+    updateUser
   };
 
   return (

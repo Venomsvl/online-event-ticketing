@@ -387,6 +387,19 @@ export default function LoginForm() {
             {errors.password && <span style={styles.error}>⚠️ {errors.password}</span>}
           </div>
 
+          <Link 
+            to="/forgot-password" 
+            style={{
+              color: '#977DFF',
+              textAlign: 'right',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              marginTop: '-1rem',
+            }}
+          >
+            Forgot Password?
+          </Link>
+
           <button 
             type="submit" 
             style={styles.button} 
