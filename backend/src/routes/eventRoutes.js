@@ -9,13 +9,14 @@ const {
     createEvent,
     updateEvent,
     deleteEvent,
-    approveOrReject
-} = require('../controllers/EventController');
+    approveOrReject,
+    viewPostedEvents
+} = require('../Controllers/EventController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const { isAdmin, isOrganizer, isOrganizerOrAdmin } = require('../middlewares/roleMiddleware');
 
 // Public routes
-router.get('/', getAllEvents);
+router.get('/', viewPostedEvents);
 router.get('/:id', getEventById);
 
 // Protected routes

@@ -6,7 +6,6 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/shared/ProtectedRoute'
 import RoleBasedRoute from './components/shared/RoleBasedRoute'
 import Layout from './components/shared/Layout'
-import HomePage from './pages/HomePage'
 import EventDetail from './pages/EventDetail'
 import Login from './components/auth/Login'
 import Register from './components/auth/Register'
@@ -15,15 +14,19 @@ import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
 import CreateEventPage from './pages/CreateEventPage'
 import ProfilePage from './pages/ProfilePage'
+import UserBookingsPage from './pages/UserBookingsPage'
 import AdminLogin from './components/auth/AdminLogin'
+import HomePage from './pages/HomePage'
 import AdminUsersPage from './pages/AdminUsersPage'
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+   
         <div className="min-h-screen bg-gray-50">
           <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/bookings" element={<UserBookingsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin-login" element={<AdminLogin />} />
@@ -31,7 +34,6 @@ function App() {
             
             <Route element={<Layout />}>
               {/* Public routes */}
-              <Route path="/" element={<HomePage />} />
               <Route path="/event/:id" element={<EventDetail />} />
               
               {/* Protected routes */}
@@ -101,8 +103,8 @@ function App() {
             pauseOnHover
           />
         </div>
-      </Router>
-    </AuthProvider>
+      
+   </AuthProvider>
   )
 }
 
