@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
+import axios from '../utils/axios'
+import EventDetail from '../../pages/EventDetail'
 
-const EventDetail = () => {
+
+const BookTicketForm = () => {
   const { id } = useParams()
   const [event, setEvent] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -45,4 +48,4 @@ const EventDetail = () => {
   )
 }
 
-export default EventDetail
+export default BookTicketForm

@@ -14,10 +14,47 @@ function HomePage() {
     seconds: '00'
   });
 
-  
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [events, setEvents] = useState([]);
+
+  // Add navigation buttons styles
+  const navButtonsStyle = {
+    position: 'fixed',
+    top: '2rem',
+    right: '2rem',
+    display: 'flex',
+    gap: '1rem',
+    zIndex: 50,
+  };
+
+  const navButtonStyle = {
+    padding: '0.75rem 1.5rem',
+    borderRadius: '12px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    textDecoration: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  };
+
+  const primaryButtonStyle = {
+    ...navButtonStyle,
+    background: 'linear-gradient(135deg, #977DFF 0%, #6B46C1 100%)',
+    color: '#ffffff',
+    border: 'none',
+    boxShadow: '0 4px 15px rgba(151, 125, 255, 0.3)',
+  };
+
+  const secondaryButtonStyle = {
+    ...navButtonStyle,
+    background: 'rgba(255, 255, 255, 0.1)',
+    color: '#ffffff',
+    border: '1px solid rgba(151, 125, 255, 0.3)',
+    backdropFilter: 'blur(10px)',
+  };
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -44,83 +81,154 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/v1/events')
+    axios.get('/api/v1/events')
       .then(res => setEvents(res.data))
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        toast.error('Failed to fetch events');
+      });
   }, []);
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }) + ' at ' + date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  };
+
+  const getMonthAbbr = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+  };
+
+  const getDay = (dateString) => {
+    const date = new Date(dateString);
+    return date.getDate();
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 to-purple-700">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-purple-600 px-4 py-4 md:px-8 z-50">
-        {/* ...navigation code... */}
-      </nav>
+    <div className="min-h-screen bg-black text-white">
+      {/* Navigation Buttons */}
+      <div style={navButtonsStyle} className="nav-buttons-container">
+        <Link 
+          to="/register" 
+          style={primaryButtonStyle} 
+          className="nav-button primary"
+        >
+          ✨ Register
+        </Link>
+        <Link 
+          to="/login" 
+          style={secondaryButtonStyle} 
+          className="nav-button secondary"
+        >
+          🔑 Login
+        </Link>
+        <Link 
+          to="/create-event" 
+          style={secondaryButtonStyle} 
+          className="nav-button secondary"
+        >
+          🎪 Create Event
+        </Link>
+        <Link 
+          to="/contact" 
+          style={secondaryButtonStyle} 
+          className="nav-button secondary"
+        >
+          📧 Contact
+        </Link>
+      </div>
 
       {/* Hero Section */}
-<section className="welcome-section hero-section">
-  <h1 className="welcome-text gradient-text mb-4">Welcome to</h1>
-  <div className="logo-container mb-6">
-    <img
-      src="\public\take3gradient.png"
-      alt="Tixify Logo"
-      className="logo-animation"
-      style={{ width: '16rem', height: '8rem', objectFit: 'contain', display: 'block', margin: '0 auto' }}
-      onError={e => { e.target.className += ' error-loading'; e.target.src = ''; }}
-    />
-  </div>
-  <p className="welcome-text text-lg mb-8 text-center gradient-text" style={{ color: 'inherit' }}>
-    Explore the vibrant events happening locally and globally.
-  </p>
-  <div className="flex gap-4 justify-center">
-    <div className="countdown-box">
-      <span className="countdown-number">{countdown.days}</span>
-      <span className="countdown-label">Days</span>
-    </div>
-    <div className="countdown-box">
-      <span className="countdown-number">{countdown.hours}</span>
-      <span className="countdown-label">Hours</span>
-    </div>
-    <div className="countdown-box">
-      <span className="countdown-number">{countdown.minutes}</span>
-      <span className="countdown-label">Minutes</span>
-    </div>
-    <div className="countdown-box">
-      <span className="countdown-number">{countdown.seconds}</span>
-      <span className="countdown-label">Seconds</span>
-    </div>
-  </div>
-</section>
-        {/* ...hero code... */}
-
-      {/* Events Section */}
-      <section className="py-12 px-4 bg-purple-900 bg-opacity-50">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold text-white mb-8">Upcoming Events</h2>
-          <div>
-            {events.length === 0 ? (
-              <p className="text-white">No events found.</p>
-            ) : (
-              events.map(event => (
-                <div key={event._id} className="bg-purple-800 rounded-lg p-4 mb-4">
-                  <h2 className="text-xl font-bold text-white">{event.title}</h2>
-                  <p className="text-purple-200">{event.description}</p>
-                  <p className="text-purple-200">{event.date}</p>
-                  <p className="text-purple-200">{event.location}</p>
-                  <p className="text-purple-200">{event.category}</p>
-                  <p className="text-purple-200">{event.ticket_price}</p>
-                   <Link to={`/event/id:${event._id}`}>
-                  <button className="booking-btn mt-4">Booking</button>
-                  </Link>
-                </div>
-              ))
-            )}
+      <section className="welcome-section hero-section flex flex-col items-center justify-center min-h-screen bg-[#2D1B69] text-center px-4">
+        <div className="hero-content">
+          <h1 className="welcome-text text-5xl md:text-7xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-200">
+            Welcome to
+          </h1>
+          <div className="logo-container mb-12 transform hover:scale-105 transition-transform duration-300">
+            <img
+              src="/take3gradient.png"
+              alt="Tixify Logo"
+              className="w-80 h-40 object-contain mx-auto logo-animation"
+            />
+          </div>
+          <p className="text-xl md:text-2xl mb-16 text-gray-200 max-w-2xl mx-auto">
+            Explore the vibrant events happening locally and globally.
+          </p>
+          <div className="flex gap-6 justify-center flex-wrap">
+            <div className="countdown-box bg-[#1a103f] p-6 rounded-lg w-28">
+              <span className="countdown-number text-4xl font-bold block">{countdown.days}</span>
+              <span className="countdown-label text-sm">Days</span>
+            </div>
+            <div className="countdown-box bg-[#1a103f] p-6 rounded-lg w-28">
+              <span className="countdown-number text-4xl font-bold block">{countdown.hours}</span>
+              <span className="countdown-label text-sm">Hours</span>
+            </div>
+            <div className="countdown-box bg-[#1a103f] p-6 rounded-lg w-28">
+              <span className="countdown-number text-4xl font-bold block">{countdown.minutes}</span>
+              <span className="countdown-label text-sm">Minutes</span>
+            </div>
+            <div className="countdown-box bg-[#1a103f] p-6 rounded-lg w-28">
+              <span className="countdown-number text-4xl font-bold block">{countdown.seconds}</span>
+              <span className="countdown-label text-sm">Seconds</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="py-12 px-4 bg-purple-900 bg-opacity-50">
-        {/* ...categories code... */}
+      {/* Events Section */}
+      <section className="py-16 px-4 bg-black">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {events.map(event => (
+              <div key={event._id} className="event-card bg-[#2D1B69] rounded-lg overflow-hidden">
+                <div className="relative">
+                  <img
+                    src={event.image || 'https://via.placeholder.com/400x200'}
+                    alt={event.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-4 left-4 bg-[#8B5CF6] text-white px-3 py-1 rounded-md">
+                    <div className="text-sm font-bold">{getDay(event.date)} {getMonthAbbr(event.date)}</div>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <h3 className="text-xl font-bold mb-2">{event.title}</h3>
+                  <p className="text-sm text-gray-300 mb-2">{formatDate(event.date)}</p>
+                  <p className="text-sm text-gray-300 mb-4">{event.location}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#8B5CF6] font-bold">${event.price}</span>
+                    <Link to={`/event/${event._id}`}>
+                      <button className="bg-[#8B5CF6] text-white px-6 py-2 rounded-md hover:bg-[#7C3AED] transition-colors">
+                        Book Now
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Event Categories Section */}
+      <section className="py-16 px-4 bg-black">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold">Event Categories</h2>
+            <Link to="/categories" className="text-[#8B5CF6] hover:text-[#7C3AED]">
+              See all categories →
+            </Link>
+          </div>
+          {/* Add your categories grid here */}
+        </div>
       </section>
     </div>
   );

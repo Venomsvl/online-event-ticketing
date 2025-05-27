@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
+import axios from '../utils/axios';  // Import the configured axios instance
 
 const styles = {
   container: {
@@ -234,6 +234,7 @@ const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [eventData, setEventData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     ticketType: 'standard',
     quantity: 1,
@@ -248,38 +249,35 @@ const EventDetail = () => {
 
   const fetchEventDetails = async () => {
     try {
-      const response = await fetch(`/api/events/${id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setEventData(data);
+      console.log('Fetching event with ID:', id);
+      const response = await axios.get(`/api/v1/events/${id}`);
+      console.log('Event data received:', response.data);
+      
+      if (response.data) {
+        setEventData(response.data);
       } else {
-        // Fallback to sample data if API fails
-        setEventData({
-          id: 1,
-          title: 'Summer Music Festival',
-          description: 'Join us for an unforgettable evening of live music featuring top artists from around the world. Experience amazing performances, great food, and create lasting memories.',
-          date: '2024-07-15',
-          time: '18:00',
-          location: 'Central Park',
-          image: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=500&h=300&fit=crop',
-          price: 50.00
-        });
+        toast.error('Failed to fetch event details from the server.');
+        setEventData(null);
       }
     } catch (error) {
-      console.error('Error fetching event details:', error);
+      console.error('Error fetching event details:', error.response || error);
+      toast.error(error.response?.data?.message || 'Error fetching event details.');
+      setEventData(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   const formatDate = (dateString) => {
-    const options = { day: 'numeric', month: 'short' };
-    return new Date(dateString).toLocaleDateString('en-US', options).toUpperCase();
-  };
-
-  const calculateTotal = () => {
-    const { quantity, ticketType } = formData;
-    const basePrice = eventData?.price || 0;
-    const vipMultiplier = ticketType === 'vip' ? 2 : 1;
-    return (quantity * basePrice * vipMultiplier).toFixed(2);
+    const options = { 
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
   const handleInputChange = (e) => {
@@ -290,63 +288,57 @@ const EventDetail = () => {
     }));
   };
 
+  const calculateTotal = () => {
+    const basePrice = eventData?.price || 0;
+    const quantity = parseInt(formData.quantity) || 0;
+    const multiplier = formData.ticketType === 'vip' ? 2 : 1;
+    return (basePrice * quantity * multiplier).toFixed(2);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     try {
-      const response = await fetch('http://localhost:3004/api/bookings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          ...formData,
-          eventId: id,
-          totalAmount: calculateTotal()
-        })
+      const response = await axios.post('/api/v1/bookings', {
+        eventId: id,
+        ...formData,
+        totalAmount: calculateTotal()
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
+      if (response.data) {
         toast.success('Booking successful! You will receive a confirmation email shortly.');
-        setTimeout(() => {
-          navigate('/booking-confirmation');
-        }, 2000);
-      } else {
-        throw new Error(data.message || 'Booking failed');
+        navigate('/bookings');
       }
     } catch (error) {
-      console.error('Booking error details:', error);
-      toast.error('There was an error processing your booking: ' + error.message);
+      console.error('Booking error:', error.response || error);
+      toast.error(error.response?.data?.message || 'Error processing your booking.');
     }
   };
 
-  if (!eventData) {
+  if (loading) {
     return (
       <div style={styles.loading}>
-        <style>
-          {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(151, 125, 255, 0.2);
-            border-top: 4px solid #977DFF;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-          }
-          `}
-        </style>
-        <div>
-          <div className="spinner"></div>
-          <p>✨ Loading event details...</p>
+        <div className="spinner"></div>
+        <p>Loading event details...</p>
+      </div>
+    );
+  }
+
+  if (!eventData) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.eventSection}>
+          <h2>Event Not Found</h2>
+          <p>Sorry, we couldn't find the event you're looking for.</p>
+          <button 
+            onClick={() => navigate('/')}
+            style={{
+              ...styles.submitButton,
+              width: 'auto',
+              marginTop: '1rem'
+            }}
+          >
+            Return to Home
+          </button>
         </div>
       </div>
     );
@@ -401,36 +393,29 @@ const EventDetail = () => {
             <div style={styles.eventCard} className="event-card">
               <div style={styles.imageContainer}>
                 <img
-                  src={eventData.image}
+                  src={eventData.image || 'https://via.placeholder.com/800x400'}
                   alt={eventData.title}
                   style={styles.eventImage}
                   className="event-image"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/800x400';
+                  }}
                 />
                 <div style={styles.dateBadge}>
-                  📅 {formatDate(eventData.date)}
+                  {formatDate(eventData.date)}
                 </div>
               </div>
-              <h1 style={styles.eventTitle}>🎪 {eventData.title}</h1>
+              <h1 style={styles.eventTitle}>{eventData.title}</h1>
               <div style={styles.eventDetails}>
                 <p style={styles.detailText}>{eventData.description}</p>
                 <div style={styles.detailItem} className="detail-item">
-                  <svg style={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  <span>📍 {eventData.location}</span>
+                  <span>📍 Location: {eventData.location}</span>
                 </div>
                 <div style={styles.detailItem} className="detail-item">
-                  <svg style={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>🕒 {eventData.date} at {eventData.time}</span>
+                  <span>💰 Price: ${eventData.price?.toFixed(2)}</span>
                 </div>
                 <div style={styles.detailItem} className="detail-item">
-                  <svg style={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-                  </svg>
-                  <span style={styles.price}>💰 ${eventData.price.toFixed(2)}</span>
+                  <span>🎟️ Available Tickets: {eventData.remaining_tickets}</span>
                 </div>
               </div>
             </div>
@@ -438,11 +423,11 @@ const EventDetail = () => {
 
           {/* Enhanced Booking Form */}
           <div style={styles.bookingForm} className="fade-in">
-            <h2 style={styles.formTitle}>🎫 Book Your Tickets</h2>
+            <h2 style={styles.formTitle}>Book Your Tickets</h2>
             <form onSubmit={handleSubmit} style={styles.form}>
               <div style={styles.formGroup}>
                 <label htmlFor="ticketType" style={styles.label}>
-                  🎭 Ticket Type
+                  Ticket Type
                 </label>
                 <select
                   id="ticketType"
@@ -453,13 +438,14 @@ const EventDetail = () => {
                   style={styles.select}
                   className="form-input"
                 >
-                  <option value="standard">🎟️ Standard Ticket - ${eventData.price.toFixed(2)}</option>
-                  <option value="vip">👑 VIP Ticket - ${(eventData.price * 2).toFixed(2)}</option>
+                  <option value="standard">Standard - ${eventData.price?.toFixed(2)}</option>
+                  <option value="vip">VIP - ${(eventData.price * 2)?.toFixed(2)}</option>
                 </select>
               </div>
+
               <div style={styles.formGroup}>
                 <label htmlFor="quantity" style={styles.label}>
-                  🔢 Number of Tickets
+                  Number of Tickets
                 </label>
                 <input
                   type="number"
@@ -468,16 +454,16 @@ const EventDetail = () => {
                   value={formData.quantity}
                   onChange={handleInputChange}
                   min="1"
-                  max="10"
+                  max={eventData.remaining_tickets}
                   required
                   style={styles.input}
                   className="form-input"
-                  placeholder="Enter number of tickets"
                 />
               </div>
+
               <div style={styles.formGroup}>
                 <label htmlFor="name" style={styles.label}>
-                  👤 Full Name
+                  Full Name
                 </label>
                 <input
                   type="text"
@@ -488,12 +474,12 @@ const EventDetail = () => {
                   required
                   style={styles.input}
                   className="form-input"
-                  placeholder="Enter your full name"
                 />
               </div>
+
               <div style={styles.formGroup}>
                 <label htmlFor="email" style={styles.label}>
-                  📧 Email Address
+                  Email
                 </label>
                 <input
                   type="email"
@@ -504,12 +490,12 @@ const EventDetail = () => {
                   required
                   style={styles.input}
                   className="form-input"
-                  placeholder="Enter your email address"
                 />
               </div>
+
               <div style={styles.formGroup}>
                 <label htmlFor="phone" style={styles.label}>
-                  📱 Phone Number
+                  Phone
                 </label>
                 <input
                   type="tel"
@@ -520,20 +506,21 @@ const EventDetail = () => {
                   required
                   style={styles.input}
                   className="form-input"
-                  placeholder="Enter your phone number"
                 />
               </div>
+
               <div style={styles.totalSection}>
                 <div style={styles.totalRow}>
-                  <span style={styles.totalLabel}>💳 Total Amount:</span>
+                  <span style={styles.totalLabel}>Total Amount:</span>
                   <span style={styles.totalAmount}>${calculateTotal()}</span>
                 </div>
                 <button
                   type="submit"
                   style={styles.submitButton}
                   className="submit-btn"
+                  disabled={!eventData.remaining_tickets}
                 >
-                  🎫 Complete Booking
+                  {eventData.remaining_tickets ? 'Complete Booking' : 'Sold Out'}
                 </button>
               </div>
             </form>

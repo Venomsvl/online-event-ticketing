@@ -11,7 +11,7 @@ const {
     deleteEvent,
     approveOrReject,
     viewPostedEvents
-} = require('../controllers/EventController');
+} = require('../Controllers/EventController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const { isAdmin, isOrganizer, isOrganizerOrAdmin } = require('../middlewares/roleMiddleware');
 
