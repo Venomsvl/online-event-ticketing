@@ -1,16 +1,10 @@
 const express = require('express');
-const { body } = require('express-validator');
-const {
-    register,
-    login,
-    logout,
-    sendOTP,
-    verifyOTP,
-    resetPassword
-} = require('../Controllers/AuthController');
 const router = express.Router();
+const { body } = require('express-validator');
+const authController = require('../Controllers/AuthController');
+const { verifyToken } = require('../middlewares/authMiddleware');
 
-// Register route with validation
+// Register route
 router.post(
     '/register',
     [
@@ -25,17 +19,18 @@ router.post(
             .matches(/^(?=.*[A-Za-z])(?=.*[0-9]).{8,}$/)
             .withMessage('Password must contain at least one letter and one number'),
         body('role')
-            .optional()
             .isIn(['user', 'organizer']).withMessage('Role must be either user or organizer')
     ],
-    register
+    authController.register
 );
 
-// Routes
-router.post('/login', login);
-router.post('/logout', logout);
-router.post('/send-otp', sendOTP);
-router.post('/verify-otp', verifyOTP);
-router.post('/reset-password', resetPassword);
+// Other auth routes
+router.post('/login', authController.login);
+router.post('/logout', authController.logout);
+router.get('/profile', verifyToken, authController.getProfile);
+router.post('/send-otp', authController.sendOTP);
+router.post('/verify-otp', authController.verifyOTP);
+router.post('/reset-password', authController.resetPassword);
+router.delete('/users/:id', authController.deleteUser);
 
 module.exports = router;
