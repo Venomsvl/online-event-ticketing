@@ -1,276 +1,172 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-function EventForm() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(id ? true : false);
-  const [error, setError] = useState(null);
-
+const EventForm = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     date: '',
+    time: '',
     location: '',
     category: '',
-    image: '',
-    ticket_price: '',
-    total_tickets: ''
+    price: '',
+    totalTickets: ''
   });
+  const navigate = useNavigate();
+  const { id } = useParams(); // Get event ID from URL if editing
 
   useEffect(() => {
     if (id) {
-      fetchEvent();
+      // If editing, load event data
+      const events = JSON.parse(localStorage.getItem('events') || '[]');
+      const event = events.find(e => e.id === parseInt(id));
+      if (event) {
+        setFormData(event);
+      }
     }
   }, [id]);
 
-  const fetchEvent = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/v1/events/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch event');
-      }
-
-      const data = await response.json();
-      // Format date for input type="datetime-local"
-      const eventDate = new Date(data.date).toISOString().slice(0, 16);
-      
-      setFormData({
-        title: data.title,
-        description: data.description,
-        date: eventDate,
-        location: data.location,
-        category: data.category,
-        image: data.image || '',
-        ticket_price: data.ticket_price,
-        total_tickets: data.total_tickets
-      });
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const url = id 
-        ? `http://localhost:3001/api/v1/events/${id}`
-        : 'http://localhost:3001/api/v1/events';
+    const events = JSON.parse(localStorage.getItem('events') || '[]');
 
-      const response = await fetch(url, {
-        method: id ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save event');
-      }
-
-      navigate('/my-events');
-    } catch (err) {
-      setError(err.message);
+    if (id) {
+      // Update existing event
+      const updatedEvents = events.map(event => 
+        event.id === parseInt(id) ? { ...formData, id: parseInt(id) } : event
+      );
+      localStorage.setItem('events', JSON.stringify(updatedEvents));
+    } else {
+      // Create new event
+      const newEvent = {
+        id: Date.now(),
+        ...formData
+      };
+      events.push(newEvent);
+      localStorage.setItem('events', JSON.stringify(events));
     }
+
+    navigate('/my-events');
   };
-
-  const handleDelete = async () => {
-    if (!id) return;
-
-    const confirmDelete = window.confirm('Are you sure you want to delete this event?');
-    if (!confirmDelete) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3001/api/v1/events/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete event');
-      }
-
-      navigate('/my-events');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">
-        {id ? 'Edit Event' : 'Create New Event'}
-      </h1>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">Create New Event</h1>
+      
+      <div className="space-y-4">
+        <div>
+          <label className="block mb-1">Title</label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => setFormData({...formData, title: e.target.value})}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="max-w-2xl">
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows="4"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Date and Time</label>
-            <input
-              type="datetime-local"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Category</label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="">Select a category</option>
-              <option value="conference">Conference</option>
-              <option value="workshop">Workshop</option>
-              <option value="seminar">Seminar</option>
-              <option value="concert">Concert</option>
-              <option value="exhibition">Exhibition</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Image URL</label>
-            <input
-              type="url"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Ticket Price ($)</label>
-            <input
-              type="number"
-              name="ticket_price"
-              value={formData.ticket_price}
-              onChange={handleChange}
-              required
-              min="0"
-              step="0.01"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Total Tickets</label>
-            <input
-              type="number"
-              name="total_tickets"
-              value={formData.total_tickets}
-              onChange={handleChange}
-              required
-              min="1"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-            >
-              {id ? 'Update Event' : 'Create Event'}
-            </button>
-            
-            <button
-              type="button"
-              onClick={() => navigate('/my-events')}
-              className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-            >
-              Cancel
-            </button>
-
-            {id && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ml-auto"
-              >
-                Delete Event
-              </button>
-            )}
-          </div>
+        <div>
+          <label className="block mb-1">Description</label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
-      </form>
-    </div>
+
+        <div>
+          <label className="block mb-1">Date</label>
+          <input
+            type="date"
+            value={formData.date}
+            onChange={(e) => setFormData({...formData, date: e.target.value})}
+            className="w-full p-2 border rounded"
+            min={new Date().toISOString().split('T')[0]}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">Time</label>
+          <input
+            type="time"
+            value={formData.time}
+            onChange={(e) => setFormData({...formData, time: e.target.value})}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">Location</label>
+          <input
+            type="text"
+            value={formData.location}
+            onChange={(e) => setFormData({...formData, location: e.target.value})}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">Category</label>
+          <select
+            value={formData.category}
+            onChange={(e) => setFormData({...formData, category: e.target.value})}
+            className="w-full p-2 border rounded"
+            required
+          >
+            <option value="">Select Category</option>
+            <option value="Concert">Concert</option>
+            <option value="Sports">Sports</option>
+            <option value="Theater">Theater</option>
+            <option value="Conference">Conference</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block mb-1">Ticket Price ($)</label>
+          <input
+            type="number"
+            value={formData.price}
+            onChange={(e) => setFormData({...formData, price: e.target.value})}
+            className="w-full p-2 border rounded"
+            min="0"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">Total Tickets</label>
+          <input
+            type="number"
+            value={formData.totalTickets}
+            onChange={(e) => setFormData({...formData, totalTickets: e.target.value})}
+            className="w-full p-2 border rounded"
+            min="1"
+            required
+          />
+        </div>
+      </div>
+
+      <div className="mt-6 space-x-4">
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        >
+          Create Event
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/my-events')}
+          className="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   );
-}
+};
 
 export default EventForm; 

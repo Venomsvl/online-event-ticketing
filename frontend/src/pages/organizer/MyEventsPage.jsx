@@ -2,37 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EventCard from '../../components/EventCard';
 
-function MyEventsPage() {
+const MyEventsPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchMyEvents();
+    // Get events from localStorage
+    const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
+    setEvents(storedEvents);
+    setLoading(false);
   }, []);
-
-  const fetchMyEvents = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/api/v1/events/my/events', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-
-      const data = await response.json();
-      setEvents(data);
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
 
   const handleCreateNew = () => {
     navigate('/my-events/new');
@@ -42,8 +23,28 @@ function MyEventsPage() {
     navigate(`/my-events/${eventId}/edit`);
   };
 
+  const handleDeleteEvent = (eventId) => {
+    const updatedEvents = events.filter(event => event.id !== eventId);
+    localStorage.setItem('events', JSON.stringify(updatedEvents));
+    setEvents(updatedEvents);
+  };
+
   const handleViewEvent = (eventId) => {
-    navigate(`/my-events/${eventId}`);
+    // Just show event details in a modal or navigate to details page
+    const event = events.find(e => e.id === eventId);
+    if (event) {
+      alert(`
+        Event Details:
+        Title: ${event.title}
+        Description: ${event.description}
+        Date: ${event.date}
+        Time: ${event.time}
+        Location: ${event.location}
+        Category: ${event.category}
+        Price: $${event.price}
+        Available Tickets: ${event.totalTickets}
+      `);
+    }
   };
 
   if (loading) {
@@ -80,10 +81,11 @@ function MyEventsPage() {
         ) : (
           events.map(event => (
             <EventCard
-              key={event._id}
+              key={event.id}
               event={event}
-              onEdit={() => handleEditEvent(event._id)}
-              onView={() => handleViewEvent(event._id)}
+              onEdit={() => handleEditEvent(event.id)}
+              onView={() => handleViewEvent(event.id)}
+              onDelete={() => handleDeleteEvent(event.id)}
               isOrganizer={true}
             />
           ))
@@ -91,6 +93,6 @@ function MyEventsPage() {
       </div>
     </div>
   );
-}
+};
 
 export default MyEventsPage; 

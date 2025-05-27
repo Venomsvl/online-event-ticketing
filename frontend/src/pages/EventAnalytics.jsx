@@ -116,24 +116,14 @@ const EventAnalytics = () => {
   const fetchEventData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
+      // Mock data for testing
+      const mockData = [
+        { name: "Event 1", ticketsBooked: 50, totalTickets: 100 },
+        { name: "Event 2", ticketsBooked: 75, totalTickets: 150 },
+        { name: "Event 3", ticketsBooked: 30, totalTickets: 80 }
+      ];
 
-      let startDate = null;
-      if (dateRange !== 'all') {
-        const months = parseInt(dateRange);
-        startDate = subMonths(new Date(), months);
-      }
-
-      const response = await axios.get('http://localhost:3000/api/v1/events/analytics', {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { startDate: startDate?.toISOString() }
-      });
-
-      const formattedData = response.data.map(event => ({
+      const formattedData = mockData.map(event => ({
         name: event.name,
         ticketsBooked: event.ticketsBooked,
         totalTickets: event.totalTickets,
@@ -142,7 +132,7 @@ const EventAnalytics = () => {
 
       setEventData(formattedData);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to fetch event analytics');
+      toast.error('Failed to fetch event analytics');
     } finally {
       setLoading(false);
     }

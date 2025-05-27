@@ -1,15 +1,16 @@
 import React from 'react';
 import { format } from 'date-fns';
 
-function EventCard({
+const EventCard = ({
   event,
   onEdit,
   onView,
+  onDelete,
   isOrganizer,
   onStatusUpdate,
   isSelected,
   onSelect
-}) {
+}) => {
   const formatDate = (dateString) => {
     try {
       return format(new Date(dateString), 'PPP');
@@ -84,12 +85,20 @@ function EventCard({
             View Details
           </button>
           {isOrganizer && (
-            <button
-              onClick={onEdit}
-              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md transition duration-200"
-            >
-              Edit Event
-            </button>
+            <>
+              <button
+                onClick={onEdit}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md transition duration-200"
+              >
+                Edit Event
+              </button>
+              <button
+                onClick={onDelete}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition duration-200"
+              >
+                Delete Event
+              </button>
+            </>
           )}
           {onStatusUpdate && (
             <button onClick={onStatusUpdate} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md transition duration-200" type="button">
@@ -250,6 +259,6 @@ function EventCard({
       `}</style>
     </div>
   );
-}
+};
 
 export default EventCard;
