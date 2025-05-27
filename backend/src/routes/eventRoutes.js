@@ -10,7 +10,7 @@ const {
     updateEvent,
     deleteEvent,
     approveOrReject
-} = require('../controllers/EventController');
+} = require('../controllers/eventController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const { isAdmin, isOrganizer, isOrganizerOrAdmin } = require('../middlewares/roleMiddleware');
 
@@ -44,4 +44,4 @@ router.get('/:id', getEventById);
 // Admin only routes
 router.patch('/:id/status', isAdmin, approveOrReject);
 
-module.exports = router; 
+module.exports = router;

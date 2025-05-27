@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import axios from '../utils/axios';
 
 const CreateEventPage = () => {
   const [formData, setFormData] = useState({
@@ -184,12 +184,14 @@ const CreateEventPage = () => {
         delete submitData.event_status;
       }
 
+      // Use custom axios instance, with credentials
       const response = await axios.post('/api/v1/events', submitData, {
         withCredentials: true
       });
 
       toast.success('🎉 Event created successfully!');
-      navigate('/admin/events');
+      // Redirect to /my-events instead of /admin/events
+      navigate('/my-events');
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error(error.response?.data?.message || 'Failed to create event');
@@ -199,7 +201,8 @@ const CreateEventPage = () => {
   };
 
   const handleCancel = () => {
-    navigate('/admin/events');
+    // Redirect to /my-events instead of /admin/events
+    navigate('/my-events');
   };
 
   return (
@@ -439,4 +442,4 @@ const CreateEventPage = () => {
   );
 };
 
-export default CreateEventPage; 
+export default CreateEventPage;

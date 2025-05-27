@@ -259,4 +259,4 @@ const MyEventsPage = () => {
   );
 };
 
-export default MyEventsPage; 
+export default MyEventsPage;
