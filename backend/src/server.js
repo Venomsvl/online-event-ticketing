@@ -35,8 +35,6 @@ const DB_PASSWORD = ''; // Add your password here
 
 // MongoDB connection options
 const mongoOptions = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     retryWrites: true,
     w: 'majority'
 };
