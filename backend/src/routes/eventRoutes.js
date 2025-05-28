@@ -9,6 +9,7 @@ const {
     createEvent,
     updateEvent,
     deleteEvent,
+<<<<<<< HEAD
     approveOrReject
 } = require('../controllers/eventController');
 const { verifyToken } = require('../middlewares/authMiddleware');
@@ -39,6 +40,16 @@ router.delete('/:id', isOrganizerOrAdmin, deleteEvent);
 
 // Public routes - These should be at the bottom to avoid conflicts with other routes
 router.get('/', getAllEvents);
+=======
+    approveOrReject,
+    viewPostedEvents
+} = require('../Controllers/EventController');
+const { verifyToken } = require('../middlewares/authMiddleware');
+const { isAdmin, isOrganizer, isOrganizerOrAdmin } = require('../middlewares/roleMiddleware');
+
+// Public routes
+router.get('/', viewPostedEvents);
+>>>>>>> 8580c6f990bca74247ca6f8d9ebb39d37c2de7dc
 router.get('/:id', getEventById);
 
 // Admin only routes

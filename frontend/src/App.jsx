@@ -6,7 +6,6 @@ import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/shared/ProtectedRoute'
 import RoleBasedRoute from './components/shared/RoleBasedRoute'
 import Layout from './components/shared/Layout'
-import HomePage from './pages/HomePage'
 import EventDetail from './pages/EventDetail'
 import Login from './components/auth/Login'
 import Register from './components/auth/Register'
@@ -14,16 +13,24 @@ import Unauthorized from './pages/Unauthorized'
 import EventAnalytics from './pages/EventAnalytics'
 import AdminEventsPage from './pages/AdminEventsPage'
 import ProfilePage from './pages/ProfilePage'
+import UserBookingsPage from './pages/UserBookingsPage'
 import AdminLogin from './components/auth/AdminLogin'
+<<<<<<< HEAD
 import MyEventsPage from './pages/MyEventsPage'
 import EventForm from './pages/EventForm'
+=======
+import HomePage from './pages/HomePage'
+import AdminUsersPage from './pages/AdminUsersPage'
+>>>>>>> 8580c6f990bca74247ca6f8d9ebb39d37c2de7dc
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+   
         <div className="min-h-screen bg-gray-50">
           <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/bookings" element={<UserBookingsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin-login" element={<AdminLogin />} />
@@ -31,7 +38,6 @@ function App() {
             
             <Route element={<Layout />}>
               {/* Public routes */}
-              <Route path="/" element={<HomePage />} />
               <Route path="/event/:id" element={<EventDetail />} />
               
               {/* Protected routes */}
@@ -88,6 +94,25 @@ function App() {
                 } 
               />
               <Route 
+<<<<<<< HEAD
+=======
+                path="/admin/users" 
+                element={
+                  <RoleBasedRoute allowedRoles={['admin']}>
+                    <AdminUsersPage />
+                  </RoleBasedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/create-event" 
+                element={
+                  <RoleBasedRoute allowedRoles={['admin', 'organizer']}>
+                    <CreateEventPage />
+                  </RoleBasedRoute>
+                } 
+              />
+              <Route 
+>>>>>>> 8580c6f990bca74247ca6f8d9ebb39d37c2de7dc
                 path="/admin/analytics" 
                 element={
                   <RoleBasedRoute allowedRoles={['admin']}>
@@ -109,8 +134,8 @@ function App() {
             pauseOnHover
           />
         </div>
-      </Router>
-    </AuthProvider>
+      
+   </AuthProvider>
   )
 }
 

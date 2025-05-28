@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 
 const instance = axios.create({
   baseURL: '/api/v1', // Add baseURL to match backend routes
+  baseURL: 'http://localhost:5000',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'

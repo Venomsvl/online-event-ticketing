@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import EventCard from '../../components/EventCard';
 import { useAuth } from '../../context/AuthContext';
 import axios from '../../utils/axios';
@@ -8,12 +8,13 @@ const MyEventsPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('/api/events/organizer');
+        const response = await axios.get('/api/events/my/events');
         setEvents(response.data);
         setLoading(false);
       } catch (err) {
@@ -24,6 +25,16 @@ const MyEventsPage = () => {
 
     fetchEvents();
   }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    try {
+      await axios.delete(`/api/events/${id}`);
+      setEvents(events.filter(event => event._id !== id));
+    } catch (err) {
+      setError('Failed to delete event');
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -53,12 +64,21 @@ const MyEventsPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => (
-            <EventCard
-              key={event._id}
-              event={event}
-              isOrganizer={true}
-              onEdit={() => navigate(`/my-events/${event._id}/edit`)}
-            />
+            <div key={event._id}>
+              <EventCard
+                event={event}
+                isOrganizer={true}
+                onEdit={() => navigate(`/my-events/${event._id}/edit`)}
+              />
+              <div className="flex gap-2 mt-2">
+                <button
+                  className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                  onClick={() => handleDelete(event._id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -66,4 +86,4 @@ const MyEventsPage = () => {
   );
 };
 
-export default MyEventsPage; 
+export default MyEventsPage;
